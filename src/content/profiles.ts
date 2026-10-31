@@ -236,7 +236,7 @@ export const PROFILES: Profile[] = [
     info: [
       '40 Fragen in 60 Minuten (≈ 1:30 Min. pro Frage), sechs Abschnitte: quantitativ, verbal und Case-Datenauswertung.',
       'Wertung: +5 Punkte richtig, −1 Punkt falsch, 0 Punkte leer (max. 200).',
-      'Nur raten, wenn du Optionen sinnvoll ausschließen konntest.',
+      'Raten: Bei +5/−1 hat schon blindes Raten einen leicht positiven Erwartungswert (+0,2 Punkte bei 5 Optionen); nach Ausschluss einer Option lohnt es sich deutlich.',
     ],
     status: [
       { label: '40 Fragen / 60 Min.', value: 'ja', status: 'berichtet' },
