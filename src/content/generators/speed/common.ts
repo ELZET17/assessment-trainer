@@ -1,4 +1,4 @@
-import { fmt, roundTo } from '../../format'
+import { fmt, onRoundingBoundary, roundTo } from '../../format'
 import { core, type GeneratorDef } from '../../generator'
 import { buildNumericOptions, type Distractor } from '../../options'
 import type { Rng } from '../../rng'
@@ -30,7 +30,8 @@ export function numericMcq(
   lang: Lang,
   rng: Rng,
   spec: SpeedSpec,
-): McqItem {
+): McqItem | null {
+  if (!spec.exact && onRoundingBoundary(spec.value, spec.decimals)) return null
   const format = spec.format ?? ((v: number) => fmt(v, lang, spec.decimals))
   const unit = 10 ** -spec.decimals
   const built = buildNumericOptions(rng, {

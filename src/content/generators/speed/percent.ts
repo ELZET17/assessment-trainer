@@ -4,7 +4,6 @@ import { tr, type GeneratorDef } from '../../generator'
 import { buildLabelOptions, type Distractor } from '../../options'
 import { firstAccepted } from '../../pipeline'
 import { core } from '../../generator'
-import type { McqItem } from '../../types'
 import { decimalsOf, numericMcq } from './common'
 
 const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : Math.abs(a))
@@ -168,7 +167,7 @@ export const percent: GeneratorDef = {
       const net = roundTo((f1 * f2 - 1) * 100, 4)
       if (net === 0) return null
       const fmtSigned = (v: number) => (v > 0 ? '+' : '') + P(v, decimalsOf(net))
-      const item: McqItem = numericMcq(this, seed, d, lang, rng, {
+      const item = numericMcq(this, seed, d, lang, rng, {
         prompt: upFirst
           ? tr(lang, `A price rises by ${P(a)} and then falls by ${P(b)}. What is the overall percentage change?`, `Ein Preis steigt um ${P(a)} und sinkt danach um ${P(b)}. Wie groß ist die prozentuale Gesamtänderung?`)
           : tr(lang, `A price falls by ${P(a)} and then rises by ${P(b)}. What is the overall percentage change?`, `Ein Preis sinkt um ${P(a)} und steigt danach um ${P(b)}. Wie groß ist die prozentuale Gesamtänderung?`),

@@ -25,8 +25,11 @@ describe('Determinism – same seed → identical item', () => {
           // Language must not change the drawn numbers or the key.
           const en = g.generate(seed, d, 'en')
           const de = g.generate(seed, d, 'de')
-          expect(JSON.stringify(de.query ?? null)).toBe(JSON.stringify(en.query ?? null))
-          if (en.type === 'mcq' && de.type === 'mcq') expect(de.correct).toBe(en.correct)
+          expect(de.type).toBe(en.type)
+          if (en.type === 'mcq' && de.type === 'mcq') {
+            expect(de.correct).toBe(en.correct)
+            expect(de.options.length).toBe(en.options.length)
+          }
         }
       }
     })

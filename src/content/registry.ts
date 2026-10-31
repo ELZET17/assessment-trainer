@@ -3,6 +3,8 @@ import { addSub, divide, multiply, squares } from './generators/speed/arith'
 import { bigNumbers, equation, estimate, ruleOfThree, wordProblems } from './generators/speed/misc'
 import { fractions, percent } from './generators/speed/percent'
 import { sequence } from './generators/speed/sequence'
+import { extremes, pctChange, percentagePoints, ratio, share, unitConversion } from './generators/numerical/templatesA'
+import { averages, cagr, exchangeRates, indexValues, projection, statistics } from './generators/numerical/templatesB'
 import type { CategoryId, Difficulty, Item, ItemRef, Lang } from './types'
 
 export const GENERATORS: GeneratorDef[] = [
@@ -19,6 +21,19 @@ export const GENERATORS: GeneratorDef[] = [
   wordProblems,
   bigNumbers,
   sequence,
+  // A – Numerical Reasoning
+  pctChange,
+  percentagePoints,
+  share,
+  ratio,
+  unitConversion,
+  extremes,
+  exchangeRates,
+  averages,
+  statistics,
+  cagr,
+  indexValues,
+  projection,
 ]
 
 const BY_ID = new Map(GENERATORS.map((g) => [g.id, g]))
