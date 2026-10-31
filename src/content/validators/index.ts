@@ -3,6 +3,7 @@ import { fail, type Validation } from './result'
 import { validateAon } from './aon'
 import { validateDeductive } from './deductive'
 import { validateDiagrammatic } from './diagrammatic'
+import { validateInductive } from './inductive'
 import { validateInteractive } from './interactive'
 import { validateNumerical } from './numerical'
 import { validateSpeed } from './speed'
@@ -17,6 +18,8 @@ export function validate(item: PublicItem): Validation {
         return validateNumerical(item)
       case 'deductive':
         return validateDeductive(item)
+      case 'inductive':
+        return validateInductive(item)
       case 'diagrammatic':
         return validateDiagrammatic(item)
       case 'aon':

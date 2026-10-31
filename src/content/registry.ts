@@ -11,6 +11,7 @@ import { rules } from './generators/deductive/rules'
 import { flowchart } from './generators/diagrammatic/flow-gen'
 import { digitChallenge, gridChallenge, switchChallenge } from './generators/aon/games'
 import { barDrag, dragOrder, tableFill } from './generators/interactive/shl'
+import { matrix, oddOneOut, series } from './generators/inductive/figures-gen'
 import type { CategoryId, Difficulty, Item, ItemRef, Lang } from './types'
 
 export const GENERATORS: GeneratorDef[] = [
@@ -46,6 +47,10 @@ export const GENERATORS: GeneratorDef[] = [
   seating,
   rules,
   orderingTfc,
+  // C – Inductive
+  series,
+  matrix,
+  oddOneOut,
   // G – Diagrammatic
   flowchart,
   // H – Aon games
