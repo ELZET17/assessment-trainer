@@ -1,0 +1,48 @@
+/** Unified access to generated and bank items. */
+import { criticalItem, verbalItem } from './banks'
+import type { CriticalType, VerbalTrap } from './banks/types'
+import { getGenerator, GENERATORS } from './registry'
+import type { CategoryId, Item, ItemRef, Lang } from './types'
+
+export function resolveItem(ref: ItemRef, lang: Lang): Item | null {
+  if (ref.kind === 'gen') {
+    const g = getGenerator(ref.gen)
+    return g ? g.generate(ref.seed, ref.d, lang) : null
+  }
+  return ref.bank === 'verbal' ? verbalItem(ref.id, lang) : criticalItem(ref.id, lang)
+}
+
+const VERBAL_SUBS: Record<VerbalTrap, string> = {
+  'prior-knowledge': 'Falle: Vorwissen',
+  'some-all': 'Falle: einige vs. alle',
+  causation: 'Falle: Kausalität',
+  temporal: 'Falle: Zeitbezug',
+  paraphrase: 'Umformulierungen',
+  negation: 'Verneinungen',
+  comparison: 'Vergleiche',
+  quantity: 'Zahlen & Mengen',
+  none: 'Direkter Textabgleich',
+}
+
+const CRITICAL_SUBS: Record<CriticalType, string> = {
+  inference: 'Inference (Schlussfolgerung)',
+  assumption: 'Recognition of Assumptions',
+  deduction: 'Deduction',
+  interpretation: 'Interpretation',
+  evaluation: 'Evaluation of Arguments',
+}
+
+export function subTitle(sub: string): string {
+  const g = getGenerator(sub)
+  if (g) return g.title
+  if (sub.startsWith('verbal.')) return VERBAL_SUBS[sub.slice(7) as VerbalTrap] ?? sub
+  if (sub.startsWith('critical.')) return CRITICAL_SUBS[sub.slice(9) as CriticalType] ?? sub
+  return sub
+}
+
+/** Subcategories offered for a category (generators or bank subtypes). */
+export function subsOf(category: CategoryId): { id: string; title: string }[] {
+  if (category === 'verbal') return Object.entries(VERBAL_SUBS).map(([k, t]) => ({ id: `verbal.${k}`, title: t }))
+  if (category === 'critical') return Object.entries(CRITICAL_SUBS).map(([k, t]) => ({ id: `critical.${k}`, title: t }))
+  return GENERATORS.filter((g) => g.category === category).map((g) => ({ id: g.id, title: g.title }))
+}

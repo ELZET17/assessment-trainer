@@ -26,7 +26,7 @@ function build(rng: Rng, d: 1 | 2 | 3): Built | null {
         ? rng.pick(['second', 'altAdd', 'addMul', 'inter'])
         : rng.pick(['fib', 'mulAdd', 'cube', 'diffDouble', 'interMix', 'ratioUp'])
   const t: number[] = []
-  let rule: string[] = []
+  let rule: string[]
   switch (fam) {
     case 'arith': {
       const a = rng.int(2, 60)

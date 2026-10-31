@@ -270,8 +270,8 @@ export const oddOneOut: GeneratorDef = {
       const odd = rng.int(0, 4)
       const cells = rng.shuffle([0, 1, 2, 3, 5, 6, 7, 8])
       const panels: Panel[] = []
-      let why = ''
-      let ruleText = ''
+      let why: string
+      let ruleText: string
       const balancedFill = () => rng.shuffle(['empty', 'empty', 'striped', 'striped', rng.pick(['empty', 'striped'])] as Fill[])
       if (rule === 'shape') {
         const [a, b] = rng.sample(STATIC_SHAPES, 2)

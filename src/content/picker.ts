@@ -1,0 +1,107 @@
+/**
+ * Item selection for all modes: random seeds for generators, sampling without
+ * replacement for banks, adaptive difficulty and weakness-weighted mixes.
+ */
+import { CRITICAL_IDS, criticalDifficulty, VERBAL_IDS, verbalDifficulty } from './banks'
+import { CRITICAL } from './banks/critical'
+import { VERBAL } from './banks/verbal'
+import { GENERATORS, getGenerator } from './registry'
+import { createRng, randomSeed, type Rng } from './rng'
+import type { CategoryId, Difficulty, ItemRef } from './types'
+
+export type DifficultyChoice = Difficulty | 'adaptive'
+
+/** Staircase: 2 correct in a row → harder, 1 wrong → easier. */
+export function adaptiveNext(current: Difficulty, recent: boolean[]): Difficulty {
+  const last = recent.at(-1)
+  if (last === false) return Math.max(1, current - 1) as Difficulty
+  if (recent.length >= 2 && recent.at(-1) && recent.at(-2)) return Math.min(3, current + 1) as Difficulty
+  return current
+}
+
+function bankSubOf(bank: 'verbal' | 'critical', id: string): string {
+  if (bank === 'verbal') {
+    for (const p of VERBAL) for (const s of p.statements) if (s.id === id) return `verbal.${s.trap}`
+  } else {
+    const c = CRITICAL.find((x) => x.id === id)
+    if (c) return `critical.${c.type}`
+  }
+  return ''
+}
+
+export interface PickContext {
+  /** Item keys already used in this session (no repetition). */
+  used: Set<string>
+  /** Bank ids answered at any time (prefer unseen ones). */
+  seen?: Set<string>
+  rng?: Rng
+}
+
+export function pickFrom(category: CategoryId, sub: string | null, d: Difficulty, ctx: PickContext): ItemRef | null {
+  const rng = ctx.rng ?? createRng(randomSeed())
+  if (category === 'verbal' || category === 'critical') {
+    const bank = category
+    const ids = (bank === 'verbal' ? VERBAL_IDS : CRITICAL_IDS).filter((id) => !sub || bankSubOf(bank, id) === sub)
+    const diffOf = bank === 'verbal' ? verbalDifficulty : criticalDifficulty
+    const free = ids.filter((id) => !ctx.used.has(`b:${bank}:${id}@1`))
+    if (free.length === 0) return null
+    const unseen = free.filter((id) => !ctx.seen?.has(id))
+    const pool = unseen.length ? unseen : free
+    const atLevel = pool.filter((id) => diffOf(id) === d)
+    const id = rng.pick(atLevel.length ? atLevel : pool)
+    return { kind: 'bank', bank, id, v: 1 }
+  }
+  const gens = GENERATORS.filter((g) => g.category === category && (!sub || g.id === sub))
+  if (gens.length === 0) return null
+  for (let i = 0; i < 20; i++) {
+    const g = rng.pick(gens)
+    const ref: ItemRef = { kind: 'gen', gen: g.id, v: g.version, seed: (rng.next() * 2 ** 32) >>> 0, d }
+    const key = `g:${g.id}@${g.version}:${d}:${ref.seed}`
+    if (!ctx.used.has(key)) return ref
+  }
+  return null
+}
+
+export function refForGen(genId: string, d: Difficulty, rng: Rng): ItemRef {
+  const g = getGenerator(genId)
+  if (!g) throw new Error(`unknown generator ${genId}`)
+  return { kind: 'gen', gen: g.id, v: g.version, seed: (rng.next() * 2 ** 32) >>> 0, d }
+}
+
+/** Weighted random choice. */
+export function weighted<T>(rng: Rng, items: { item: T; w: number }[]): T {
+  const total = items.reduce((s, x) => s + x.w, 0)
+  let r = rng.next() * total
+  for (const x of items) {
+    r -= x.w
+    if (r <= 0) return x.item
+  }
+  return items[items.length - 1].item
+}
+
+/** Quick set: 10 mixed items, weighted towards weak subcategories. */
+export function quickSetPlan(accuracyBySub: Map<string, number>, n = 10, rng: Rng = createRng(randomSeed())): ItemRef[] {
+  const cats: CategoryId[] = ['numerical', 'speed', 'inductive', 'deductive', 'verbal', 'critical', 'diagrammatic', 'interactive']
+  const subs: { item: { cat: CategoryId; sub: string | null }; w: number }[] = []
+  for (const cat of cats) {
+    const own = GENERATORS.filter((g) => g.category === cat).map((g) => g.id)
+    const list = own.length ? own : [null]
+    for (const sub of list) {
+      const acc = sub ? accuracyBySub.get(sub) : undefined
+      // Unknown → medium weight; weak → high weight; strong → low weight.
+      const w = acc === undefined ? 1 : Math.max(0.25, (100 - acc) / 40)
+      subs.push({ item: { cat, sub }, w: w / list.length })
+    }
+  }
+  const used = new Set<string>()
+  const out: ItemRef[] = []
+  for (let i = 0; i < n * 5 && out.length < n; i++) {
+    const { cat, sub } = weighted(rng, subs)
+    const ref = pickFrom(cat, sub, 2, { used, rng })
+    if (!ref) continue
+    const key = ref.kind === 'gen' ? `g:${ref.gen}@${ref.v}:${ref.d}:${ref.seed}` : `b:${ref.bank}:${ref.id}@1`
+    used.add(key)
+    out.push(ref)
+  }
+  return out
+}

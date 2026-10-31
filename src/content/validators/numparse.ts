@@ -12,7 +12,7 @@ const SCALE_WORDS: [RegExp, number][] = [
 ]
 
 export function parseDisplayedNumber(text: string, lang: Lang): number | null {
-  let s = text.trim().replace(/−/g, '-').replace(/ | /g, ' ')
+  let s = text.trim().replace(/−/g, '-').replace(/\u00a0|\u202f/g, ' ')
   let scale = 1
   for (const [re, f] of SCALE_WORDS) {
     if (re.test(s)) {
