@@ -7,6 +7,7 @@ import { deriveSeed } from '../../src/content/rng'
 import { toPublic, type Difficulty, type Item, type Lang } from '../../src/content/types'
 import { validate } from '../../src/content/validators'
 import type { Solution } from '../../src/content/validators/result'
+import { digitValid } from '../../src/content/validators/aon'
 
 export const ITEMS_PER_LEVEL = Number(process.env.GATE_ITEMS ?? 2000)
 
@@ -53,6 +54,8 @@ function structural(item: Item): string | null {
     if (new Set(t).size !== t.length) return 'duplicate options'
     if (item.correct < 0 || item.correct >= item.options.length) return 'correct index out of range'
   }
+  if (item.type === 'digit' && !digitValid(item.equation, item.sample)) return 'sample digit solution invalid'
+  if (item.type === 'order' && new Set(item.correctOrder).size !== item.entries.length) return 'order key is not a permutation'
   return null
 }
 

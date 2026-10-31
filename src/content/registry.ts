@@ -8,6 +8,9 @@ import { averages, cagr, exchangeRates, indexValues, projection, statistics } fr
 import { syllogism } from './generators/deductive/syllogism'
 import { ordering, orderingTfc, seating } from './generators/deductive/puzzles'
 import { rules } from './generators/deductive/rules'
+import { flowchart } from './generators/diagrammatic/flow-gen'
+import { digitChallenge, gridChallenge, switchChallenge } from './generators/aon/games'
+import { barDrag, dragOrder, tableFill } from './generators/interactive/shl'
 import type { CategoryId, Difficulty, Item, ItemRef, Lang } from './types'
 
 export const GENERATORS: GeneratorDef[] = [
@@ -43,6 +46,16 @@ export const GENERATORS: GeneratorDef[] = [
   seating,
   rules,
   orderingTfc,
+  // G – Diagrammatic
+  flowchart,
+  // H – Aon games
+  switchChallenge,
+  digitChallenge,
+  gridChallenge,
+  // I – SHL interactive
+  barDrag,
+  dragOrder,
+  tableFill,
 ]
 
 const BY_ID = new Map(GENERATORS.map((g) => [g.id, g]))

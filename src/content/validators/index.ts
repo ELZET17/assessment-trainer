@@ -1,6 +1,9 @@
 import type { PublicItem } from '../types'
 import { fail, type Validation } from './result'
+import { validateAon } from './aon'
 import { validateDeductive } from './deductive'
+import { validateDiagrammatic } from './diagrammatic'
+import { validateInteractive } from './interactive'
 import { validateNumerical } from './numerical'
 import { validateSpeed } from './speed'
 
@@ -14,6 +17,12 @@ export function validate(item: PublicItem): Validation {
         return validateNumerical(item)
       case 'deductive':
         return validateDeductive(item)
+      case 'diagrammatic':
+        return validateDiagrammatic(item)
+      case 'aon':
+        return validateAon(item)
+      case 'interactive':
+        return validateInteractive(item)
       default:
         return fail(`no validator for category ${item.category}`)
     }
