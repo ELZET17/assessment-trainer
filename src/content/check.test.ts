@@ -26,3 +26,13 @@ describe('checkAnswer', () => {
     expect(checkAnswer(it, { type: 'numeric', value: it.free.answer + 1 }).correct).toBe(false)
   })
 })
+
+describe('item references', () => {
+  it('never substitutes an item from a different generator version', async () => {
+    const { resolveItem, isReproducible } = await import('./items')
+    const ref = { kind: 'gen' as const, gen: 'speed.mul', v: 99, seed: 1, d: 2 as const }
+    expect(isReproducible(ref)).toBe(false)
+    expect(resolveItem(ref, 'en')).toBeNull()
+    expect(resolveItem({ ...ref, v: 1 }, 'en')).not.toBeNull()
+  })
+})

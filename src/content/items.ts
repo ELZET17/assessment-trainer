@@ -4,10 +4,16 @@ import type { CriticalType, VerbalTrap } from './banks/types'
 import { getGenerator, GENERATORS } from './registry'
 import type { CategoryId, Item, ItemRef, Lang } from './types'
 
+/** Can this stored reference still be reproduced exactly (same generator version)? */
+export function isReproducible(ref: ItemRef): boolean {
+  return ref.kind === 'bank' || getGenerator(ref.gen)?.version === ref.v
+}
+
 export function resolveItem(ref: ItemRef, lang: Lang): Item | null {
   if (ref.kind === 'gen') {
     const g = getGenerator(ref.gen)
-    return g ? g.generate(ref.seed, ref.d, lang) : null
+    // A different generator version would produce a different item for the same seed – never substitute it.
+    return g && g.version === ref.v ? g.generate(ref.seed, ref.d, lang) : null
   }
   return ref.bank === 'verbal' ? verbalItem(ref.id, lang) : criticalItem(ref.id, lang)
 }

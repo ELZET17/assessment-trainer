@@ -52,3 +52,15 @@ Jede Entscheidung: Kontext → Entscheidung → Begründung. Neueste unten.
 
 ## D13 – Item-Sprache
 **Entscheidung:** UI, Erklärungen und Akademie auf Deutsch. Aufgabentexte standardmäßig Englisch; Schalter auf Deutsch, wo eine deutsche Fassung existiert (Generator-Templates haben EN + DE; Verbal-Bank: ≥ 15 Texte mit DE). Fehlt die DE-Fassung, wird EN angezeigt.
+
+## D14 – Kearney: „keine Frage leer lassen“ statt „nur nach Eliminierung raten“
+Der Master-Prompt nennt als Taktik „mit Negativwertung bei Kearney: nur bei sinnvollen Eliminierungen raten“. Bei der berichteten Wertung +5/−1/0 hat aber schon blindes Raten einen positiven Erwartungswert (5 Optionen: 0,2 × 5 − 0,8 × 1 = +0,2; 4 Optionen: +0,5), leer lassen bringt sicher 0. Auch die zitierte Quelle (StrategyCase, abgerufen 02.11.2026) empfiehlt, jede Frage zu beantworten. Weil die Akademie „inhaltlich korrekt“ sein muss (Abschnitt 5.4, Gate 4), lehrt die App: keine Frage leer lassen, Eliminierung erhöht den Erwartungswert weiter; bei anderer Wertung neu rechnen (Raten lohnt, solange Abzug < Punkte ÷ (Optionen − 1)).
+
+## D15 – BCG CCA: numerischer statt „Logik“-Teil
+Der Master-Prompt nennt den „CCA-Logikteil“. Laut Recherche besteht der kognitive Teil des CCA aus einem numerischen Block im SHL-Stil (berichtet; genauer Aufbau nicht öffentlich). Das Profil „BCG – CCA kognitiver Teil (SHL-Stil)“ trainiert deshalb Numerical inkl. interaktiver SHL-Formate; Logik-Aufgaben übt man im BCG-Cognitive-Test-Profil und in Kategorie D.
+
+## D16 – Kearney-Abschnitte und Rechner
+Abschnittsgrößen 8/6/6/8/6/6 und „ohne Taschenrechner“ folgen den Kandidatenberichten bei StrategyCase (berichtet, nicht offiziell). Das dort beschriebene Format „Data Sufficiency“ gibt es in der App noch nicht; der zweite Quant-Teil nutzt Textaufgaben (Caveat im Profil).
+
+## D17 – Generator-Versionen bleiben bei v1 bis zum ersten Release
+Generatoren wurden während der Prüf-Gates mehrfach geändert (gleicher Seed → andere Aufgabe als vor der Änderung). Vor dem ersten Deploy gibt es keine gespeicherten Nutzerdaten, deshalb bleibt die Version 1. Ab dem ersten Release gilt: Jede Änderung, die Aufgaben zu einem Seed verändert, erhöht die Generator-Version. `resolveItem` erzeugt eine Aufgabe nur, wenn die gespeicherte Version zur aktuellen passt – ein alter Fehlerheft-Eintrag wird also nie stillschweigend durch eine andere Aufgabe ersetzt, sondern ausgelassen (die Statistik bleibt erhalten, weil sie nur aus den gespeicherten Versuchen rechnet).

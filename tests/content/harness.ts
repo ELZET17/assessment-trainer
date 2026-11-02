@@ -59,29 +59,27 @@ function structural(item: Item): string | null {
   return null
 }
 
+/** Generates one item and checks it against the independent validator; null = fine. */
+export function checkOne(g: GeneratorDef, d: Difficulty, seed: number, lang: Lang = 'en'): string | null {
+  let item: Item
+  try {
+    item = g.generate(seed, d, lang)
+  } catch (e) {
+    return `generator crashed: ${(e as Error).message}`
+  }
+  const s = structural(item)
+  if (s) return s
+  const v = validate(toPublic(item))
+  if (!v.ok) return v.reason
+  return agrees(item, v.solution)
+}
+
 export function runGenerator(g: GeneratorDef, d: Difficulty, n = ITEMS_PER_LEVEL, lang: Lang = 'en'): Failure[] {
   const failures: Failure[] = []
   for (let i = 0; i < n; i++) {
     const seed = deriveSeed(0xc0ffee, g.id, d, i)
-    let item: Item
-    try {
-      item = g.generate(seed, d, lang)
-    } catch (e) {
-      failures.push({ gen: g.id, d, seed, reason: `generator crashed: ${(e as Error).message}` })
-      continue
-    }
-    const s = structural(item)
-    if (s) {
-      failures.push({ gen: g.id, d, seed, reason: s })
-      continue
-    }
-    const v = validate(toPublic(item))
-    if (!v.ok) {
-      failures.push({ gen: g.id, d, seed, reason: v.reason })
-      continue
-    }
-    const a = agrees(item, v.solution)
-    if (a) failures.push({ gen: g.id, d, seed, reason: a })
+    const reason = checkOne(g, d, seed, lang)
+    if (reason) failures.push({ gen: g.id, d, seed, reason })
     if (failures.length > 20) break
   }
   return failures

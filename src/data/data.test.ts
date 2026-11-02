@@ -175,3 +175,33 @@ describe('persistence: export, reset, import, migration', () => {
     expect(DB_NAME).toBe('assessment-trainer')
   })
 })
+
+describe('properties (fast-check)', () => {
+  it('accuracy always equals correct ÷ answered of the raw attempts', async () => {
+    const fc = (await import('fast-check')).default
+    fc.assert(
+      fc.property(fc.array(fc.boolean(), { minLength: 1, maxLength: 60 }), (results) => {
+        const list = results.map((c) => att({ correct: c }))
+        const a = byCategory(list).get('numerical')
+        const right = results.filter(Boolean).length
+        expect(a?.correct).toBe(right)
+        expect(a?.answered).toBe(results.length)
+        expect(a?.accuracy).toBeCloseTo((right / results.length) * 100, 9)
+      }),
+    )
+  })
+
+  it('an item leaves the error book exactly after two correct answers in a row', async () => {
+    const fc = (await import('fast-check')).default
+    fc.assert(
+      fc.property(fc.array(fc.boolean(), { minLength: 1, maxLength: 12 }), (results) => {
+        const ref: ItemRef = { kind: 'gen', gen: 'num.share', v: 1, seed: 777, d: 2 }
+        const list = results.map((c) => att({ correct: c, ref, itemKey: 'g:num.share@1:2:777' }))
+        const lastWrong = results.lastIndexOf(false)
+        const after = lastWrong < 0 ? 0 : results.length - 1 - lastWrong
+        const expected = lastWrong >= 0 && after < 2
+        expect(mistakeBook(list).some((m) => m.itemKey === 'g:num.share@1:2:777')).toBe(expected)
+      }),
+    )
+  })
+})

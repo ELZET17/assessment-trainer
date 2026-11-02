@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { CATEGORY_BY_ID, DIFFICULTY_LABEL } from '../../content/categories'
 import { checkAnswer, type CheckResult } from '../../content/check'
-import { resolveItem, subTitle } from '../../content/items'
+import { isReproducible, resolveItem, subTitle } from '../../content/items'
 import { adaptiveNext, pickFrom, quickSetPlan } from '../../content/picker'
 import type { Answer, CategoryId, Difficulty, Item, ItemRef } from '../../content/types'
 import { refKey } from '../../content/types'
@@ -52,7 +52,7 @@ export default function TrainingRunner() {
   // Build fixed plans for mistakes / quick set once attempts are loaded.
   useEffect(() => {
     if (plan !== null || !attempts) return
-    if (kind === 'mistakes') setPlan(mistakeBook(attempts).filter((m) => !params.get('cat') || m.category === params.get('cat')).map((m) => m.ref))
+    if (kind === 'mistakes') setPlan(mistakeBook(attempts).filter((m) => (!params.get('cat') || m.category === params.get('cat')) && isReproducible(m.ref)).map((m) => m.ref))
     else if (kind === 'quick') {
       const acc = new Map<string, number>()
       for (const [k, v] of bySub(attempts)) if (v.accuracy !== null && v.answered >= 3) acc.set(k, v.accuracy)
