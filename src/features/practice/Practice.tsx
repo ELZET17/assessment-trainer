@@ -69,7 +69,7 @@ export function CategoryPage() {
           <label htmlFor="sub" className="mb-1.5 block text-sm font-semibold">
             Unterkategorie
           </label>
-          <select id="sub" value={sub} onChange={(e) => setSub(e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
+          <select id="sub" value={sub} onChange={(e) => setSub(e.target.value)} className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3">
             <option value="">Alle gemischt</option>
             {subs.map((s) => {
               const st = subStats.get(s.id)

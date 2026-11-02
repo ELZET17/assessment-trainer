@@ -8,11 +8,11 @@ export const VERBAL_3: VerbalPassage[] = [
     difficulty: 2,
     title: { en: 'A new chip plant for Ostervik' },
     text: {
-      en: 'The chipmaker Nordisil plans to build a semiconductor plant near Ostervik at a cost of 4.8 billion euros. The national government has offered a subsidy of 1.2 billion euros, subject to approval by the European Commission. Nordisil says the plant will create 1,500 jobs once fully operational, which is expected in 2029. Local residents have raised concerns about the plant’s water consumption, as chip production requires large amounts of ultrapure water. Nordisil has stated that it will recycle at least 70% of the water it uses. Construction can only begin after an environmental assessment has been completed. Ostervik is a town of about 25,000 inhabitants with a long industrial tradition. The plant would produce chips for cars and industrial machines. Several suppliers have said that they might open offices nearby if the plant is built.',
+      en: 'The chipmaker Nordisil plans to build a semiconductor plant near Ostervik at a cost of 4.8 billion euros. The national government has offered a subsidy of 1.2 billion euros, which still requires approval by the European Commission. Nordisil says the plant will create 1,500 jobs once fully operational, which is expected in 2029. Local residents have raised concerns about the plant’s water consumption, as chip production requires large amounts of ultrapure water. Nordisil has stated that it will recycle at least 70% of the water it uses. Construction can only begin after an environmental assessment has been completed. Ostervik is a town of about 25,000 inhabitants with a long industrial tradition. The plant would produce chips for cars and industrial machines. Several suppliers have said that they might open offices nearby if the plant is built.',
     },
     statements: [
       { id: 'v21-1', text: { en: 'The government subsidy would cover a quarter of the plant’s cost.' }, answer: 'T', trap: 'quantity', reason: 'Satz 1–2: 1,2 Mrd. von 4,8 Mrd. Euro = 25 %, also ein Viertel.' },
-      { id: 'v21-2', text: { en: 'The European Commission has approved the subsidy.' }, answer: 'C', trap: 'temporal', reason: 'Satz 2: Die Subvention steht unter dem Vorbehalt der Genehmigung („subject to approval“). Ob sie erteilt wurde, sagt der Text nicht.' },
+      { id: 'v21-2', text: { en: 'The European Commission has already approved the subsidy.' }, answer: 'F', trap: 'temporal', reason: 'Satz 2: Die Subvention „still requires approval“ – die Genehmigung steht also noch aus.' },
       { id: 'v21-3', text: { en: 'Nordisil has promised to recycle all of the water the plant uses.' }, answer: 'F', trap: 'some-all', reason: 'Satz 5: „at least 70%“ – nicht das gesamte Wasser.' },
       { id: 'v21-4', text: { en: 'Construction may start before the environmental assessment is finished.' }, answer: 'F', trap: 'negation', reason: 'Satz 6: Der Bau darf erst NACH Abschluss der Umweltprüfung beginnen („can only begin after“).' },
     ],
@@ -113,12 +113,12 @@ export const VERBAL_3: VerbalPassage[] = [
     difficulty: 2,
     title: { en: 'Carbon offsets at Aurel Airlines' },
     text: {
-      en: 'Aurel Airlines allows passengers to pay an optional surcharge when booking a flight to offset the carbon emissions of their journey. The money is used to finance reforestation projects certified by an independent standard. In 2024, 7% of passengers chose to pay the surcharge, compared with 4% in 2022. A consumer organisation has criticised such schemes, arguing that it can take decades for newly planted trees to absorb the emissions of a single flight. Aurel says that it is also investing in more fuel-efficient aircraft, which will make up half of its fleet by 2028. Aurel flies to around 70 destinations in Europe and North Africa. The surcharge is calculated based on the distance of the flight. Passengers can see the amount before they decide whether to pay it.',
+      en: 'Aurel Airlines allows passengers to pay an optional surcharge when booking a flight to offset the carbon emissions of their journey. The money is used to finance reforestation projects certified by an independent standard. In 2024, 7% of passengers chose to pay the surcharge, compared with 4% in 2022. A consumer organisation has criticised such schemes, arguing that it can take decades for newly planted trees to absorb the emissions of a single flight. Aurel says that it is also investing in more fuel-efficient aircraft, which currently make up about a quarter of its fleet and will make up half of it by 2028. Aurel flies to around 70 destinations in Europe and North Africa. The surcharge is calculated based on the distance of the flight. Passengers can see the amount before they decide whether to pay it.',
     },
     statements: [
       { id: 'v28-1', text: { en: 'Paying the carbon surcharge is compulsory for Aurel passengers.' }, answer: 'F', trap: 'none', reason: 'Satz 1: Der Aufschlag ist optional.' },
       { id: 'v28-2', text: { en: 'The share of passengers paying the surcharge rose by 3 percentage points between 2022 and 2024.' }, answer: 'T', trap: 'quantity', reason: 'Satz 3: von 4 % auf 7 % = +3 Prozentpunkte.' },
-      { id: 'v28-3', text: { en: 'Fuel-efficient aircraft currently make up half of Aurel’s fleet.' }, answer: 'F', trap: 'temporal', reason: 'Satz 5: Die Hälfte soll erst „by 2028“ erreicht werden – also nicht schon jetzt.' },
+      { id: 'v28-3', text: { en: 'Fuel-efficient aircraft currently make up half of Aurel’s fleet.' }, answer: 'F', trap: 'temporal', reason: 'Satz 5: Derzeit sind es „about a quarter“; die Hälfte soll erst 2028 erreicht werden.' },
       { id: 'v28-4', text: { en: 'Aurel’s reforestation projects fully offset the emissions of its flights within one year.' }, answer: 'C', trap: 'prior-knowledge', reason: 'Der Text nennt nur die Kritik, dass Bäume Jahrzehnte brauchen können. Konkrete Angaben zu Aurels Projekten gibt es nicht.' },
     ],
   },
@@ -134,7 +134,7 @@ export const VERBAL_3: VerbalPassage[] = [
       { id: 'v29-1', text: { en: 'In 2024, most of Felden’s security lanes had the new scanners.' }, answer: 'T', trap: 'quantity', reason: 'Satz 2: sechs von zehn Spuren – die Mehrheit.' },
       { id: 'v29-2', text: { en: 'On all lanes, passengers can now leave laptops in their bags.' }, answer: 'F', trap: 'some-all', reason: 'Satz 2 und 4: Nur sechs Spuren haben die neuen Scanner; vier werden erst 2025 umgerüstet.' },
       { id: 'v29-3', text: { en: 'Average peak-time waiting times on the upgraded lanes more than halved.' }, answer: 'T', trap: 'quantity', reason: 'Satz 3: von 24 auf 11 Minuten – weniger als die Hälfte von 24 (12).' },
-      { id: 'v29-4', text: { en: 'Waiting times at Felden will never exceed 30 minutes once all lanes are upgraded.' }, answer: 'C', trap: 'temporal', reason: 'Satz 6 warnt vor über 30 Minuten an Spitzentagen, sagt aber nichts über die Zeit nach der vollständigen Umrüstung.' },
+      { id: 'v29-4', text: { en: 'Once all ten lanes have the new scanners, the average peak-time waiting time across all lanes will be 11 minutes.' }, answer: 'C', trap: 'temporal', reason: 'Satz 3 nennt 11 Minuten nur für die bereits umgerüsteten Spuren im Jahr 2024. Was nach der vollständigen Umrüstung gilt, sagt der Text nicht.' },
     ],
   },
   {

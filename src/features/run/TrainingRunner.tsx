@@ -85,7 +85,8 @@ export default function TrainingRunner() {
       }
       setItem(it)
       setResult(null)
-      setDraft(null)
+      // Ordering items start with a valid answer (the shown order), like in SHL tests.
+      setDraft(it.type === 'order' ? { type: 'order', order: it.entries.map((_, i) => i) } : null)
       setShownAt(Date.now())
       submitting.current = false
     },

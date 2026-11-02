@@ -28,7 +28,7 @@ function texts(ctx: Ctx, lang: Lang, n: number): Texts {
   if (ctx === 'race') {
     const pos = (k: number) => (de ? `Platz ${k + 1}` : ORD_EN[k])
     return {
-      intro: (n) => (de ? `${n} Personen laufen ein Rennen. Es gibt keine Gleichstände.` : `${n} people run a race. There are no ties.`),
+      intro: (n) => (de ? `${n} Personen – ${names(n, lang)} – laufen ein Rennen. Es gibt keine Gleichstände.` : `${n} people – ${names(n, lang)} – run a race. There are no ties.`),
       pos,
       clue: (c) => {
         switch (c.t) {
@@ -73,8 +73,8 @@ function texts(ctx: Ctx, lang: Lang, n: number): Texts {
     return {
       intro: (n) =>
         de
-          ? `${n} Kolleginnen und Kollegen halten je eine Präsentation, an ${n} verschiedenen Tagen von Montag bis ${last}.`
-          : `${n} colleagues each give one presentation, on ${n} different days from Monday to ${last}.`,
+          ? `${n} Kolleginnen und Kollegen – ${names(n, lang)} – halten je eine Präsentation, an ${n} verschiedenen Tagen von Montag bis ${last}.`
+          : `${n} colleagues – ${names(n, lang)} – each give one presentation, on ${n} different days from Monday to ${last}.`,
       pos: day,
       clue: (c) => {
         switch (c.t) {
@@ -116,8 +116,8 @@ function texts(ctx: Ctx, lang: Lang, n: number): Texts {
   return {
     intro: (n) =>
       de
-        ? `${n} Personen sitzen an einem runden Tisch auf den Plätzen 1 bis ${n}, im Uhrzeigersinn nummeriert. Platz ${n} grenzt an Platz 1.`
-        : `${n} people sit at a round table in seats numbered 1 to ${n} clockwise. Seat ${n} is next to seat 1.`,
+        ? `${n} Personen – ${names(n, lang)} – sitzen an einem runden Tisch auf den Plätzen 1 bis ${n}, im Uhrzeigersinn nummeriert. Platz ${n} grenzt an Platz 1. „X sitzt im Uhrzeigersinn unmittelbar nach Y“ heißt: X sitzt auf dem Platz mit der nächsthöheren Nummer (nach Platz ${n} kommt Platz 1).`
+        : `${n} people – ${names(n, lang)} – sit at a round table in seats numbered 1 to ${n} clockwise. Seat ${n} is next to seat 1. “X sits immediately clockwise from Y” means X sits in the seat with the next higher number (after seat ${n} comes seat 1).`,
     pos: (k) => (de ? `Platz ${k + 1}` : `Seat ${k + 1}`),
     clue: (c) => {
       switch (c.t) {
@@ -152,6 +152,11 @@ function texts(ctx: Ctx, lang: Lang, n: number): Texts {
       }
     },
   }
+}
+
+function names(n: number, lang: Lang): string {
+  const list = NAMES.slice(0, n)
+  return `${list.slice(0, -1).join(', ')} ${lang === 'de' ? 'und' : 'and'} ${list[n - 1]}`
 }
 
 function cap(s: string): string {
@@ -219,6 +224,15 @@ function randomClue(rng: Rng, pos: number[], d: Difficulty, circular: boolean): 
 }
 
 const sameClue = (x: Clue, y: Clue) => JSON.stringify(x) === JSON.stringify(y)
+
+/** True if one clue alone already settles the fact (too easy for a puzzle question). */
+function trivial(f: Fact, clues: Clue[], n: number, circular: boolean): boolean {
+  return clues.some((c) => {
+    const sols = solveOrdering(n, [c], circular)
+    const vals = new Set(sols.map((s) => factHolds(f, s, circular)))
+    return vals.size === 1
+  })
+}
 
 interface Puzzle {
   n: number
@@ -317,6 +331,8 @@ export const ordering: GeneratorDef = {
         const p = buildPuzzle(rng, d, ctx, (s) => (d === 1 ? s.length === 1 : askKind === 'whoAt' ? new Set(s.map((x) => x.indexOf(k))).size === 1 : new Set(s.map((x) => x[a])).size === 1))
         if (!p) return null
         const t = texts(ctx, lang, n)
+        const askedFact: Fact = askKind === 'whoAt' ? { t: 'at', a: p.pos.indexOf(k), k } : { t: 'at', a, k: p.pos[a] }
+        if (trivial(askedFact, p.clues, n, false)) return null
         if (askKind === 'whoAt') {
           const who = p.pos.indexOf(k)
           const people = optPeople(who)
@@ -338,7 +354,7 @@ export const ordering: GeneratorDef = {
         for (let kk = 0; kk < n; kk++) allFacts.push({ t: 'at', a: x, k: kk })
       }
       const isClue = (f: Fact) => p.clues.some((c) => (c.t === 'pos' && f.t === 'at' && c.a === f.a && c.k === f.k) || (c.t === f.t && 'b' in c && 'b' in f && c.a === f.a && c.b === f.b))
-      const must = allFacts.filter((f) => !isClue(f) && p.sols.every((s) => factHolds(f, s, false)))
+      const must = allFacts.filter((f) => !isClue(f) && !trivial(f, p.clues, n, false) && p.sols.every((s) => factHolds(f, s, false)))
       const could = allFacts.filter((f) => p.sols.some((s) => factHolds(f, s, false)) && !p.sols.every((s) => factHolds(f, s, false)))
       const never = allFacts.filter((f) => !p.sols.some((s) => factHolds(f, s, false)))
       if (must.length === 0) return null
@@ -383,6 +399,7 @@ export const seating: GeneratorDef = {
       if (!p) return null
       const t = texts('seating', lang, n)
       const who = p.pos.indexOf(k)
+      if (trivial({ t: 'at', a: who, k }, p.clues, n, true)) return null
       const people = rng.shuffle([who, ...rng.sample(Array.from({ length: n }, (_, i) => i).filter((x) => x !== who), Math.min(4, n - 1))])
       const correct = people.indexOf(who)
       return makeItem(this, seed, d, lang, p, t.whoAt(k), { ask: { t: 'whoAt', k }, optionPeople: people }, people.map((x) => NAMES[x]), correct, explain(p, lang, `Also: **${NAMES[who]}** (${t.pos(k)})`), people.filter((x) => x !== who).map((x) => (p.sols.length === 1 ? `${NAMES[x]}: sitzt in der Lösung auf ${t.pos(p.pos[x])}.` : `${NAMES[x]}: sitzt in keiner erlaubten Anordnung auf ${t.pos(k)}.`)))
@@ -413,7 +430,7 @@ export const orderingTfc: GeneratorDef = {
         return v.size === 2 ? 'C' : v.has(true) ? 'T' : 'F'
       }
       const isClueText = (f: Fact) => p.clues.some((c) => t.clue(c) === t.fact(f))
-      const cands = facts.filter((f) => cls(f) === target && !isClueText(f))
+      const cands = facts.filter((f) => cls(f) === target && !isClueText(f) && (d === 1 || target === 'C' || !trivial(f, p.clues, p.n, false)))
       if (cands.length === 0) return null
       const fact = rng.pick(cands)
       const opts = lang === 'de' ? ['Wahr', 'Falsch', 'Nicht bestimmbar'] : ['True', 'False', 'Cannot say']

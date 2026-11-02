@@ -77,14 +77,21 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Inputs ≥ 16px: iOS Safari does not zoom on focus. */
-input,
-select,
-textarea,
-button {
-  font-size: 16px;
-  font-family: inherit;
-  color: inherit;
+/* In the base layer so that Tailwind utilities (text colour/size) can override it. */
+@layer base {
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    color: inherit;
+  }
+  /* Text inputs ≥ 16px: iOS Safari does not zoom on focus. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 .tabnums {

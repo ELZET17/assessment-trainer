@@ -155,7 +155,7 @@ export default function Stats() {
         <Card>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-bold">Verlauf der Trefferquote</h2>
-            <select aria-label="Kategorie für den Verlauf" value={trendCat} onChange={(e) => setTrendCat(e.target.value as CategoryId | '')} className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2 text-sm">
+            <select aria-label="Kategorie für den Verlauf" value={trendCat} onChange={(e) => setTrendCat(e.target.value as CategoryId | '')} className="h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2">
               <option value="">Alle Kategorien</option>
               {CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -214,7 +214,7 @@ export default function Stats() {
                 {d.sims.map((s) => (
                   <tr key={s.session.id} className="border-t border-[var(--border)]">
                     <td className="px-3 py-2">
-                      <a href={`#/sim/result/${s.session.id}`} className="font-medium text-[var(--accent)]">
+                      <a href={`#/sim/result/${s.session.id}`} className="inline-flex min-h-11 items-center font-medium text-[var(--accent)]">
                         {s.session.title}
                       </a>
                       <div className="muted text-xs">{new Date(s.session.startedAt).toLocaleString('de-CH')}</div>

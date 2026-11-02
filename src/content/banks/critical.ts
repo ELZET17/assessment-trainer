@@ -15,7 +15,7 @@ const I2 =
 const I3 =
   'A survey of 2,000 commuters in the city of Darrow found that 62% would cycle to work if there were safe, separate cycle lanes on their route. Currently, 8% of commuters in Darrow cycle to work. The city has a budget for 30 kilometres of new cycle lanes over the next five years, while its main roads are about 240 kilometres long in total.'
 const I4 =
-  'Moreland Electronics sells headphones online and in its own shops. Last year, the company cut the price of its most popular model by 20%. Unit sales of this model rose by 35% in the following six months, while unit sales of the company’s other models stayed roughly the same.'
+  'Moreland Electronics sells headphones online and in its own shops. Last year, the company cut the price of its most popular model by 20%. Unit sales of this model in the following six months were 35% higher than in the six months before the price cut, while unit sales of the company’s other models stayed roughly the same.'
 const A1 = 'Statement: “We should advertise our new savings account on the radio, because many of our potential customers listen to the radio while driving to work.”'
 const A2 = 'Statement: “The council should close the old swimming pool, since the new leisure centre opening next year will have a larger pool.”'
 const A3 = 'Statement: “Our online training course must be effective: 90% of participants said they enjoyed it.”'
@@ -40,7 +40,7 @@ const c = (id: string, type: CriticalType, difficulty: Difficulty, stimulus: str
 export const CRITICAL: CriticalItem[] = [
   // ------------------------------------------------------------- inference
   c('c01', 'inference', 1, I1, 'Before January, it was not possible to visit the library on a Sunday.', 0, 'Wahr: Der Text sagt, die Bibliothek war vor Januar sonntags immer geschlossen.'),
-  c('c02', 'inference', 1, I1, 'The library will still be open on Sundays in the following year.', 2, 'Unzureichende Daten: Geplant ist die Sonntagsöffnung nur „at least until the end of the year“ – über das Folgejahr sagt der Text nichts.'),
+  c('c02', 'inference', 1, I1, 'Most of the Sunday visitors live within walking distance of the library.', 2, 'Unzureichende Daten: Über den Wohnort der Besucher sagt der Text nichts – weder direkt noch indirekt.'),
   c('c03', 'inference', 1, I1, 'Fewer than 100 people visited the library on a typical Sunday in the first three months.', 4, 'Falsch: Es kamen etwa 400 Personen pro Sonntag – das widerspricht der Aussage direkt.'),
   c('c04', 'inference', 1, I2, 'Ten years ago, fewer students took the advanced mathematics course than today.', 0, 'Wahr: Die Zahl ist zehn Jahre lang jedes Jahr gestiegen, also war sie vor zehn Jahren niedriger.'),
   c('c05', 'inference', 2, I2, 'The school wants to bring class sizes in the advanced course closer to its recommended maximum.', 1, 'Wahrscheinlich wahr: Die Klassen sind größer als empfohlen und die Schule hat zusätzliche Lehrkräfte eingestellt – das spricht dafür, ist aber nicht ausdrücklich gesagt.'),
@@ -55,7 +55,7 @@ export const CRITICAL: CriticalItem[] = [
   // ------------------------------------------------------------ assumption
   c('c13', 'assumption', 1, A1, 'Radio advertising can reach people while they are driving.', 0, 'Annahme wird gemacht: Die Begründung ergibt nur Sinn, wenn Radiowerbung Menschen beim Autofahren erreicht.'),
   c('c14', 'assumption', 1, A1, 'Radio is the only way to reach potential customers.', 1, 'Annahme wird nicht gemacht: Die Aussage behauptet nur, dass Radio ein geeigneter Weg ist – nicht der einzige.'),
-  c('c15', 'assumption', 1, A1, 'Some potential customers drive to work.', 0, 'Annahme wird gemacht: Die Begründung setzt voraus, dass potenzielle Kunden mit dem Auto zur Arbeit fahren.'),
+  c('c15', 'assumption', 1, A1, 'Some people who hear the advertisement could become customers of the savings account.', 0, 'Annahme wird gemacht: Werbung zu empfehlen ergibt nur Sinn, wenn sie zu neuen Kunden führen kann – das wird stillschweigend vorausgesetzt.'),
   c('c16', 'assumption', 2, A2, 'The new leisure centre will open as planned.', 0, 'Annahme wird gemacht: Die Schließung wird mit dem neuen Bad begründet – das setzt voraus, dass es tatsächlich eröffnet.'),
   c('c17', 'assumption', 2, A2, 'Nobody will want to use the old pool once the new one has opened.', 1, 'Annahme wird nicht gemacht: Die Empfehlung braucht nicht, dass NIEMAND das alte Bad nutzen möchte – nur, dass das neue es ersetzen kann.'),
   c('c18', 'assumption', 2, A2, 'The new pool will be able to serve the people who currently use the old pool.', 0, 'Annahme wird gemacht: Nur wenn das neue Bad die bisherigen Nutzer aufnehmen kann, ist es ein Grund für die Schließung des alten.'),

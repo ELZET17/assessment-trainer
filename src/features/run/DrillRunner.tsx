@@ -93,6 +93,12 @@ export default function DrillRunner() {
     [items, session, pos, shownAt, results, end, done],
   )
 
+  // Ordering items start with a valid answer (the shown order), like in SHL tests.
+  useEffect(() => {
+    const it = items?.[pos]
+    setDraft(it?.type === 'order' ? { type: 'order', order: it.entries.map((_, i) => i) } : null)
+  }, [items, pos])
+
   const now = useNow(250, !done && endsAt > 0)
   const remaining = endsAt ? (endsAt - now) / 1000 : 0
   useEffect(() => {

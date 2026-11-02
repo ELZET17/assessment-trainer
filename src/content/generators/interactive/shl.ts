@@ -44,6 +44,8 @@ export const barDrag: GeneratorDef = {
         const avg = rng.int(Math.ceil(theme.range[0] / step), Math.floor(theme.range[1] / 2 / step)) * step
         answer = avg * 5 - vals.reduce((a, b) => a + b, 0)
         if (answer <= 0 || !Number.isInteger(answer / step)) return null
+        // Keep the required bar in a realistic range of the others.
+        if (answer < Math.min(...vals) * 0.5 || answer > Math.max(...vals) * 1.6) return null
         prompt = tr(lang, `The average value over 2021–2025 was ${f(avg)}. Drag the 2025 bar to the value that makes this true.`, `Der Durchschnitt über 2021–2025 betrug ${f(avg)}. Ziehe den Balken für 2025 auf den Wert, der das erfüllt.`)
         steps = [`Summe aller 5 Jahre = 5 × ${f(avg)} = ${f(avg * 5)}`, `Summe 2021–2024: ${vals.map(f).join(' + ')} = ${f(vals.reduce((a, b) => a + b, 0))}`, `2025 = ${f(avg * 5)} − ${f(vals.reduce((a, b) => a + b, 0))} = ${f(answer)}`]
         query = { family: 'bar', kind: 'average', avg }
@@ -76,7 +78,8 @@ export const dragOrder: GeneratorDef = {
   types: ['order'],
   generate(seed, d, lang) {
     return firstAccepted(seed, (rng) => {
-      const theme = rng.pick(THEMES)
+      // Margins (level 3) only make sense for money: use the revenue theme there.
+      const theme = d === 3 ? (THEMES.find((t) => t.id === 'revenue') as (typeof THEMES)[number]) : rng.pick(THEMES)
       const ds = makeDataset(rng, theme, { nRows: d === 1 ? 4 : 5, nYears: 2, nice: d === 1 })
       if (!ds) return null
       const labels = rowLabels(ds, lang)
@@ -185,6 +188,9 @@ export const tableFill: GeneratorDef = {
         const total = ds.values.reduce((s, v) => s + v[c], 0)
         const shares = ds.values.map((v) => roundTo((v[c] / total) * 100, 1))
         const answer = (ds.values[r][c] / total) * 100
+        // Both methods (divide, or 100 % minus the other rounded shares) must give the same 1-dp value.
+        const viaRest = roundTo(100 - shares.filter((_, i) => i !== r).reduce((a, b) => a + b, 0), 1)
+        if (Math.abs(viaRest - roundTo(answer, 1)) > 1e-9) return null
         const header = [String(ds.years[c]), tr(lang, `Share of total ${ds.years[c]}`, `Anteil an der Summe ${ds.years[c]}`)]
         const rows = ds.values.map((v, i) => ({ label: labels[i], cells: [v[c], i === r ? null : shares[i]] as (number | null)[] }))
         const table: TableExhibit = { kind: 'table', title: lang === 'de' ? theme.title.de : theme.title.en, unitNote: unitOf(theme, lang), rowHeader: '', header, rows, decimals: [0, 1], suffix: ['', lang === 'de' ? ' %' : '%'] }
@@ -225,10 +231,15 @@ export const tableFill: GeneratorDef = {
         table,
         blank: { row: r, col: 1 },
         answer: exact,
-        tolerance: 0.5 + 1e-9,
+        // Every whole number whose change rounds to the displayed value is accepted.
+        tolerance: Math.max(0.5, v0[r] * 0.0005) + 1e-9,
         decimals: 0,
         explanation: {
-          steps: [`${fmt(v0[r], lang, 0)} × (1 ${changes[r] >= 0 ? '+' : '−'} ${fmt(Math.abs(changes[r]) / 100, lang, 3)}) = ${fmt(exact, lang, 2)}`, `Gerundet: **${fmt(Math.round(exact), lang, 0)}**`],
+          steps: [
+            `${fmt(v0[r], lang, 0)} × (1 ${changes[r] >= 0 ? '+' : '−'} ${fmt(Math.abs(changes[r]) / 100, lang, 3)}) = ${fmt(exact, lang, 2)}`,
+            `Gerundet: **${fmt(Math.round(exact), lang, 0)}**`,
+            'Da die Veränderung nur auf eine Nachkommastelle gerundet angezeigt wird, zählen auch benachbarte ganze Zahlen als richtig, deren Veränderung ebenfalls so gerundet würde.',
+          ],
           shortcut: 'Neuer Wert = alter Wert × (1 + Veränderung). Bei negativer Veränderung wird der Faktor kleiner als 1.',
         },
       }

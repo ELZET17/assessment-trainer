@@ -73,7 +73,7 @@ export const VERBAL_4: VerbalPassage[] = [
     statements: [
       { id: 'v35-1', text: { en: 'Dravo Group has more than 250 employees.' }, answer: 'T', trap: 'paraphrase', reason: 'Satz 1: Dravo muss nach Regeln berichten, die NUR für Unternehmen mit mehr als 250 Beschäftigten gelten – also hat Dravo mehr als 250 Beschäftigte.' },
       { id: 'v35-2', text: { en: 'Dravo has supply-chain emissions data from most of its suppliers.' }, answer: 'F', trap: 'quantity', reason: 'Satz 3: nur von etwa einem Drittel der Lieferanten – nicht von den meisten.' },
-      { id: 'v35-3', text: { en: 'Dravo has 600 suppliers in total.' }, answer: 'C', trap: 'quantity', reason: 'Satz 4 spricht von den 600 GRÖSSTEN Lieferanten; die Gesamtzahl ist unbekannt.' },
+      { id: 'v35-3', text: { en: 'Most of Dravo’s 600 largest suppliers have already sent their emissions data.' }, answer: 'C', trap: 'temporal', reason: 'Satz 4: Die Daten sind bis Mitte 2025 angefragt. Wie viele der 600 größten Lieferanten schon geantwortet haben, sagt der Text nicht (das „Drittel“ in Satz 3 bezieht sich auf alle Lieferanten und auf bereits vorhandene Daten).' },
       { id: 'v35-4', text: { en: 'The auditor’s review of the sustainability report will be as extensive as a financial audit.' }, answer: 'F', trap: 'comparison', reason: 'Satz 6: Die Prüfung ist „less extensive than a financial audit“.' },
     ],
   },
@@ -83,13 +83,13 @@ export const VERBAL_4: VerbalPassage[] = [
     difficulty: 3,
     title: { en: 'Expansion of Brewline Coffee' },
     text: {
-      en: 'Brewline Coffee opened 45 new cafés in 2024, bringing its total to 310. Most new cafés were opened at railway stations and motorway service areas rather than in city centres. Revenue per café rose by 3%, but like-for-like sales, which compare only cafés that were open for the whole of both years, fell by 1%. The company explained that the newer locations generate higher revenue than the older city-centre cafés. Brewline intends to close up to 20 unprofitable city-centre cafés in 2025. It has not specified which ones. Brewline was founded in 2009 and is headquartered in Hamburg. All cafés are operated by the company itself rather than by franchise partners. The menu is the same in all locations, and prices differ only slightly between regions.',
+      en: 'Brewline Coffee opened 45 new cafés and closed eight in 2024, bringing its total to 310. Most new cafés were opened at railway stations and motorway service areas rather than in city centres. Revenue per café rose by 3%, but like-for-like sales, which compare only cafés that were open for the whole of both years, fell by 1%. The company explained that the newer locations generate higher revenue than the older city-centre cafés. Brewline intends to close up to 20 unprofitable city-centre cafés in 2025. It has not specified which ones. Brewline was founded in 2009 and is headquartered in Hamburg. All cafés are operated by the company itself rather than by franchise partners. The menu is the same in all locations, and prices differ only slightly between regions.',
     },
     statements: [
-      { id: 'v36-1', text: { en: 'Brewline had 265 cafés before opening its new cafés in 2024.' }, answer: 'C', trap: 'quantity', reason: 'Rechnerisch 310 − 45 = 265 – aber nur, wenn 2024 kein Café geschlossen wurde. Darüber sagt der Text nichts, daher nicht bestimmbar.' },
+      { id: 'v36-1', text: { en: 'Brewline had 265 cafés at the start of 2024.' }, answer: 'F', trap: 'quantity', reason: 'Satz 1: 2024 kamen 45 Cafés hinzu und 8 wurden geschlossen, Endstand 310 → Anfang 2024: 310 − 45 + 8 = 273, nicht 265.' },
       { id: 'v36-2', text: { en: 'Sales in cafés open throughout both years fell slightly.' }, answer: 'T', trap: 'paraphrase', reason: 'Satz 3: Like-for-like-Umsatz (nur Cafés, die beide Jahre ganz geöffnet waren) sank um 1 %.' },
       { id: 'v36-3', text: { en: 'Most of Brewline’s cafés are located at railway stations and motorway service areas.' }, answer: 'C', trap: 'some-all', reason: 'Satz 2 bezieht sich nur auf die NEUEN Cafés. Wo die Mehrheit aller 310 Cafés liegt, ist unbekannt.' },
-      { id: 'v36-4', text: { en: 'Brewline will close at least 20 cafés in 2025.' }, answer: 'F', trap: 'quantity', reason: 'Satz 5: „up to 20“ – bis zu 20, also höchstens 20, nicht mindestens.' },
+      { id: 'v36-4', text: { en: 'Brewline plans to close more than 20 cafés in 2025.' }, answer: 'F', trap: 'quantity', reason: 'Satz 5: Geplant sind „up to 20“ – also höchstens 20, nicht mehr als 20.' },
     ],
   },
   {

@@ -72,7 +72,12 @@ export function buildNumericOptions(rng: Rng, spec: NumericOptionSpec): BuiltOpt
   const gap = Math.max(spec.minGapAbs ?? 2 * 10 ** -spec.decimals, rel * Math.abs(correct)) - 1e-9
   const allowNeg = spec.allowNegative ?? correct < 0
   const chosen: { value: number; tag: string; why: string }[] = [{ value: correct, tag: 'correct', why: '' }]
-  const accept = (d: Distractor) => {
+  // Options are shown in ascending order, so the correct answer's position is
+  // its rank. Aim for a uniformly random rank (no "it's usually C" pattern).
+  const target = rng.int(0, count - 1)
+  const quota = { below: target, above: count - 1 - target }
+  const accept = (d: Distractor, strict: boolean) => {
+    if (chosen.length >= count) return
     const v = roundTo(d.value, spec.decimals)
     if (!Number.isFinite(v)) return
     if (spec.exactOnly && Math.abs(v - d.value) > 1e-9 * Math.max(1, Math.abs(v))) return
@@ -80,16 +85,17 @@ export function buildNumericOptions(rng: Rng, spec: NumericOptionSpec): BuiltOpt
     if (v === 0 && correct !== 0 && Math.abs(correct) > 1) return
     if (chosen.some((c) => Math.abs(c.value - v) < gap)) return
     if (chosen.some((c) => spec.format(c.value) === spec.format(v))) return
+    const side = v < correct ? 'below' : 'above'
+    if (strict && quota[side] <= 0) return
+    quota[side]--
     chosen.push({ value: v, tag: d.tag, why: d.why })
   }
-  for (const d of spec.distractors) {
-    if (chosen.length >= count) break
-    accept(d)
-  }
-  for (const d of fallbackDistractors(correct, spec.decimals, rng)) {
-    if (chosen.length >= count) break
-    accept(d)
-  }
+  const fallback = fallbackDistractors(correct, spec.decimals, rng)
+  for (const d of spec.distractors) accept(d, true)
+  // Keep at least two realistic error models even if that breaks the target rank.
+  for (const d of spec.distractors) if (chosen.length < 3) accept(d, false)
+  for (const d of fallback) accept(d, true)
+  for (const d of [...spec.distractors, ...fallback]) accept(d, false)
   if (chosen.length < count) throw new Error('buildNumericOptions: not enough distinct options')
   // Classic test layout: ascending order of values (like SHL/Aon numeric options).
   const ordered = chosen.slice().sort((a, b) => a.value - b.value)

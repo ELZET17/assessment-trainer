@@ -567,7 +567,7 @@ export const projection: GeneratorDef = {
         if (value <= 0) return null
         return numMcq(this, seed, d, lang, rng, {
           exhibits: [ex],
-          prompt: tr(lang, `If ${subject} ${pl ? 'change' : 'changes'} from ${y4} to ${y4 + 1} by the same absolute amount as from ${y3} to ${y4}, what will it be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'verändern' : 'verändert'} sich von ${y4} bis ${y4 + 1} um denselben absoluten Betrag wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
+          prompt: tr(lang, `If ${subject} ${pl ? 'change' : 'changes'} from ${y4} to ${y4 + 1} by the same absolute amount as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'verändern' : 'verändert'} sich von ${y4} bis ${y4 + 1} um denselben absoluten Betrag wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
           query: { family: 'num', op: 'projectAbs', a: { ex: 0, row: labels[r], col: String(y3) }, b: { ex: 0, row: labels[r], col: String(y4) } },
           value,
           decimals: dp,
@@ -585,7 +585,7 @@ export const projection: GeneratorDef = {
         const value = v[3] * (v[3] / v[2])
         return numMcq(this, seed, d, lang, rng, {
           exhibits: [ex],
-          prompt: tr(lang, `If ${subject} ${pl ? 'grow' : 'grows'} from ${y4} to ${y4 + 1} at the same percentage rate as from ${y3} to ${y4}, what will it be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} von ${y4} bis ${y4 + 1} mit derselben prozentualen Rate wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
+          prompt: tr(lang, `If ${subject} ${pl ? 'grow' : 'grows'} from ${y4} to ${y4 + 1} at the same percentage rate as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} von ${y4} bis ${y4 + 1} mit derselben prozentualen Rate wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
           query: { family: 'num', op: 'projectPct', a: { ex: 0, row: labels[r], col: String(y3) }, b: { ex: 0, row: labels[r], col: String(y4) } },
           value,
           decimals: dp,
@@ -604,8 +604,8 @@ export const projection: GeneratorDef = {
         exhibits: [ex],
         prompt: tr(
           lang,
-          `If ${subject} ${pl ? 'keep growing at their' : 'keeps growing at its'} average annual rate from ${ds.years[1]} to ${y4}, what will it be in ${y4 + 2}?`,
-          `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} weiter mit der durchschnittlichen jährlichen Rate von ${ds.years[1]} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 2}?`,
+          `If ${subject} ${pl ? 'keep' : 'keeps'} growing at the same compound annual growth rate (CAGR) as from ${ds.years[1]} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 2}?`,
+          `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} weiter mit derselben durchschnittlichen jährlichen Wachstumsrate (CAGR) wie von ${ds.years[1]} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 2}?`,
         ),
         query: { family: 'num', op: 'projectCagr', a: { ex: 0, row: labels[r], col: String(ds.years[1]) }, b: { ex: 0, row: labels[r], col: String(y4) }, periods: 2, ahead: 2 },
         value,
