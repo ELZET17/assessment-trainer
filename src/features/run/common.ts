@@ -4,11 +4,12 @@ import type { Answer, Item } from '../../content/types'
 import { localDay, saveSession, uuid } from '../../data/repo'
 import type { Attempt, Mode, Session } from '../../data/types'
 
-export function makeAttempt(item: Item, o: { mode: Mode; sessionId: string; answer: Answer | null; timeMs: number; points?: number; result?: CheckResult }): Attempt {
+export function makeAttempt(item: Item, o: { mode: Mode; sessionId: string; answer: Answer | null; timeMs: number; points?: number; result?: CheckResult; id?: string; seq?: number }): Attempt {
   const res = o.result ?? (o.answer ? checkAnswer(item, o.answer) : { correct: false, credit: 0 })
   const ts = Date.now()
   return {
-    id: uuid(),
+    // Deterministic ids (session + position) let a run save every answer immediately and upsert it later.
+    id: o.id ?? uuid(),
     ts,
     day: localDay(ts),
     itemKey: item.key,
@@ -26,6 +27,7 @@ export function makeAttempt(item: Item, o: { mode: Mode; sessionId: string; answ
     targetSec: item.targetSec,
     lang: item.lang,
     answer: o.answer ?? undefined,
+    seq: o.seq,
   }
 }
 

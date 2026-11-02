@@ -3,12 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker, useNavigate, useParams } from 'react-router'
 import { checkAnswer } from '../../content/check'
 import { resolveItem } from '../../content/items'
-import { adaptiveNext, pickForSection } from '../../content/picker'
+import { adaptiveLevel, pickForSection } from '../../content/picker'
 import { getProfile, type Profile, type SectionSpec } from '../../content/profiles'
 import { createRng, randomSeed } from '../../content/rng'
 import type { Answer, Difficulty, Item } from '../../content/types'
 import { db } from '../../data/db'
-import { saveAttempts } from '../../data/repo'
+import { saveAttempt, saveAttempts } from '../../data/repo'
 import type { Attempt, Session } from '../../data/types'
 import { useSettings } from '../../state/settings'
 import { Calculator } from '../../ui/Calculator'
@@ -33,11 +33,17 @@ export default function SimRunner() {
   const seen = useRef(new Set<string>())
   const [session, setSession] = useState<Session | null>(null)
   const [secIdx, setSecIdx] = useState(0)
-  const [slots, setSlots] = useState<Slot[][]>([])
+  const [slots, setSlotsState] = useState<Slot[][]>([])
+  // Mirror of `slots` that is updated synchronously: finishing right after a time/answer
+  // update must see the latest values (state updates are applied only on the next render).
+  const slotsRef = useRef<Slot[][]>([])
+  const setSlots = useCallback((next: Slot[][] | ((all: Slot[][]) => Slot[][])) => {
+    slotsRef.current = typeof next === 'function' ? next(slotsRef.current) : next
+    setSlotsState(slotsRef.current)
+  }, [])
   const [pos, setPos] = useState(0)
   const [sectionEnds, setSectionEnds] = useState(0)
   const [shownAt, setShownAt] = useState(() => Date.now())
-  const [diff, setDiff] = useState<Difficulty>(profile?.difficulty ?? 2)
   const [history, setHistory] = useState<boolean[]>([])
   const [calc, setCalc] = useState(false)
   const [confirmEnd, setConfirmEnd] = useState(false)
@@ -101,26 +107,53 @@ export default function SimRunner() {
   const curList = total ? flat.map((f) => f.s) : (slots[secIdx] ?? [])
   const current = curList[pos]
 
+  const slotAttempt = useCallback(
+    (si: number, i: number, sl: Slot): Attempt => {
+      const res = sl.answer ? checkAnswer(sl.item, sl.answer) : null
+      const points = !sl.answer ? profile.scoring.blank : res?.correct ? profile.scoring.correct : profile.scoring.wrong
+      return makeAttempt(sl.item, { mode: 'simulation', sessionId: (session as Session).id, answer: sl.answer, timeMs: sl.timeMs, points, result: res ?? undefined, id: `${(session as Session).id}:${si}:${i}`, seq: si * 1000 + i })
+    },
+    [profile, session],
+  )
+
+  /** Saves an answered slot immediately (upsert by id): a reload or crash does not lose given answers. */
+  const persist = useCallback(
+    (si: number, i: number) => {
+      const sl = slotsRef.current[si]?.[i]
+      if (!session || !sl?.answer || ending.current) return
+      saveAttempt(slotAttempt(si, i, sl)).catch(() => undefined)
+    },
+    [session, slotAttempt],
+  )
+
   const commitTime = useCallback(() => {
     if (!current) return
     const dt = Date.now() - shownAt
+    const loc = total ? flat[pos] : { si: secIdx, i: pos }
     setSlots((all) => {
       const copy = all.map((l) => l.slice())
-      const loc = total ? flat[pos] : { si: secIdx, i: pos }
       if (loc && copy[loc.si]?.[loc.i]) copy[loc.si][loc.i] = { ...copy[loc.si][loc.i], timeMs: copy[loc.si][loc.i].timeMs + dt }
       return copy
     })
+    if (loc) persist(loc.si, loc.i)
     setShownAt(Date.now())
-  }, [current, shownAt, total, flat, pos, secIdx])
+  }, [current, shownAt, total, flat, pos, secIdx, setSlots, persist])
 
   const setAnswer = (a: Answer) => {
+    const loc = total ? flat[pos] : { si: secIdx, i: pos }
     setSlots((all) => {
       const copy = all.map((l) => l.slice())
-      const loc = total ? flat[pos] : { si: secIdx, i: pos }
       if (loc) copy[loc.si][loc.i] = { ...copy[loc.si][loc.i], answer: a }
       return copy
     })
+    if (loc) persist(loc.si, loc.i)
   }
+
+  const gameAttempt = useCallback(
+    (si: number, k: number, g: GameResult): Attempt =>
+      makeAttempt(g.item, { mode: 'simulation', sessionId: (session as Session).id, answer: g.answer, timeMs: g.timeMs, points: g.correct ? profile.scoring.correct : profile.scoring.wrong, id: `${(session as Session).id}:g${si}:${k}`, seq: si * 1000 + k }),
+    [profile, session],
+  )
 
   const finishAll = useCallback(async () => {
     if (!session || ending.current) return
@@ -128,21 +161,17 @@ export default function SimRunner() {
     const attempts: Attempt[] = []
     profile.sections.forEach((s, si) => {
       if (s.game) {
-        for (const g of gameResults.current[si] ?? []) attempts.push(makeAttempt(g.item, { mode: 'simulation', sessionId: session.id, answer: g.answer, timeMs: g.timeMs, points: g.correct ? profile.scoring.correct : profile.scoring.wrong }))
+        ;(gameResults.current[si] ?? []).forEach((g, k) => attempts.push(gameAttempt(si, k, g)))
         return
       }
-      for (const sl of slots[si] ?? []) {
-        const res = sl.answer ? checkAnswer(sl.item, sl.answer) : null
-        const points = !sl.answer ? profile.scoring.blank : res?.correct ? profile.scoring.correct : profile.scoring.wrong
-        attempts.push(makeAttempt(sl.item, { mode: 'simulation', sessionId: session.id, answer: sl.answer, timeMs: sl.timeMs, points, result: res ?? undefined }))
-      }
+      ;(slotsRef.current[si] ?? []).forEach((sl, i) => attempts.push(slotAttempt(si, i, sl)))
     })
     await saveAttempts(attempts)
     await finishSession(session)
     finishedRef.current = true
     setFinished(true)
     nav(`/sim/result/${session.id}`, { replace: true })
-  }, [session, profile, slots, nav])
+  }, [session, profile, nav, slotAttempt, gameAttempt])
 
   const nextSection = useCallback(() => {
     if (total || secIdx + 1 >= profile.sections.length) {
@@ -152,7 +181,6 @@ export default function SimRunner() {
     const ni = secIdx + 1
     setSecIdx(ni)
     setPos(0)
-    setDiff(profile.difficulty)
     setHistory([])
     setSectionEnds(Date.now() + profile.sections[ni].timeLimitSec * 1000)
     setShownAt(Date.now())
@@ -176,9 +204,8 @@ export default function SimRunner() {
       const cur = curList[pos]
       const ok = cur.answer ? checkAnswer(cur.item, cur.answer).correct : false
       const h = [...history, ok]
-      const d = adaptiveNext(diff, h)
+      const d = adaptiveLevel(profile.difficulty, h)
       setHistory(h)
-      setDiff(d)
       const it = makeItem(sec, d)
       if (it) setSlots((all) => all.map((l, si) => (si === secIdx ? [...l, { item: it, answer: null, timeMs: 0 }] : l)))
     }
@@ -244,7 +271,12 @@ export default function SimRunner() {
           game={sec.game}
           durationSec={sec.timeLimitSec}
           lang={settings.itemLang}
+          startDifficulty={profile.difficulty}
           onStart={(end) => setSectionEnds(end)}
+          onResult={(r, k) => {
+            ;(gameResults.current[secIdx] ??= [])[k] = r
+            if (!ending.current) saveAttempt(gameAttempt(secIdx, k, r)).catch(() => undefined)
+          }}
           onEnd={(res) => {
             gameResults.current[secIdx] = res
             nextSection()

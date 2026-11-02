@@ -5,7 +5,7 @@
 import { CRITICAL_IDS, criticalDifficulty, VERBAL_IDS, verbalDifficulty } from './banks'
 import { CRITICAL } from './banks/critical'
 import { VERBAL } from './banks/verbal'
-import { resolveItem } from './items'
+import { contentKey, resolveItem } from './items'
 import type { MixEntry } from './profiles'
 import { GENERATORS, getGenerator } from './registry'
 import { createRng, randomSeed, type Rng } from './rng'
@@ -13,12 +13,24 @@ import { refKey, type CategoryId, type Difficulty, type ItemRef } from './types'
 
 export type DifficultyChoice = Difficulty | 'adaptive'
 
-/** Staircase: 2 correct in a row → harder, 1 wrong → easier. */
-export function adaptiveNext(current: Difficulty, recent: boolean[]): Difficulty {
-  const last = recent.at(-1)
-  if (last === false) return Math.max(1, current - 1) as Difficulty
-  if (recent.length >= 2 && recent.at(-1) && recent.at(-2)) return Math.min(3, current + 1) as Difficulty
-  return current
+/**
+ * Staircase from `start` over the answer history: 2 correct in a row → one level
+ * harder, 1 wrong → one level easier. The run of correct answers starts again after
+ * every level change, so each step up needs two fresh correct answers.
+ */
+export function adaptiveLevel(start: Difficulty, history: boolean[]): Difficulty {
+  let level = start
+  let run = 0
+  for (const ok of history) {
+    if (!ok) {
+      level = Math.max(1, level - 1) as Difficulty
+      run = 0
+    } else if (++run === 2) {
+      level = Math.min(3, level + 1) as Difficulty
+      run = 0
+    }
+  }
+  return level
 }
 
 function bankSubOf(bank: 'verbal' | 'critical', id: string): string {
@@ -32,7 +44,7 @@ function bankSubOf(bank: 'verbal' | 'critical', id: string): string {
 }
 
 export interface PickContext {
-  /** Item keys already used in this session (no repetition). */
+  /** Item keys already used in this session (no repetition); pickFrom also records content keys here. */
   used: Set<string>
   /** Bank ids answered at any time (prefer unseen ones). */
   seen?: Set<string>
@@ -59,7 +71,13 @@ export function pickFrom(category: CategoryId, sub: string | null, d: Difficulty
     const g = rng.pick(gens)
     const ref: ItemRef = { kind: 'gen', gen: g.id, v: g.version, seed: (rng.next() * 2 ** 32) >>> 0, d }
     const key = `g:${g.id}@${g.version}:${d}:${ref.seed}`
-    if (!ctx.used.has(key)) return ref
+    if (ctx.used.has(key)) continue
+    // Same task from a different seed counts as a repetition too.
+    const item = resolveItem(ref, 'en')
+    const ck = item ? contentKey(item) : null
+    if (!ck || ctx.used.has(ck)) continue
+    ctx.used.add(ck)
+    return ref
   }
   return null
 }
@@ -89,10 +107,13 @@ export function pickForSection(rng: Rng, mix: MixEntry[], d: Difficulty, used: S
     let ref: ItemRef | null = null
     if (m.bank) ref = pickFrom(m.bank, m.sub ?? null, diff, { used, rng, seen })
     else if (m.gen && getGenerator(m.gen)) ref = refForGen(m.gen, diff, rng)
-    if (ref && !used.has(refKey(ref)) && exhibitFits(ref, m.exhibit)) {
-      used.add(refKey(ref))
-      return ref
-    }
+    if (!ref || used.has(refKey(ref)) || !exhibitFits(ref, m.exhibit)) continue
+    const item = resolveItem(ref, 'en')
+    const ck = item ? contentKey(item) : null
+    if (!ck || used.has(ck)) continue
+    used.add(refKey(ref))
+    used.add(ck)
+    return ref
   }
   return null
 }

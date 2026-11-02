@@ -44,3 +44,32 @@ describe('simulation item selection', () => {
     expect(second.filter((r) => seen.has(r.id))).toEqual([])
   })
 })
+
+describe('no repeated tasks', () => {
+  it('a 20-item drill from a small domain never shows the same task twice', async () => {
+    const { pickFrom } = await import('../src/content/picker')
+    const { contentKey } = await import('../src/content/items')
+    for (const gen of ['speed.squares', 'aon.digit', 'speed.fraction']) {
+      const used = new Set<string>()
+      const keys: string[] = []
+      for (let i = 0; i < 60 && keys.length < 20; i++) {
+        const ref = pickFrom(gen.startsWith('aon') ? 'aon' : 'speed', gen, 1, { used, rng: createRng(i + 1) })
+        if (!ref) continue
+        used.add(refKey(ref))
+        keys.push(contentKey(resolveItem(ref, 'en')!))
+      }
+      expect(new Set(keys).size, gen).toBe(keys.length)
+    }
+  })
+
+  it('simulation runs contain no task twice (by content)', async () => {
+    const { contentKey } = await import('../src/content/items')
+    for (const p of PROFILES) {
+      for (let seed = 1; seed <= 5; seed++) {
+        const refs = buildRun(p.id, seed).flat().filter((r): r is ItemRef => r !== null)
+        const keys = refs.map((r) => contentKey(resolveItem(r, 'en')!))
+        expect(new Set(keys).size, p.id).toBe(keys.length)
+      }
+    }
+  })
+})

@@ -1,7 +1,8 @@
 /** Aon game section: as many items as possible until the countdown ends, adaptive difficulty, no going back. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { checkAnswer } from '../../content/check'
-import { adaptiveNext } from '../../content/picker'
+import { contentKey } from '../../content/items'
+import { adaptiveLevel } from '../../content/picker'
 import { getGenerator } from '../../content/registry'
 import { randomSeed } from '../../content/rng'
 import type { Answer, Difficulty, Item, Lang } from '../../content/types'
@@ -23,7 +24,24 @@ const INTRO: Record<'switch' | 'digit' | 'grid', string> = {
   grid: 'Merke dir die Punkte im 4×4-Raster. Dazwischen beantwortest du Symmetrie- bzw. Drehungsfragen. Am Ende tippst du die Punkte in der richtigen Reihenfolge an.',
 }
 
-export function GameSection({ game, durationSec, lang, onStart, onEnd, startDifficulty = 1 }: { game: 'switch' | 'digit' | 'grid'; durationSec: number; lang: Lang; onStart?: (endsAt: number) => void; onEnd: (r: GameResult[]) => void; startDifficulty?: Difficulty }) {
+export function GameSection({
+  game,
+  durationSec,
+  lang,
+  onStart,
+  onResult,
+  onEnd,
+  startDifficulty = 1,
+}: {
+  game: 'switch' | 'digit' | 'grid'
+  durationSec: number
+  lang: Lang
+  onStart?: (endsAt: number) => void
+  /** Called for every answer right away, so nothing is lost if the run ends early. */
+  onResult?: (r: GameResult, index: number) => void
+  onEnd: (r: GameResult[]) => void
+  startDifficulty?: Difficulty
+}) {
   const gen = getGenerator(GEN[game])
   const [started, setStarted] = useState(false)
   const [item, setItem] = useState<Item | null>(null)
@@ -36,10 +54,15 @@ export function GameSection({ game, durationSec, lang, onStart, onEnd, startDiff
   const [endsAt, setEndsAt] = useState(0)
   const [tally, setTally] = useState({ solved: 0, total: 0 })
 
+  const seenContent = useRef(new Set<string>())
   const newItem = useCallback(
     (diff: Difficulty) => {
       if (!gen) return
-      setItem(gen.generate(randomSeed(), diff, lang))
+      // No task twice in one game (small domains repeat across seeds).
+      let it = gen.generate(randomSeed(), diff, lang)
+      for (let i = 0; i < 20 && seenContent.current.has(contentKey(it)); i++) it = gen.generate(randomSeed(), diff, lang)
+      seenContent.current.add(contentKey(it))
+      setItem(it)
       setDraft(null)
       setShownAt(Date.now())
     },
@@ -59,10 +82,12 @@ export function GameSection({ game, durationSec, lang, onStart, onEnd, startDiff
   const submit = (a: Answer) => {
     if (!item || ended.current) return
     const ok = checkAnswer(item, a).correct
-    results.current.push({ item, answer: a, correct: ok, timeMs: Date.now() - shownAt })
+    const r: GameResult = { item, answer: a, correct: ok, timeMs: Date.now() - shownAt }
+    results.current.push(r)
+    onResult?.(r, results.current.length - 1)
     history.current.push(ok)
     setTally((t) => ({ solved: t.solved + (ok ? 1 : 0), total: t.total + 1 }))
-    const nd = adaptiveNext(d, history.current)
+    const nd = adaptiveLevel(startDifficulty, history.current)
     setD(nd)
     newItem(nd)
   }

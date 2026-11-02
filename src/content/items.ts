@@ -2,7 +2,17 @@
 import { criticalItem, verbalItem } from './banks'
 import type { CriticalType, VerbalTrap } from './banks/types'
 import { getGenerator, GENERATORS } from './registry'
-import type { CategoryId, Item, ItemRef, Lang } from './types'
+import { toPublic, type CategoryId, type Item, type ItemRef, type Lang } from './types'
+
+/**
+ * What a candidate sees, independent of seed and ids: two different seeds can produce
+ * the same task (small domains such as squares at level 1) – this key catches that.
+ */
+export function contentKey(item: Item): string {
+  const pub = toPublic(item) as unknown as Record<string, unknown>
+  for (const k of ['ref', 'key', 'query']) delete pub[k]
+  return `c:${JSON.stringify(pub)}`
+}
 
 /** Can this stored reference still be reproduced exactly (same generator version)? */
 export function isReproducible(ref: ItemRef): boolean {

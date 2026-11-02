@@ -127,7 +127,8 @@ export function SimResult() {
   const entries = useMemo(() => {
     if (!attempts) return []
     return attempts
-      .sort((a, b) => a.ts - b.ts)
+      // Simulation order (section × 1000 + index); older data without seq falls back to the timestamp.
+      .sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0) || a.ts - b.ts)
       .map((a) => ({ attempt: a, item: resolveItem(a.ref, a.lang ?? settings.itemLang) as Item }))
       .filter((e) => e.item)
   }, [attempts, settings.itemLang])

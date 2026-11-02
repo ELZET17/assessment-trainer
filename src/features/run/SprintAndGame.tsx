@@ -4,13 +4,14 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { checkAnswer } from '../../content/check'
 import { pickFrom } from '../../content/picker'
 import { resolveItem } from '../../content/items'
-import type { Item, McqItem } from '../../content/types'
+import { randomSeed } from '../../content/rng'
+import type { McqItem } from '../../content/types'
 import { refKey } from '../../content/types'
-import { saveAttempt, saveAttempts } from '../../data/repo'
+import { saveAttempt } from '../../data/repo'
 import type { Session } from '../../data/types'
 import { useSettings } from '../../state/settings'
 import { NumberEntry } from '../../ui/answers'
-import { Badge, Button, Card, fmtDuration, LinkButton, PageHeader, Segmented } from '../../ui/kit'
+import { Badge, Button, Card, Confirm, fmtDuration, LinkButton, PageHeader, Segmented } from '../../ui/kit'
 import { GameSection, type GameResult } from '../sim/GameSection'
 import { finishSession, makeAttempt, startSession, useNow } from './common'
 
@@ -47,7 +48,7 @@ export function SprintRun() {
   const used = useRef(new Set<string>())
   const next = () => {
     for (let i = 0; i < 10; i++) {
-      const ref = pickFrom('speed', SPRINT_GENS[Math.floor(Math.random() * SPRINT_GENS.length)], 2, { used: used.current })
+      const ref = pickFrom('speed', SPRINT_GENS[randomSeed() % SPRINT_GENS.length], 2, { used: used.current })
       if (!ref) continue
       used.current.add(refKey(ref))
       const it = resolveItem(ref, settings.itemLang)
@@ -130,15 +131,32 @@ const GAME_SEC = { switch: 360, digit: 300, grid: 360 } as const
 
 export function GameRun() {
   const { game = 'switch' } = useParams() as { game: 'switch' | 'digit' | 'grid' }
+  // "Nochmal" stays on the same route, so a round counter remounts the game.
+  const [round, setRound] = useState(0)
+  return <GameRound key={`${game}-${round}`} game={game} onAgain={() => setRound((r) => r + 1)} />
+}
+
+function GameRound({ game, onAgain }: { game: 'switch' | 'digit' | 'grid'; onAgain: () => void }) {
   const { settings } = useSettings()
-  const [session, setSession] = useState<Session | null>(null)
+  const nav = useNavigate()
+  const session = useRef<Promise<Session> | null>(null)
   const [results, setResults] = useState<GameResult[] | null>(null)
   const [endsAt, setEndsAt] = useState(0)
+  const [confirmEnd, setConfirmEnd] = useState(false)
   const now = useNow(250, !!endsAt && !results)
-  useEffect(() => {
-    void startSession({ mode: 'game', title: `Aon ${game}`, category: 'aon', sub: `aon.${game}` }).then(setSession)
-  }, [game])
-  if (!session) return null
+  // The session starts with the game (not on mount); every answer is saved right away.
+  const start = (end: number) => {
+    setEndsAt(end)
+    session.current = startSession({ mode: 'game', title: `Aon ${game}`, category: 'aon', sub: `aon.${game}` })
+  }
+  const save = (r: GameResult, k: number) => {
+    void session.current?.then((s) => saveAttempt(makeAttempt(r.item, { mode: 'game', sessionId: s.id, answer: r.answer, timeMs: r.timeMs, id: `${s.id}:${k}`, seq: k }))).catch(() => undefined)
+  }
+  const leave = async () => {
+    const s = await session.current
+    if (s) await finishSession(s, 'aborted')
+    nav('/practice/aon')
+  }
   if (results) {
     const right = results.filter((r) => r.correct).length
     return (
@@ -151,9 +169,9 @@ export function GameRun() {
           <p className="muted text-sm">Höchste erreichte Stufe: {Math.max(1, ...results.map((r) => r.item.difficulty))}</p>
         </Card>
         <div className="mt-4 flex gap-2">
-          <LinkButton to={`/run/game/${game}`} variant="primary">
+          <Button variant="primary" onClick={onAgain}>
             Nochmal
-          </LinkButton>
+          </Button>
           <LinkButton to="/practice/aon">Zurück</LinkButton>
         </div>
       </div>
@@ -162,9 +180,15 @@ export function GameRun() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <LinkButton to="/practice/aon" variant="ghost">
-          ← Beenden
-        </LinkButton>
+        {endsAt > 0 ? (
+          <Button variant="ghost" onClick={() => setConfirmEnd(true)}>
+            ← Beenden
+          </Button>
+        ) : (
+          <LinkButton to="/practice/aon" variant="ghost">
+            ← Zurück
+          </LinkButton>
+        )}
         {endsAt > 0 && (
           <Badge tone={endsAt - now < 30000 ? 'bad' : 'neutral'}>
             <span className="tabnums">⏱ {fmtDuration((endsAt - now) / 1000)}</span>
@@ -175,12 +199,20 @@ export function GameRun() {
         game={game}
         durationSec={GAME_SEC[game]}
         lang={settings.itemLang}
-        onStart={setEndsAt}
+        onStart={start}
+        onResult={save}
         onEnd={(r) => {
-          void saveAttempts(r.map((g) => makeAttempt(g.item as Item, { mode: 'game', sessionId: session.id, answer: g.answer, timeMs: g.timeMs })))
-          void finishSession(session)
+          void session.current?.then((s) => finishSession(s))
           setResults(r)
         }}
+      />
+      <Confirm
+        open={confirmEnd}
+        title="Spiel beenden?"
+        body="Deine bisherigen Antworten bleiben gespeichert und zählen in der Statistik."
+        confirmLabel="Beenden"
+        onCancel={() => setConfirmEnd(false)}
+        onConfirm={() => void leave()}
       />
     </div>
   )

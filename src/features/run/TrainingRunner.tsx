@@ -8,7 +8,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { CATEGORY_BY_ID, DIFFICULTY_LABEL } from '../../content/categories'
 import { checkAnswer, type CheckResult } from '../../content/check'
 import { isReproducible, resolveItem, subTitle } from '../../content/items'
-import { adaptiveNext, pickFrom, quickSetPlan } from '../../content/picker'
+import { adaptiveLevel, pickFrom, quickSetPlan } from '../../content/picker'
 import type { Answer, CategoryId, Difficulty, Item, ItemRef } from '../../content/types'
 import { refKey } from '../../content/types'
 import { db } from '../../data/db'
@@ -24,6 +24,9 @@ import { beep, finishSession, haptic, makeAttempt, startSession, useNow } from '
 
 type Kind = 'training' | 'mistakes' | 'quick'
 
+/** Adaptive training starts at test level. */
+const ADAPTIVE_START: Difficulty = 2
+
 export default function TrainingRunner() {
   const { kind = 'training' } = useParams() as { kind: Kind }
   const [params] = useSearchParams()
@@ -33,7 +36,7 @@ export default function TrainingRunner() {
   const sub = params.get('sub')
   const dParam = params.get('d') ?? '2'
   const adaptive = dParam === 'adaptive'
-  const [difficulty, setDifficulty] = useState<Difficulty>(adaptive ? 2 : (Number(dParam) as Difficulty))
+  const [difficulty, setDifficulty] = useState<Difficulty>(adaptive ? ADAPTIVE_START : (Number(dParam) as Difficulty))
   const attempts = useLiveQuery(() => db.attempts.toArray(), [])
   const [plan, setPlan] = useState<ItemRef[] | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -129,7 +132,7 @@ export default function TrainingRunner() {
     if (!result) return
     let d = difficulty
     if (adaptive) {
-      d = adaptiveNext(difficulty, [...log.map((l) => l.correct)])
+      d = adaptiveLevel(ADAPTIVE_START, log.map((l) => l.correct))
       setDifficulty(d)
     }
     nextItem(d)

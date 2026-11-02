@@ -36,3 +36,16 @@ describe('item references', () => {
     expect(resolveItem({ ...ref, v: 1 }, 'en')).not.toBeNull()
   })
 })
+
+describe('adaptive staircase', () => {
+  it('needs two fresh correct answers for every step up, one wrong for a step down', async () => {
+    const { adaptiveLevel } = await import('./picker')
+    expect(adaptiveLevel(1, [true])).toBe(1)
+    expect(adaptiveLevel(1, [true, true])).toBe(2)
+    expect(adaptiveLevel(1, [true, true, true])).toBe(2)
+    expect(adaptiveLevel(1, [true, true, true, true])).toBe(3)
+    expect(adaptiveLevel(3, [false])).toBe(2)
+    expect(adaptiveLevel(2, [true, false, true])).toBe(1)
+    expect(adaptiveLevel(1, [false, false])).toBe(1)
+  })
+})

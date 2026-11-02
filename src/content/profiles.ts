@@ -304,7 +304,7 @@ export const PROFILES: Profile[] = [
     allowSkip: false,
     adaptive: true,
     scoring: { correct: 1, wrong: 0, blank: 0 },
-    difficulty: 2,
+    difficulty: 1, // the games start easy and adapt upwards
     sections: [
       { id: 'switch', title: 'Switch Challenge', timeLimitSec: 6 * 60, count: null, mix: [{ gen: 'aon.switch', weight: 1 }], calculator: false, game: 'switch' },
       { id: 'digit', title: 'Digit Challenge', timeLimitSec: 5 * 60, count: null, mix: [{ gen: 'aon.digit', weight: 1 }], calculator: false, game: 'digit' },

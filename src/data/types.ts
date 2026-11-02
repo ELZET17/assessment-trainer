@@ -26,6 +26,8 @@ export interface Attempt {
   targetSec: number
   lang: Lang
   answer?: Answer
+  /** Position within its session (simulation order: section × 1000 + index). */
+  seq?: number
 }
 
 export interface SessionSection {
