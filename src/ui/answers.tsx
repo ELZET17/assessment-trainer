@@ -63,7 +63,12 @@ export function McqOptions({ options, selected, onSelect, reveal, disabled, larg
 // ----------------------------------------------------------- numeric input
 
 export function parseUserNumber(s: string): number | null {
-  const t = s.trim().replace(/\s/g, '').replace(/[’']/g, '')
+  // Units and symbols the candidate may type along with the number are ignored ("12,5 %", "€7.50").
+  const t = s
+    .trim()
+    .replace(/\s/g, '')
+    .replace(/[’']/g, '')
+    .replace(/^[€$£]|[%€$£]$|(EUR|CHF|USD)$/gi, '')
   if (!t) return null
   // Accept "1,234.5", "1.234,5", "12,5", "12.5"
   let norm: string
@@ -376,11 +381,16 @@ export function GridRoundPlayer({ round, onDone, showMs = 1500 }: { round: GridR
     setJudgements(next)
     setPhase(phase.i + 1 < n ? { k: 'dot', i: phase.i + 1 } : { k: 'recall', i: 0 })
   }
+  // 8 s per judgement; keyed on the phase only, so parent re-renders (timer ticks) do not restart it.
+  const judgeRef = useRef(judge)
+  useEffect(() => {
+    judgeRef.current = judge
+  })
   useEffect(() => {
     if (phase.k !== 'judge') return
-    const t = setTimeout(() => judge(null), 8000)
+    const t = setTimeout(() => judgeRef.current(null), 8000)
     return () => clearTimeout(t)
-  })
+  }, [phase.k, phase.i])
   const tap = (cell: number) => {
     if (taps.includes(cell)) return
     const next = [...taps, cell]

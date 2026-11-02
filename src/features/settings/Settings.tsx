@@ -23,23 +23,37 @@ export default function Settings() {
 
   const doExport = async () => {
     const data = await exportAll()
+    const name = `assessment-trainer-${new Date().toISOString().slice(0, 10)}.json`
     const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' })
+    const file = new File([blob], name, { type: 'application/json' })
+    const summary = `${data.attempts.length} Antworten, ${data.sessions.length} Sitzungen`
+    // iPhone/iPad (home-screen app): the share sheet is the reliable way to save or AirDrop the file.
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Assessment Trainer – Export' })
+        setMsg(`Export geteilt: ${summary}.`)
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setMsg('Teilen nicht möglich – bitte erneut versuchen.')
+      }
+      return
+    }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `assessment-trainer-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = name
     document.body.appendChild(a)
     a.click()
     a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-    setMsg(`Export erstellt: ${data.attempts.length} Antworten, ${data.sessions.length} Sitzungen.`)
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+    setMsg(`Export erstellt: ${summary}.`)
   }
 
   const doImport = async (f: File) => {
     try {
       const json = JSON.parse(await f.text())
       const r = await importMerge(json)
-      setMsg(`Import zusammengeführt: ${r.addedAttempts} neue Antworten, ${r.skippedAttempts} bereits vorhanden, ${r.addedSessions} neue Sitzungen.`)
+      await useSettings.getState().load()
+      setMsg(`Import zusammengeführt: ${r.addedAttempts} neue Antworten, ${r.skippedAttempts} bereits vorhanden, ${r.addedSessions} neue Sitzungen${r.invalidAttempts ? `, ${r.invalidAttempts} ungültige Einträge übersprungen` : ''}.`)
     } catch (e) {
       setMsg(e instanceof ImportError ? e.message : 'Die Datei konnte nicht gelesen werden.')
     }

@@ -49,3 +49,14 @@ describe('adaptive staircase', () => {
     expect(adaptiveLevel(1, [false, false])).toBe(1)
   })
 })
+
+describe('free number input', () => {
+  it('accepts German/English formats and ignores typed units', async () => {
+    const { parseUserNumber } = await import('../ui/answers')
+    expect(parseUserNumber('12,5 %')).toBe(12.5)
+    expect(parseUserNumber('€7.50')).toBe(7.5)
+    expect(parseUserNumber('1.234,5')).toBe(1234.5)
+    expect(parseUserNumber('−3')).toBe(-3)
+    expect(parseUserNumber('abc')).toBeNull()
+  })
+})

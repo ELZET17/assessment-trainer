@@ -84,4 +84,6 @@ export interface ExportFile {
   attempts: Attempt[]
   sessions: Session[]
   settings: Settings | null
+  /** Set by the import check: number of dropped invalid attempts. */
+  invalid?: number
 }

@@ -3,6 +3,7 @@
  * book if it was ever answered wrongly and has not been answered correctly
  * twice in a row since its last wrong answer.
  */
+import { isReproducible } from '../content/items'
 import type { ItemRef } from '../content/types'
 import type { Attempt } from './types'
 
@@ -35,6 +36,8 @@ export function mistakeBook(attempts: Attempt[]): MistakeEntry[] {
     const streak = after.filter((a) => a.correct).length
     if (streak >= 2) continue
     const last = list[lastWrongIdx]
+    // After a generator update the old task cannot be shown again (D17) – it leaves the book.
+    if (!isReproducible(last.ref)) continue
     out.push({ itemKey: key, ref: last.ref, category: last.category, sub: last.sub, lastWrong: last.ts, wrongCount: list.filter((a) => !a.correct).length, streak })
   }
   return out.sort((a, b) => b.lastWrong - a.lastWrong)

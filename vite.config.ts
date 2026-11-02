@@ -12,9 +12,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': a new version waits until main.tsx activates it – never in the middle of a run.
+      registerType: 'prompt',
       injectRegister: false,
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         id: base,
         name: 'Assessment Trainer',

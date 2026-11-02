@@ -46,9 +46,11 @@ export interface ItemViewProps {
   /** After submission in training: show the key. */
   revealed?: boolean
   freeInput?: boolean
+  /** Keyboard shortcuts 1–5 / A–E (off for embedded examples, so one key does not answer several items). */
+  keyboard?: boolean
 }
 
-export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed = false, freeInput = false }: ItemViewProps) {
+export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed = false, freeInput = false, keyboard = true }: ItemViewProps) {
   const lang = item.lang
   const act = (a: Answer) => {
     if (revealed) return
@@ -57,9 +59,13 @@ export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed
   }
   // Keyboard: 1–5 / A–E choose an option.
   useEffect(() => {
-    if (item.type !== 'mcq' || revealed || (freeInput && item.free)) return
+    if (!keyboard || item.type !== 'mcq' || revealed || (freeInput && item.free)) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey) return
+      const t = e.target as HTMLElement | null
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      if (t && (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || t.isContentEditable)) return
+      // An open dialog (abort confirmation, calculator) owns the keyboard.
+      if (document.querySelector('[role="alertdialog"], [role="dialog"]')) return
       const k = e.key.toLowerCase()
       let i = -1
       if (/^[1-9]$/.test(k)) i = Number(k) - 1

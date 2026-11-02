@@ -107,25 +107,25 @@ body {
   }
 }
 
-.tabnums {
-  font-variant-numeric: tabular-nums;
-}
-
-.safe-top {
-  padding-top: env(safe-area-inset-top);
-}
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-}
-
-.muted {
-  color: var(--muted);
+/* Component classes live in a layer, so Tailwind utilities (borders, padding, colours) can override them. */
+@layer components {
+  .tabnums {
+    font-variant-numeric: tabular-nums;
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .muted {
+    color: var(--muted);
+  }
 }
 
 :focus-visible {

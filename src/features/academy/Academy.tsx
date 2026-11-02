@@ -38,7 +38,7 @@ function Example({ gen, d, seed, caption }: { gen: string; d: 1 | 2 | 3; seed: n
   return (
     <Card className="my-4 border-dashed">
       <div className="muted mb-2 text-xs font-bold tracking-wide uppercase">Beispiel · {caption}</div>
-      <ItemView item={item} mode={needsSubmitButton(item) ? 'draft' : 'instant'} draft={answer ?? draft} onDraft={setDraft} onSubmit={setAnswer} revealed={revealed} />
+      <ItemView item={item} mode={needsSubmitButton(item) ? 'draft' : 'instant'} draft={answer ?? draft} onDraft={setDraft} onSubmit={setAnswer} revealed={revealed} keyboard={false} />
       {!revealed && (
         <div className="mt-3 flex gap-2">
           {needsSubmitButton(item) && (

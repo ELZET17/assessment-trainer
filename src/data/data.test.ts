@@ -205,3 +205,27 @@ describe('properties (fast-check)', () => {
     )
   })
 })
+
+describe('import validation', () => {
+  it('drops broken attempts, de-duplicates ids inside the file and keeps valid entries', async () => {
+    const db = openDb(`imp-${Math.random()}`)
+    const good = att({ correct: true })
+    const file = {
+      app: 'assessment-trainer',
+      format: 1,
+      schemaVersion: 1,
+      attempts: [good, good, { ...att({ correct: false }), ref: undefined }, { ...att({ correct: false }), category: 'nope' }, { __proto__: { polluted: true }, id: 'x' }],
+      sessions: [],
+      settings: null,
+    }
+    const r = await importMerge(file, db)
+    expect(r.addedAttempts).toBe(1)
+    expect(r.invalidAttempts).toBe(3)
+    expect(await db.attempts.count()).toBe(1)
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined()
+  })
+
+  it('rejects a file without any valid entry', () => {
+    expect(() => migrateExport({ app: 'assessment-trainer', attempts: [{ id: 'a' }], sessions: [] })).toThrow(/keine gültigen/)
+  })
+})

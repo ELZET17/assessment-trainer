@@ -11,7 +11,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run --exclude tests/content/**",
     "test:content": "vitest run tests/content",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "golden": "tsx scripts/golden.ts"
   },
   "dependencies": {
     "dexie": "^4.4.7",

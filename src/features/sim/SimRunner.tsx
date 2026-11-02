@@ -23,6 +23,9 @@ interface Slot {
   timeMs: number
 }
 
+/** Ordering items start with the shown order as a valid answer (as in Training and in SHL tests). */
+const initialAnswer = (it: Item): Answer | null => (it.type === 'order' ? { type: 'order', order: it.entries.map((_, i) => i) } : null)
+
 export default function SimRunner() {
   const { profileId = '' } = useParams()
   const profile = getProfile(profileId) as Profile
@@ -78,7 +81,7 @@ export default function SimRunner() {
         const list: Slot[] = []
         for (let i = 0; i < n; i++) {
           const it = makeItem(s, profile.difficulty)
-          if (it) list.push({ item: it, answer: null, timeMs: 0 })
+          if (it) list.push({ item: it, answer: initialAnswer(it), timeMs: 0 })
         }
         return list
       })
@@ -207,12 +210,18 @@ export default function SimRunner() {
       const d = adaptiveLevel(profile.difficulty, h)
       setHistory(h)
       const it = makeItem(sec, d)
-      if (it) setSlots((all) => all.map((l, si) => (si === secIdx ? [...l, { item: it, answer: null, timeMs: 0 }] : l)))
+      if (it) setSlots((all) => all.map((l, si) => (si === secIdx ? [...l, { item: it, answer: initialAnswer(it), timeMs: 0 }] : l)))
     }
     if (pos + 1 < (profile.adaptive && sec.count ? sec.count : curList.length)) setPos(pos + 1)
     else if (total) setConfirmEnd(true)
     else nextSection()
   }
+
+  const calcAllowed = !!(total ? profile?.sections[flat[pos]?.si ?? 0]?.calculator : sec?.calculator)
+  // Setting "Taschenrechner standardmäßig öffnen": open it in every section that allows it.
+  useEffect(() => {
+    if (calcAllowed && settings.calculatorDefault) setCalc(true)
+  }, [calcAllowed, secIdx, settings.calculatorDefault])
 
   if (!profile) return <p className="p-6">Unbekanntes Profil.</p>
   if (!session || !sec) return <p className="muted p-6">Test wird vorbereitet …</p>
@@ -302,7 +311,7 @@ export default function SimRunner() {
         </nav>
       )}
       <ItemView key={current.item.key} item={current.item} mode="draft" draft={current.answer} onDraft={setAnswer} />
-      <div className="sticky bottom-0 mt-4 flex flex-wrap justify-end gap-2 bg-gradient-to-t from-[var(--bg)] py-3">
+      <div className="sticky bottom-0 mt-4 flex flex-wrap justify-end gap-2 bg-gradient-to-t from-[var(--bg)] pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         {profile.allowBack && pos > 0 && (
           <Button onClick={() => (commitTime(), setPos(pos - 1))}>← Zurück</Button>
         )}
@@ -311,7 +320,7 @@ export default function SimRunner() {
           {pos + 1 >= (total ? flat.length : (sec.count ?? curList.length)) ? (total || secIdx + 1 >= profile.sections.length ? 'Test abgeben' : 'Nächster Teil →') : 'Weiter →'}
         </Button>
       </div>
-      {calc && <Calculator onClose={() => setCalc(false)} />}
+      {calc && calcAllowed && <Calculator onClose={() => setCalc(false)} />}
       {confirm}
     </div>
   )

@@ -3,7 +3,8 @@ import { core, tr, type GeneratorDef } from '../../generator'
 import { firstAccepted } from '../../pipeline'
 import type { Rng } from '../../rng'
 import type { Difficulty, Lang, McqItem } from '../../types'
-import { clueHolds, factHolds, solveOrdering, type Clue, type Fact } from '../../validators/deductive'
+import type { Clue, Fact } from '../../validators/deductive'
+import { arrangements, clueTrue, factTrue } from './arrange'
 
 const NAMES = ['Anna', 'Ben', 'Clara', 'David', 'Eva', 'Felix']
 const DAYS_EN = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -228,8 +229,8 @@ const sameClue = (x: Clue, y: Clue) => JSON.stringify(x) === JSON.stringify(y)
 /** True if one clue alone already settles the fact (too easy for a puzzle question). */
 function trivial(f: Fact, clues: Clue[], n: number, circular: boolean): boolean {
   return clues.some((c) => {
-    const sols = solveOrdering(n, [c], circular)
-    const vals = new Set(sols.map((s) => factHolds(f, s, circular)))
+    const sols = arrangements(n, [c], circular)
+    const vals = new Set(sols.map((s) => factTrue(f, s, circular)))
     return vals.size === 1
   })
 }
@@ -252,12 +253,12 @@ function buildPuzzle(rng: Rng, d: Difficulty, ctx: Ctx, done: (sols: number[][])
   const pos = new Array(n)
   order.forEach((p, k) => (pos[p] = k))
   const clues: Clue[] = []
-  let sols = solveOrdering(n, clues, circular)
+  let sols = arrangements(n, clues, circular)
   for (let i = 0; i < 40 && !done(sols); i++) {
     const c = randomClue(rng, pos, d, circular)
-    if (!clueHolds(c, pos, circular) || clues.some((x) => sameClue(x, c))) continue
+    if (!clueTrue(c, pos, circular) || clues.some((x) => sameClue(x, c))) continue
     if (circular && c.t === 'before') continue
-    const next = solveOrdering(n, [...clues, c], circular)
+    const next = arrangements(n, [...clues, c], circular)
     if (next.length === sols.length) continue // clue adds no information
     clues.push(c)
     sols = next
@@ -266,7 +267,7 @@ function buildPuzzle(rng: Rng, d: Difficulty, ctx: Ctx, done: (sols: number[][])
   // Drop clues that are not needed (keeps puzzles crisp).
   for (let i = clues.length - 1; i >= 0; i--) {
     const without = clues.filter((_, j) => j !== i)
-    const s = solveOrdering(n, without, circular)
+    const s = arrangements(n, without, circular)
     if (done(s)) {
       clues.splice(i, 1)
       sols = s
@@ -290,7 +291,7 @@ function explain(p: Puzzle, lang: Lang, conclusion: string): string[] {
   const used: Clue[] = []
   const left = (cs: Clue[]) => {
     used.push(...cs)
-    const k = solveOrdering(p.n, used, p.circular).length
+    const k = arrangements(p.n, used, p.circular).length
     return k === 1 ? ' → nur noch 1 Anordnung möglich.' : ` → noch ${k} Anordnungen möglich.`
   }
   if (fixed.length) steps.push(`Feste Angaben zuerst eintragen: ${fixed.map((c) => t.clue(c)).join(' ')}${left(fixed)}`)
@@ -361,9 +362,9 @@ export const ordering: GeneratorDef = {
         for (let kk = 0; kk < n; kk++) allFacts.push({ t: 'at', a: x, k: kk })
       }
       const isClue = (f: Fact) => p.clues.some((c) => (c.t === 'pos' && f.t === 'at' && c.a === f.a && c.k === f.k) || (c.t === f.t && 'b' in c && 'b' in f && c.a === f.a && c.b === f.b))
-      const must = allFacts.filter((f) => !isClue(f) && !trivial(f, p.clues, n, false) && p.sols.every((s) => factHolds(f, s, false)))
-      const could = allFacts.filter((f) => p.sols.some((s) => factHolds(f, s, false)) && !p.sols.every((s) => factHolds(f, s, false)))
-      const never = allFacts.filter((f) => !p.sols.some((s) => factHolds(f, s, false)))
+      const must = allFacts.filter((f) => !isClue(f) && !trivial(f, p.clues, n, false) && p.sols.every((s) => factTrue(f, s, false)))
+      const could = allFacts.filter((f) => p.sols.some((s) => factTrue(f, s, false)) && !p.sols.every((s) => factTrue(f, s, false)))
+      const never = allFacts.filter((f) => !p.sols.some((s) => factTrue(f, s, false)))
       if (must.length === 0) return null
       const right = rng.pick(must)
       const wrong = [...rng.shuffle(could).slice(0, d === 3 ? 3 : 2), ...rng.shuffle(never)].slice(0, 4)
@@ -386,7 +387,7 @@ export const ordering: GeneratorDef = {
         facts
           .map((f, i) => ({ f, i }))
           .filter(({ i }) => i !== correct)
-          .map(({ f, i }) => `**${String.fromCharCode(65 + i)}**: ${p.sols.some((s) => factHolds(f, s, false)) ? 'Kann wahr sein, muss aber nicht (nicht in jeder möglichen Anordnung).' : 'Ist in keiner möglichen Anordnung wahr.'}`),
+          .map(({ f, i }) => `**${String.fromCharCode(65 + i)}**: ${p.sols.some((s) => factTrue(f, s, false)) ? 'Kann wahr sein, muss aber nicht (nicht in jeder möglichen Anordnung).' : 'Ist in keiner möglichen Anordnung wahr.'}`),
       )
     })
   },
@@ -433,7 +434,7 @@ export const orderingTfc: GeneratorDef = {
         for (let kk = 0; kk < p.n; kk++) facts.push({ t: 'at', a: x, k: kk })
       }
       const cls = (f: Fact) => {
-        const v = new Set(p.sols.map((s) => factHolds(f, s, false)))
+        const v = new Set(p.sols.map((s) => factTrue(f, s, false)))
         return v.size === 2 ? 'C' : v.has(true) ? 'T' : 'F'
       }
       const isClueText = (f: Fact) => p.clues.some((c) => t.clue(c) === t.fact(f))

@@ -47,6 +47,7 @@ export default function TrainingRunner() {
   const [log, setLog] = useState<{ correct: boolean; timeMs: number }[]>([])
   const [done, setDone] = useState(false)
   const [calc, setCalc] = useState(false)
+  const calcOpened = useRef(false)
   const used = useRef(new Set<string>())
   const index = useRef(0)
   const submitting = useRef(false)
@@ -137,6 +138,14 @@ export default function TrainingRunner() {
     }
     nextItem(d)
   }, [result, adaptive, difficulty, log, nextItem])
+
+  // Setting "Taschenrechner standardmäßig öffnen": open it once at the first item that allows it.
+  useEffect(() => {
+    if (item?.calculator === 'allowed' && settings.calculatorDefault && !calcOpened.current) {
+      calcOpened.current = true
+      setCalc(true)
+    }
+  }, [item, settings.calculatorDefault])
 
   // Enter = next
   useEffect(() => {
@@ -233,14 +242,14 @@ export default function TrainingRunner() {
       {result && (
         <>
           <Explanation item={item} correct={result.correct} />
-          <div className="sticky bottom-0 mt-4 flex justify-end bg-gradient-to-t from-[var(--bg)] py-3">
+          <div className="sticky bottom-0 mt-4 flex justify-end bg-gradient-to-t from-[var(--bg)] pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
             <Button variant="primary" onClick={next} autoFocus>
               Weiter ↵
             </Button>
           </div>
         </>
       )}
-      {calc && <Calculator onClose={() => setCalc(false)} />}
+      {calc && item?.calculator === 'allowed' && <Calculator onClose={() => setCalc(false)} />}
     </div>
   )
 }

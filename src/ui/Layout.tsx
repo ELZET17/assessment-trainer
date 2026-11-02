@@ -38,7 +38,7 @@ export default function Layout() {
           ))}
         </nav>
       )}
-      <main className={`safe-top mx-auto w-full min-w-0 px-4 pt-4 ${focus ? 'max-w-[1400px] pb-6' : 'max-w-6xl pb-28 lg:pb-10'} lg:px-8 lg:pt-8`}>
+      <main className={`mx-auto w-full min-w-0 pt-[calc(env(safe-area-inset-top)+1rem)] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] ${focus ? 'max-w-[1400px] pb-[calc(env(safe-area-inset-bottom)+1.5rem)]' : 'max-w-6xl pb-28 lg:pb-10'} lg:px-8 lg:pt-[calc(env(safe-area-inset-top)+2rem)]`}>
         <Outlet />
       </main>
       {!focus && (

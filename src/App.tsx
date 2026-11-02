@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { createHashRouter, RouterProvider, useLocation } from 'react-router'
+import { createHashRouter, RouterProvider, useLocation, useRouteError } from 'react-router'
 import { AcademyIndex, LessonPage } from './features/academy/Academy'
 import Home from './features/home/Home'
 import Mistakes from './features/mistakes/Mistakes'
@@ -20,9 +20,24 @@ function Fresh({ C }: { C: ComponentType }) {
   return <C key={loc.pathname + loc.search} />
 }
 
+/** Shown instead of a white screen if a page throws (e.g. unexpected stored data). */
+function ErrorPage() {
+  const error = useRouteError()
+  return (
+    <div className="mx-auto max-w-lg p-6">
+      <h1 className="mb-2 text-xl font-bold">Hier ist etwas schiefgegangen</h1>
+      <p className="muted mb-4 text-sm">{error instanceof Error ? error.message : 'Unbekannter Fehler.'} Deine gespeicherten Daten sind davon nicht betroffen.</p>
+      <a className="inline-flex min-h-11 items-center rounded-xl bg-[var(--accent)] px-4 font-semibold text-[var(--accent-contrast)]" href="#/">
+        Zur Startseite
+      </a>
+    </div>
+  )
+}
+
 const router = createHashRouter([
   {
     element: <Layout />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
       { path: 'practice', element: <PracticeIndex /> },
@@ -41,7 +56,8 @@ const router = createHashRouter([
       { path: 'academy', element: <AcademyIndex /> },
       { path: 'academy/:lessonId', element: <LessonPage /> },
       { path: 'settings', element: <Settings /> },
-      { path: 'render/:key', element: <RenderItem /> },
+      // QA route for blind-solving screenshots (scripts/blind-export.ts); not part of the production app.
+      ...(import.meta.env.DEV ? [{ path: 'render/:key', element: <RenderItem /> }] : []),
       { path: '*', element: <Home /> },
     ],
   },
