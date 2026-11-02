@@ -57,7 +57,7 @@ export const VERBAL_4: VerbalPassage[] = [
     },
     statements: [
       { id: 'v34-1', text: { en: 'GreenStack uses pesticides only in small quantities.' }, answer: 'F', trap: 'negation', reason: 'Satz 2: Die Pflanzen wachsen „without pesticides“ – also gar keine Pestizide.' },
-      { id: 'v34-2', text: { en: 'Electricity is GreenStack’s largest single operating cost.' }, answer: 'C', trap: 'comparison', reason: 'Satz 4: Strom macht „almost half“ der Betriebskosten aus. Über die übrigen Posten sagt der Text nichts – ein einzelner anderer Posten könnte (knapp über der Hälfte) sogar größer sein. Daher nicht bestimmbar.' },
+      { id: 'v34-2', text: { en: 'Electricity accounts for more than half of GreenStack’s operating costs.' }, answer: 'F', trap: 'quantity', reason: 'Satz 4: Strom macht „almost half“ der Betriebskosten aus – also knapp weniger als die Hälfte, nicht mehr.' },
       { id: 'v34-3', text: { en: 'GreenStack was profitable in 2024.' }, answer: 'F', trap: 'none', reason: 'Satz 6: Das Unternehmen machte 2024 einen Verlust.' },
       { id: 'v34-4', text: { en: 'Vertical farming uses less water per kilogram of lettuce than any other growing method.' }, answer: 'C', trap: 'comparison', reason: 'Satz 3 vergleicht nur mit konventionellem Feldanbau, nicht mit allen Methoden.' },
     ],
@@ -88,8 +88,8 @@ export const VERBAL_4: VerbalPassage[] = [
     statements: [
       { id: 'v36-1', text: { en: 'Brewline had 265 cafés at the start of 2024.' }, answer: 'F', trap: 'quantity', reason: 'Satz 1: 2024 kamen 45 Cafés hinzu und 8 wurden geschlossen, Endstand 310 → Anfang 2024: 310 − 45 + 8 = 273, nicht 265.' },
       { id: 'v36-2', text: { en: 'Sales in cafés open throughout both years fell slightly.' }, answer: 'T', trap: 'paraphrase', reason: 'Satz 3: Like-for-like-Umsatz (nur Cafés, die beide Jahre ganz geöffnet waren) sank um 1 %.' },
-      { id: 'v36-3', text: { en: 'Most of Brewline’s cafés are located at railway stations and motorway service areas.' }, answer: 'C', trap: 'some-all', reason: 'Satz 2 bezieht sich nur auf die NEUEN Cafés. Wo die Mehrheit aller 310 Cafés liegt, ist unbekannt.' },
-      { id: 'v36-4', text: { en: 'Brewline plans to close more than 20 cafés in 2025.' }, answer: 'F', trap: 'quantity', reason: 'Satz 5: Geplant sind „up to 20“ – also höchstens 20, nicht mehr als 20.' },
+      { id: 'v36-3', text: { en: 'More than half of the cafés opened in 2024 are located at railway stations.' }, answer: 'C', trap: 'some-all', reason: 'Satz 2 nennt Bahnhöfe und Autobahnraststätten nur zusammen („most … at railway stations and motorway service areas“). Wie viele der neuen Cafés allein an Bahnhöfen liegen, ist unbekannt.' },
+      { id: 'v36-4', text: { en: 'Brewline plans to close more than 20 unprofitable city-centre cafés in 2025.' }, answer: 'F', trap: 'quantity', reason: 'Satz 5: Geplant ist, „up to 20“ unrentable Innenstadt-Cafés zu schließen – also höchstens 20, nicht mehr als 20.' },
     ],
   },
   {

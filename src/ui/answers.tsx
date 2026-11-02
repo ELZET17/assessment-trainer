@@ -14,7 +14,7 @@ export interface Reveal {
   correct: number | null
 }
 
-export function McqOptions({ options, selected, onSelect, reveal, disabled }: { options: McqOption[]; selected: number | null; onSelect: (i: number) => void; reveal?: Reveal; disabled?: boolean }) {
+export function McqOptions({ options, selected, onSelect, reveal, disabled, largeFigures }: { options: McqOption[]; selected: number | null; onSelect: (i: number) => void; reveal?: Reveal; disabled?: boolean; largeFigures?: boolean }) {
   const withPanels = options.some((o) => o.panel)
   return (
     <div role="radiogroup" aria-label="Antwortoptionen" className={withPanels ? 'grid grid-cols-3 gap-2 sm:grid-cols-5' : 'grid gap-2'}>
@@ -36,7 +36,7 @@ export function McqOptions({ options, selected, onSelect, reveal, disabled }: { 
             <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${isSel ? 'bg-[var(--accent)] text-[var(--accent-contrast)]' : 'bg-[var(--surface-2)] text-[var(--muted)]'}`}>{String.fromCharCode(65 + i)}</span>
             {o.panel ? (
               <span className="w-full max-w-[120px]">
-                <FigurePanel panel={o.panel} label={`Option ${String.fromCharCode(65 + i)}`} />
+                <FigurePanel panel={o.panel} large={largeFigures} label={`Option ${String.fromCharCode(65 + i)}`} />
               </span>
             ) : (
               <span className="tabnums min-w-0 flex-1 break-words">{o.text}</span>

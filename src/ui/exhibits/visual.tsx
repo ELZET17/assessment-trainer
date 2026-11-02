@@ -24,7 +24,8 @@ const SHAPE_POINTS: Record<Exclude<Shape, 'circle'>, string> = {
   star: STAR,
   cross: '-0.3,-1 0.3,-1 0.3,-0.3 1,-0.3 1,0.3 0.3,0.3 0.3,1 -0.3,1 -0.3,0.3 -1,0.3 -1,-0.3 -0.3,-0.3',
   arrow: '0,-1 0.72,-0.2 0.28,-0.2 0.28,1 -0.28,1 -0.28,-0.2 -0.72,-0.2',
-  lshape: '-0.7,-1 -0.2,-1 -0.2,0.5 0.7,0.5 0.7,1 -0.7,1',
+  // Normalised to radius 1 so that no rotation reaches beyond the cell.
+  lshape: '-0.573,-0.819 -0.164,-0.819 -0.164,0.410 0.573,0.410 0.573,0.819 -0.573,0.819',
 }
 
 function FigDefs({ id }: { id: string }) {
@@ -42,7 +43,14 @@ function FigDefs({ id }: { id: string }) {
   )
 }
 
-const SIZE_SCALE = [9, 13.5, 18]
+const SIZE_SCALE = [8.5, 12.5, 16.5]
+/** Cell centres of the 3×3 grid; the strip below y = 116 is reserved for tick marks. */
+const CX = [20, 60, 100]
+const CY = [20, 58, 96]
+
+/** Large rendering only if EVERY panel of the item is a single centred element without lines (consistent sizes). */
+export const largeFigures = (panels: (Panel | null | undefined)[]) =>
+  panels.every((p) => !p || (p.els.length === 1 && p.els[0].cell === 4 && (p.lines ?? []).length === 0))
 
 /** Scales a unit polygon in user space (not via transform) so fill patterns keep their size. */
 const scalePoints = (pts: string, s: number) =>
@@ -52,30 +60,45 @@ const scalePoints = (pts: string, s: number) =>
     .join(' ')
 
 function Element({ el, id, big }: { el: FigEl; id: string; big?: boolean }) {
-  const cx = big ? 60 : (el.cell % 3) * 40 + 20
-  const cy = big ? 58 : Math.floor(el.cell / 3) * 40 + 20
+  const cx = CX[el.cell % 3]
+  const cy = CY[Math.floor(el.cell / 3)]
   const s = SIZE_SCALE[el.size] * (big ? 2.1 : 1)
   const fill = el.fill === 'solid' ? 'var(--fig)' : el.fill === 'empty' ? 'var(--fig-bg)' : `url(#${id}-${el.fill})`
   const t = `translate(${cx} ${cy}) rotate(${(el.rot % 8) * 45}) scale(${el.mirror ? -1 : 1} 1)`
   const common = { fill, stroke: 'var(--fig)', strokeWidth: 2, strokeLinejoin: 'round' as const }
-  return <g transform={t}>{el.shape === 'circle' ? <circle r={0.92 * s} {...common} /> : <polygon points={scalePoints(SHAPE_POINTS[el.shape], s)} {...common} />}</g>
+  // A halo in the background colour keeps the outline readable where it crosses panel lines.
+  const halo = { fill: 'none', stroke: 'var(--fig-bg)', strokeWidth: 7, strokeLinejoin: 'round' as const }
+  const pts = el.shape === 'circle' ? '' : scalePoints(SHAPE_POINTS[el.shape], s)
+  return (
+    <g transform={t}>
+      {el.shape === 'circle' ? <circle r={0.92 * s} {...halo} /> : <polygon points={pts} {...halo} />}
+      {el.shape === 'circle' ? <circle r={0.92 * s} {...common} /> : <polygon points={pts} {...common} />}
+    </g>
+  )
 }
 
 const LINE_COORDS: [number, number, number, number][] = [
   [6, 6, 114, 6],
-  [114, 6, 114, 114],
-  [6, 114, 114, 114],
-  [6, 6, 6, 114],
-  [6, 6, 114, 114],
-  [114, 6, 6, 114],
-  [6, 60, 114, 60],
-  [60, 6, 60, 114],
+  [114, 6, 114, 110],
+  [6, 110, 114, 110],
+  [6, 6, 6, 110],
+  [6, 6, 114, 110],
+  [114, 6, 6, 110],
+  [6, 58, 114, 58],
+  [60, 6, 60, 110],
 ]
 
-export function FigurePanel({ panel, label }: { panel: Panel | null; label?: string }) {
+/** Tick x positions: 11 px apart, with an extra gap after every four ticks so they are easy to count. */
+function tickXs(n: number): number[] {
+  const xs = Array.from({ length: n }, (_, i) => i * 11 + Math.floor(i / 4) * 5)
+  const w = xs[n - 1] ?? 0
+  return xs.map((x) => 60 - w / 2 + x)
+}
+
+export function FigurePanel({ panel, label, large }: { panel: Panel | null; label?: string; large?: boolean }) {
   const id = useId().replace(/:/g, '')
   return (
-    <svg viewBox="0 0 120 132" className="block h-auto w-full rounded-lg border border-[var(--border)] bg-[var(--fig-bg)]" role="img" aria-label={label ?? (panel ? 'Figur' : 'Fehlende Figur')}>
+    <svg viewBox="0 0 120 134" className="block h-auto w-full rounded-lg border border-[var(--border)] bg-[var(--fig-bg)]" role="img" aria-label={label ?? (panel ? 'Figur' : 'Fehlende Figur')}>
       <FigDefs id={id} />
       {panel === null ? (
         <text x="60" y="76" textAnchor="middle" fontSize="44" fontWeight="700" fill="var(--muted)">
@@ -88,25 +111,23 @@ export function FigurePanel({ panel, label }: { panel: Panel | null; label?: str
             return <line key={l} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--fig)" strokeWidth="3.2" strokeLinecap="round" />
           })}
           {panel.els.map((el, i) => (
-            <Element key={i} el={el} id={id} big={panel.els.length === 1 && el.cell === 4 && (panel.lines ?? []).length === 0} />
+            <Element key={i} el={el} id={id} big={large} />
           ))}
-          {Array.from({ length: panel.ticks ?? 0 }, (_, i) => {
-            const n = panel.ticks ?? 0
-            const x = 60 - ((n - 1) * 9) / 2 + i * 9
-            return <line key={i} x1={x} y1={120} x2={x} y2={129} stroke="var(--fig)" strokeWidth="2.6" strokeLinecap="round" />
-          })}
+          {tickXs(panel.ticks ?? 0).map((x, i) => (
+            <line key={i} x1={x} y1={121} x2={x} y2={130} stroke="var(--fig)" strokeWidth="2.6" strokeLinecap="round" />
+          ))}
         </>
       )}
     </svg>
   )
 }
 
-export function FiguresView({ layout, panels }: { layout: 'series' | 'matrix' | 'odd'; panels: (Panel | null)[] }) {
+export function FiguresView({ layout, panels, large }: { layout: 'series' | 'matrix' | 'odd'; panels: (Panel | null)[]; large?: boolean }) {
   if (layout === 'matrix') {
     return (
       <div className="mx-auto grid max-w-[420px] grid-cols-3 gap-2">
         {panels.map((p, i) => (
-          <FigurePanel key={i} panel={p} label={p ? `Feld ${i + 1}` : 'Fehlendes Feld'} />
+          <FigurePanel key={i} panel={p} large={large} label={p ? `Feld ${i + 1}` : 'Fehlendes Feld'} />
         ))}
       </div>
     )
@@ -116,7 +137,7 @@ export function FiguresView({ layout, panels }: { layout: 'series' | 'matrix' | 
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
       {panels.map((p, i) => (
         <div key={i}>
-          <FigurePanel panel={p} label={p ? `Figur ${i + 1}` : 'Gesuchte Figur'} />
+          <FigurePanel panel={p} large={large} label={p ? `Figur ${i + 1}` : 'Gesuchte Figur'} />
           <div className="muted mt-1 text-center text-xs tabnums">{i + 1}</div>
         </div>
       ))}

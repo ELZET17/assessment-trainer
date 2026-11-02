@@ -12,6 +12,8 @@ export interface Theme {
   subj: { en: (r: string) => string; de: (r: string) => string }
   /** German verb agreement for subj ("ist" vs. "sind"). */
   dePlural: boolean
+  /** English verb agreement for subj ("unit sales were" vs. "revenue was"). */
+  enPlural: boolean
   /** EN: "total revenue of all regions shown"; DE incl. preposition: "am Gesamtumsatz …" */
   total: { en: string; de: string }
   range: [number, number]
@@ -35,6 +37,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'region', enPlural: 'regions', de: 'Region', dePlural: 'Regionen', deWhich: 'Welche' },
     subj: { en: (r) => `revenue in ${r}`, de: (r) => `der Umsatz in ${r}` },
     dePlural: false,
+    enPlural: false,
     total: { en: 'total revenue of all regions shown', de: 'am Gesamtumsatz aller dargestellten Regionen' },
     range: [120, 980],
     decimals: 0,
@@ -55,6 +58,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'product line', enPlural: 'product lines', de: 'Produktlinie', dePlural: 'Produktlinien', deWhich: 'Welche' },
     subj: { en: (r) => `unit sales of ${r}`, de: (r) => `der Absatz von ${r}` },
     dePlural: false,
+    enPlural: true,
     total: { en: 'total unit sales of all product lines shown', de: 'am Gesamtabsatz aller dargestellten Produktlinien' },
     range: [40, 650],
     decimals: 1,
@@ -75,6 +79,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'department', enPlural: 'departments', de: 'Abteilung', dePlural: 'Abteilungen', deWhich: 'Welche' },
     subj: { en: (r) => `headcount in ${r}`, de: (r) => `die Mitarbeiterzahl der Abteilung ${r}` },
     dePlural: false,
+    enPlural: false,
     total: { en: 'total headcount of all departments shown', de: 'an der Gesamtzahl der Mitarbeitenden aller dargestellten Abteilungen' },
     range: [35, 480],
     decimals: 0,
@@ -95,6 +100,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'airport', enPlural: 'airports', de: 'Flughafen', dePlural: 'Flughäfen', deWhich: 'Welcher' },
     subj: { en: (r) => `passenger numbers at ${r}`, de: (r) => `die Passagierzahl am Flughafen ${r}` },
     dePlural: false,
+    enPlural: true,
     total: { en: 'total passengers of all airports shown', de: 'an der Gesamtzahl der Passagiere aller dargestellten Flughäfen' },
     range: [3, 48],
     decimals: 1,
@@ -115,6 +121,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'source', enPlural: 'sources', de: 'Quelle', dePlural: 'Quellen', deWhich: 'Welche' },
     subj: { en: (r) => `electricity generation from ${r}`, de: (r) => `die Stromerzeugung aus ${r}` },
     dePlural: false,
+    enPlural: false,
     total: { en: 'total generation of all sources shown', de: 'an der Gesamterzeugung aller dargestellten Quellen' },
     range: [8, 140],
     decimals: 1,
@@ -135,6 +142,7 @@ export const THEMES: Theme[] = [
     entity: { en: 'cost category', enPlural: 'cost categories', de: 'Kostenkategorie', dePlural: 'Kostenkategorien', deWhich: 'Welche' },
     subj: { en: (r) => `costs for ${r}`, de: (r) => `die Kosten für ${r}` },
     dePlural: true,
+    enPlural: true,
     total: { en: 'total operating costs of all categories shown', de: 'an den gesamten Betriebskosten aller dargestellten Kategorien' },
     range: [150, 2400],
     decimals: 0,

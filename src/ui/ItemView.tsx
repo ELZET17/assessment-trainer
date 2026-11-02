@@ -4,10 +4,10 @@ import { fmt } from '../content/format'
 import type { Answer, Exhibit, Item, Lang } from '../content/types'
 import { BarDrag, DigitPad, DragOrder, GridRoundPlayer, McqOptions, NumberEntry } from './answers'
 import { BarChart, ComboChart, LineChart, PieChart, TableView } from './exhibits/charts'
-import { FiguresView, FlowView, SwitchView } from './exhibits/visual'
+import { FiguresView, FlowView, largeFigures, SwitchView } from './exhibits/visual'
 import { Button, Rich } from './kit'
 
-export function ExhibitView({ ex, lang }: { ex: Exhibit; lang: Lang }) {
+export function ExhibitView({ ex, lang, largeFigs }: { ex: Exhibit; lang: Lang; largeFigs?: boolean }) {
   const id = useId().replace(/:/g, '')
   switch (ex.kind) {
     case 'table':
@@ -28,7 +28,7 @@ export function ExhibitView({ ex, lang }: { ex: Exhibit; lang: Lang }) {
         </div>
       )
     case 'figures':
-      return <FiguresView layout={ex.layout} panels={ex.panels} />
+      return <FiguresView layout={ex.layout} panels={ex.panels} large={largeFigs} />
     case 'flow':
       return <FlowView flow={ex.flow} lang={lang} />
     case 'switch':
@@ -93,7 +93,7 @@ export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start" data-item-key={item.key}>
       <div className="min-w-0 space-y-4 lg:sticky lg:top-4">
         {exhibits.map((ex, i) => (
-          <ExhibitView key={i} ex={ex} lang={lang} />
+          <ExhibitView key={i} ex={ex} lang={lang} largeFigs={figLarge(item)} />
         ))}
       </div>
       <div className="min-w-0">{question}</div>
@@ -121,7 +121,7 @@ function Answer({ item, draft, act, revealed, freeInput, lang }: { item: Item; d
           <NumberEntry label="Antwort" onSubmit={(v) => act({ type: 'numeric', value: v })} />
         )
       }
-      return <McqOptions options={item.options} selected={draft?.type === 'mcq' ? draft.choice : null} onSelect={(i) => act({ type: 'mcq', choice: i })} reveal={revealed ? { correct: item.correct } : undefined} disabled={revealed} />
+      return <McqOptions options={item.options} largeFigures={figLarge(item)} selected={draft?.type === 'mcq' ? draft.choice : null} onSelect={(i) => act({ type: 'mcq', choice: i })} reveal={revealed ? { correct: item.correct } : undefined} disabled={revealed} />
     case 'numeric':
     case 'tablefill':
       return revealed ? (
@@ -173,6 +173,13 @@ function Answer({ item, draft, act, revealed, freeInput, lang }: { item: Item; d
 }
 
 /** For item types whose widget does not submit by itself (bar, order) in instant mode. */
+/** Figures of one item are drawn at one consistent scale (exhibit panels and option panels). */
+function figLarge(item: Item): boolean {
+  const panels = item.exhibits.flatMap((e) => (e.kind === 'figures' ? e.panels : []))
+  if (item.type === 'mcq') panels.push(...item.options.map((o) => o.panel ?? null))
+  return panels.some((p) => p) && largeFigures(panels)
+}
+
 export function needsSubmitButton(item: Item): boolean {
   return item.type === 'bar' || item.type === 'order'
 }

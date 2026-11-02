@@ -96,7 +96,7 @@ export const flowchart: GeneratorDef = {
           ...core(this, seed, d, lang),
           type: 'mcq',
           exhibits: [{ kind: 'flow', flow: spec }],
-          prompt: tr(lang, 'What is the output of the last row?', 'Was kommt in der letzten Zeile heraus?'),
+          prompt: spec.examples.length ? tr(lang, 'What is the output of the last row?', 'Was kommt in der letzten Zeile heraus?') : tr(lang, 'What is the output?', 'Was kommt am Ende heraus?'),
           query: { family: 'flow', ask: 'output' },
           options: shuffled.map((x) => ({ text: x.w })),
           correct,

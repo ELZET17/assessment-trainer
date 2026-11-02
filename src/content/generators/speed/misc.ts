@@ -642,7 +642,7 @@ export const bigNumbers: GeneratorDef = {
         const revenue = perHead * heads
         terms = [revenue, heads]
         ops = ['/']
-        prompt = tr(lang, `A company with revenue of ${B(revenue)} has ${B(heads)} employees. What is the revenue per employee?`, `Ein Unternehmen mit ${B(revenue)} Umsatz hat ${B(heads)} Mitarbeitende. Wie hoch ist der Umsatz pro Kopf?`)
+        prompt = tr(lang, `A company with revenue of ${B(revenue)} euros has ${B(heads)} employees. What is the revenue per employee, in euros?`, `Ein Unternehmen mit ${B(revenue)} Euro Umsatz hat ${B(heads)} Mitarbeitende. Wie hoch ist der Umsatz pro Kopf, in Euro?`)
         steps = [`${B(revenue)} ÷ ${B(heads)}`, `Nullen getrennt behandeln: ${N(revenue / 1e6, lang)} Mio. ÷ ${N(heads / 1000, lang)} Tsd. = ${N(revenue / 1e6 / (heads / 1000), lang)} Tsd.`, `= ${B(perHead)}`]
       }
       const value = ops[0] === '*' ? terms[0] * terms[1] : terms[0] / terms[1]

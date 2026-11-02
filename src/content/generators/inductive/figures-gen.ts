@@ -5,7 +5,7 @@
  */
 import { core, tr, type GeneratorDef } from '../../generator'
 import { firstAccepted } from '../../pipeline'
-import type { Rng } from '../../rng'
+import { createRng, deriveSeed, type Rng } from '../../rng'
 import type { Difficulty, Lang, McqItem } from '../../types'
 import { canonPanel, oddCandidates, solveMatrix, solveSeries } from '../../validators/inductive'
 import { RING, ROTATING, SIDES, STATIC_SHAPES, type FigEl, type Fill, type Panel, type Shape, type Size } from './figure'
@@ -265,19 +265,23 @@ export const oddOneOut: GeneratorDef = {
   title: 'Odd one out',
   types: ['mcq'],
   generate(seed, d, lang) {
+    // The rule is fixed per seed (outside the retry loop), so rejections do not skew the mix of rules.
+    const pickRule = createRng(deriveSeed(seed, 'rule'))
+    const rule: OddRule = d === 1 ? pickRule.pick(['shape', 'solid']) : d === 2 ? pickRule.pick(['mirror', 'solid', 'parity']) : pickRule.pick(['mirror', 'parity', 'sides'])
     return firstAccepted(seed, (rng) => {
-      const rule: OddRule = d === 1 ? rng.pick(['shape', 'solid']) : d === 2 ? rng.pick(['mirror', 'solid', 'parity']) : rng.pick(['mirror', 'parity', 'sides'])
       const odd = rng.int(0, 4)
-      const cells = rng.shuffle([0, 1, 2, 3, 5, 6, 7, 8])
       const panels: Panel[] = []
       let why: string
       let ruleText: string
-      const balancedFill = () => rng.shuffle(['empty', 'empty', 'striped', 'striped', rng.pick(['empty', 'striped'])] as Fill[])
+      // Distractor attributes are spread 3:2 (never 4:1), so that they cannot single out a panel by themselves.
+      const balanced = <T,>(a: T, b: T) => rng.shuffle([a, a, b, b, rng.pick([a, b])])
       if (rule === 'shape') {
         const [a, b] = rng.sample(STATIC_SHAPES, 2)
-        const fills = balancedFill()
-        for (let i = 0; i < 5; i++) panels.push({ els: [{ shape: i === odd ? b : a, cell: cells[i], size: rng.pick([1, 2] as Size[]), fill: fills[i], rot: 0 }], ticks: 0 })
-        ruleText = `Vier Figuren zeigen die Form „${SHAPE_DE[a]}“, eine zeigt die Form „${SHAPE_DE[b]}“. Position, Größe und Füllung variieren nur als Ablenkung.`
+        // The four panels with the common shape show the four size/fill combinations (no two alike).
+        const looks = rng.shuffle([[1, 'empty'], [1, 'striped'], [2, 'empty'], [2, 'striped']] as [Size, Fill][])
+        looks.splice(odd, 0, rng.pick(looks))
+        for (let i = 0; i < 5; i++) panels.push({ els: [{ shape: i === odd ? b : a, cell: 4, size: looks[i][0], fill: looks[i][1], rot: 0 }], ticks: 0 })
+        ruleText = `Vier Figuren zeigen die Form „${SHAPE_DE[a]}“, eine zeigt die Form „${SHAPE_DE[b]}“. Größe und Füllung variieren nur als Ablenkung.`
         why = `Zeigt ebenfalls die Form „${SHAPE_DE[a]}“.`
       } else if (rule === 'mirror') {
         const rots = rng.sample([0, 1, 2, 3, 4, 5, 6, 7], 5)
@@ -286,22 +290,35 @@ export const oddOneOut: GeneratorDef = {
         why = 'Lässt sich durch Drehung auf die anderen L-Formen bringen.'
       } else if (rule === 'solid') {
         // Four panels contain exactly one black element, one panel contains two (or none).
-        const pairShapes = rng.sample(STATIC_SHAPES, 2)
+        // Both shapes sit side by side; which one is black and the left/right order are spread 2:2 / 3:2.
+        const [s0, s1] = rng.sample(STATIC_SHAPES, 2)
+        const oddSolid = rng.pick([0, 2])
+        const blackFirst = rng.shuffle([true, true, false, false])
+        const otherFill = rng.shuffle(['empty', 'empty', 'striped', 'striped'] as Fill[])
+        const s0Left = balanced(true, false)
+        let k = 0
         for (let i = 0; i < 5; i++) {
-          const solidN = i === odd ? rng.pick([0, 2]) : 1
-          const fills: Fill[] = solidN === 2 ? ['solid', 'solid'] : solidN === 1 ? rng.shuffle(['solid', rng.pick(['empty', 'striped'] as Fill[])]) : ['empty', 'striped']
-          const [c1, c2] = rng.sample([0, 2, 6, 8], 2)
-          panels.push({ els: [{ shape: pairShapes[0], cell: c1, size: 1, fill: fills[0], rot: 0 }, { shape: pairShapes[1], cell: c2, size: 1, fill: fills[1], rot: 0 }], ticks: 0 })
+          let fills: [Fill, Fill]
+          if (i === odd) fills = oddSolid === 2 ? ['solid', 'solid'] : rng.shuffle(['empty', 'striped'] as Fill[]) as [Fill, Fill]
+          else {
+            fills = blackFirst[k] ? ['solid', otherFill[k]] : [otherFill[k], 'solid']
+            k++
+          }
+          const [c0, c1] = s0Left[i] ? [3, 5] : [5, 3]
+          panels.push({ els: [{ shape: s0, cell: c0, size: 1, fill: fills[0], rot: 0 }, { shape: s1, cell: c1, size: 1, fill: fills[1], rot: 0 }], ticks: 0 })
         }
-        ruleText = 'In vier Feldern ist genau eine Figur schwarz gefüllt; im gesuchten Feld nicht.'
+        ruleText = oddSolid === 2 ? 'In vier Feldern ist genau eine der beiden Figuren schwarz gefüllt; im gesuchten Feld sind es beide.' : 'In vier Feldern ist genau eine der beiden Figuren schwarz gefüllt; im gesuchten Feld keine.'
         why = 'Enthält genau eine schwarze Figur – wie die Mehrheit.'
       } else if (rule === 'parity') {
-        for (let i = 0; i < 5; i++) {
-          const base = rng.pick([2, 4, 6])
-          const ticks = i === odd ? base + rng.pick([-1, 1]) : base
-          panels.push({ els: [{ shape: rng.pick(STATIC_SHAPES), cell: cells[i], size: 1, fill: rng.pick(['empty', 'striped'] as Fill[]), rot: 0 }], ticks })
-        }
-        ruleText = 'Vier Felder haben eine gerade Anzahl Striche, das gesuchte eine ungerade.'
+        // The even counts vary (2, 4 and 6 all occur), the odd count lies in between – the count itself is no shortcut.
+        const evens = rng.shuffle([2, 4, 6, rng.pick([2, 4, 6])])
+        const oddTicks = rng.pick([3, 5])
+        const [a, b] = rng.sample(STATIC_SHAPES, 2)
+        const shapes = balanced(a, b)
+        const fills = balanced<Fill>('empty', 'striped')
+        let k = 0
+        for (let i = 0; i < 5; i++) panels.push({ els: [{ shape: shapes[i], cell: 4, size: 1, fill: fills[i], rot: 0 }], ticks: i === odd ? oddTicks : evens[k++] })
+        ruleText = `Vier Felder haben eine gerade Anzahl Striche (2, 4 oder 6), das gesuchte eine ungerade (${oddTicks}).`
         why = 'Gerade Anzahl Striche – wie die Mehrheit.'
       } else {
         // Total number of sides: four panels share the same sum.
@@ -313,9 +330,8 @@ export const oddOneOut: GeneratorDef = {
         const bad = combos.filter(([a, b]) => SIDES[a] + SIDES[b] !== target && Math.abs(SIDES[a] + SIDES[b] - target) <= 2)
         if (good.length < 3 || bad.length === 0) return null
         for (let i = 0; i < 5; i++) {
-          const [a, b] = i === odd ? rng.pick(bad) : rng.pick(good)
-          const [c1, c2] = rng.sample([0, 2, 6, 8], 2)
-          panels.push({ els: [{ shape: a, cell: c1, size: 1, fill: 'empty', rot: 0 }, { shape: b, cell: c2, size: 1, fill: 'empty', rot: 0 }], ticks: 0 })
+          const [a, b] = rng.shuffle(i === odd ? rng.pick(bad) : rng.pick(good))
+          panels.push({ els: [{ shape: a, cell: 3, size: 1, fill: 'empty', rot: 0 }, { shape: b, cell: 5, size: 1, fill: 'empty', rot: 0 }], ticks: 0 })
         }
         ruleText = `Die Seitenzahlen der beiden Figuren ergeben in vier Feldern zusammen ${target}; im gesuchten Feld nicht.`
         why = `Seitensumme ${target} – wie die Mehrheit.`

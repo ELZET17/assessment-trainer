@@ -13,7 +13,7 @@ export const VERBAL_3: VerbalPassage[] = [
     statements: [
       { id: 'v21-1', text: { en: 'The government subsidy would cover a quarter of the plant’s cost.' }, answer: 'T', trap: 'quantity', reason: 'Satz 1–2: 1,2 Mrd. von 4,8 Mrd. Euro = 25 %, also ein Viertel.' },
       { id: 'v21-2', text: { en: 'The European Commission has already approved the subsidy.' }, answer: 'F', trap: 'temporal', reason: 'Satz 2: Die Subvention „still requires approval“ – die Genehmigung steht also noch aus.' },
-      { id: 'v21-3', text: { en: 'Nordisil has promised to recycle all of the water the plant uses.' }, answer: 'F', trap: 'some-all', reason: 'Satz 5: „at least 70%“ – nicht das gesamte Wasser.' },
+      { id: 'v21-3', text: { en: 'Nordisil has said that it will recycle less than half of the water it uses.' }, answer: 'F', trap: 'quantity', reason: 'Satz 5: Nordisil will „at least 70%“ des Wassers recyceln – also mehr als die Hälfte, nicht weniger.' },
       { id: 'v21-4', text: { en: 'Construction may start before the environmental assessment is finished.' }, answer: 'F', trap: 'negation', reason: 'Satz 6: Der Bau darf erst NACH Abschluss der Umweltprüfung beginnen („can only begin after“).' },
     ],
   },
@@ -23,13 +23,13 @@ export const VERBAL_3: VerbalPassage[] = [
     difficulty: 2,
     title: { en: 'Wine exports from the Meriva region' },
     text: {
-      en: 'Wine producers in the Meriva region exported 42 million bottles in 2024, 6% more than in 2023. Exports to Asian markets rose by 19%, while exports to North America fell by 4%. The region’s largest single export market remains Germany, which took 11 million bottles. The producers’ association attributes the growth in Asia to a promotional campaign launched in 2023 together with the regional tourism board. However, the average export price per bottle fell slightly, as more of the growth came from lower-priced wines. The association expects export volumes to grow more slowly in 2025. The Meriva region has about 1,200 wine producers, most of them small family businesses. Red wine accounts for around two thirds of production. The region’s wines are protected by a designation of origin.',
+      en: 'Wine producers in the Meriva region exported 42 million bottles in 2024, 6% more than in 2023. Exports to Asian markets rose by 19%, while exports to North America fell by 4%. The region’s largest single export market remains Germany, which took 11 million bottles. The producers’ association attributes the growth in Asia to a promotional campaign launched in 2023 together with the regional tourism board. However, the average export price per bottle fell by 2%, as more of the growth came from lower-priced wines. The association expects export volumes to grow more slowly in 2025. The Meriva region has about 1,200 wine producers, most of them small family businesses. Red wine accounts for around two thirds of production. The region’s wines are protected by a designation of origin.',
     },
     statements: [
       { id: 'v22-1', text: { en: 'Meriva exported fewer than 40 million bottles in 2023.' }, answer: 'T', trap: 'quantity', reason: 'Satz 1: 42 Mio. waren 6 % mehr als 2023 → 2023 ≈ 42 ÷ 1,06 ≈ 39,6 Mio. – weniger als 40 Mio.' },
       { id: 'v22-2', text: { en: 'More than a quarter of the region’s exported bottles went to Germany in 2024.' }, answer: 'T', trap: 'quantity', reason: 'Satz 1 und 3: 11 von 42 Mio. Flaschen = 26,2 % – mehr als ein Viertel (25 %).' },
       { id: 'v22-3', text: { en: 'According to the producers’ association, the promotional campaign contributed to the growth in Asian exports.' }, answer: 'T', trap: 'causation', reason: 'Satz 4: Der Verband führt das Wachstum in Asien auf die Kampagne zurück. Die Aussage gibt ausdrücklich die Sicht des Verbands wieder.' },
-      { id: 'v22-4', text: { en: 'Total export revenue fell in 2024.' }, answer: 'C', trap: 'quantity', reason: 'Die Menge stieg um 6 %, der Durchschnittspreis sank „slightly“. Ohne genaue Zahlen ist offen, ob der Umsatz insgesamt stieg oder fiel.' },
+      { id: 'v22-4', text: { en: 'Total export revenue fell in 2024.' }, answer: 'F', trap: 'quantity', reason: 'Satz 1 und 5: Umsatz = Flaschen × Durchschnittspreis. Menge +6 %, Preis −2 % → 1,06 × 0,98 ≈ 1,039, der Umsatz stieg also um rund 4 %. Falle: −2 % beim Preis als „Umsatz sinkt“ lesen.' },
     ],
   },
   {

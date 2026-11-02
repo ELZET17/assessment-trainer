@@ -560,14 +560,15 @@ export const projection: GeneratorDef = {
       const [, , y3, y4] = ds.years
       const ex = rng.chance(0.5) ? tableOf(ds, lang) : d === 1 ? barByYear(ds, lang) : lineOf(ds, lang, [r])
       const subject = subjOf(theme, ds.rows[r], lang)
-      const pl = theme.dePlural
+      const pl = theme.enPlural
+      const plDe = theme.dePlural
       const dp = ds.decimals + 1
       if (d === 1) {
         const value = v[3] + (v[3] - v[2])
         if (value <= 0) return null
         return numMcq(this, seed, d, lang, rng, {
           exhibits: [ex],
-          prompt: tr(lang, `If ${subject} ${pl ? 'change' : 'changes'} from ${y4} to ${y4 + 1} by the same absolute amount as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'verändern' : 'verändert'} sich von ${y4} bis ${y4 + 1} um denselben absoluten Betrag wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
+          prompt: tr(lang, `If ${subject} ${pl ? 'change' : 'changes'} from ${y4} to ${y4 + 1} by the same absolute amount as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`, `Angenommen, ${subject} ${plDe ? 'verändern' : 'verändert'} sich von ${y4} bis ${y4 + 1} um denselben absoluten Betrag wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
           query: { family: 'num', op: 'projectAbs', a: { ex: 0, row: labels[r], col: String(y3) }, b: { ex: 0, row: labels[r], col: String(y4) } },
           value,
           decimals: dp,
@@ -583,9 +584,15 @@ export const projection: GeneratorDef = {
       }
       if (d === 2) {
         const value = v[3] * (v[3] / v[2])
+        const up = v[3] > v[2]
         return numMcq(this, seed, d, lang, rng, {
           exhibits: [ex],
-          prompt: tr(lang, `If ${subject} ${pl ? 'grow' : 'grows'} from ${y4} to ${y4 + 1} at the same percentage rate as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`, `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} von ${y4} bis ${y4 + 1} mit derselben prozentualen Rate wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`),
+          // Verb follows the direction of the change ("falls at the same percentage rate" for a decline).
+          prompt: tr(
+            lang,
+            `If ${subject} ${up ? (pl ? 'grow' : 'grows') : pl ? 'fall' : 'falls'} from ${y4} to ${y4 + 1} at the same percentage rate as from ${y3} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 1}?`,
+            `Angenommen, ${subject} ${up ? (plDe ? 'wachsen' : 'wächst') : plDe ? 'sinken' : 'sinkt'} von ${y4} bis ${y4 + 1} mit derselben prozentualen Rate wie von ${y3} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 1}?`,
+          ),
           query: { family: 'num', op: 'projectPct', a: { ex: 0, row: labels[r], col: String(y3) }, b: { ex: 0, row: labels[r], col: String(y4) } },
           value,
           decimals: dp,
@@ -593,19 +600,19 @@ export const projection: GeneratorDef = {
             { value: v[3] + (v[3] - v[2]), tag: 'absolute', why: 'Absolute statt prozentuale Veränderung fortgeschrieben.' },
             { value: v[3] * (v[2] / v[1]), tag: 'wrong-period', why: 'Rate der falschen Periode.' },
             { value: v[3] * (2 - v[2] / v[3]), tag: 'wrong-base', why: 'Rate auf den neuen Wert bezogen.' },
-            { value: v[2] * (v[3] / v[2]) ** 2, tag: 'from-prev', why: 'Vom Vorjahr aus zweimal hochgerechnet – richtig, aber falsch gerundet bzw. falsche Basis.' },
           ],
           steps: [`Rate ${y3} → ${y4}: ${f(v[3])} ÷ ${f(v[2])} = ${fmt(v[3] / v[2], lang, 4)}`, `${y4 + 1}: ${f(v[3])} × ${fmt(v[3] / v[2], lang, 4)} = ${f(value, dp + 1)}`],
           shortcut: 'Gleiche Rate = mit demselben Faktor multiplizieren: neu = alt × (alt ÷ vorher).',
         })
       }
       const value = v[3] * (v[3] / v[1])
+      const up = v[3] > v[1]
       return numMcq(this, seed, d, lang, rng, {
         exhibits: [ex],
         prompt: tr(
           lang,
-          `If ${subject} ${pl ? 'keep' : 'keeps'} growing at the same compound annual growth rate (CAGR) as from ${ds.years[1]} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 2}?`,
-          `Angenommen, ${subject} ${pl ? 'wachsen' : 'wächst'} weiter mit derselben durchschnittlichen jährlichen Wachstumsrate (CAGR) wie von ${ds.years[1]} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 2}?`,
+          `If ${subject} ${pl ? 'keep' : 'keeps'} ${up ? 'growing' : 'falling'} at the same compound annual ${up ? 'growth' : 'rate of decline'} (CAGR) as from ${ds.years[1]} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 2}?`,
+          `Angenommen, ${subject} ${up ? (plDe ? 'wachsen' : 'wächst') : plDe ? 'sinken' : 'sinkt'} weiter mit derselben durchschnittlichen jährlichen ${up ? 'Wachstumsrate' : 'Rate'} (CAGR) wie von ${ds.years[1]} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 2}?`,
         ),
         query: { family: 'num', op: 'projectCagr', a: { ex: 0, row: labels[r], col: String(ds.years[1]) }, b: { ex: 0, row: labels[r], col: String(y4) }, periods: 2, ahead: 2 },
         value,

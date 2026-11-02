@@ -134,7 +134,8 @@ export const rules: GeneratorDef = {
   types: ['mcq'],
   generate(seed, d, lang) {
     return firstAccepted(seed, (rng) => {
-      const vars = d === 3 ? 4 : 3
+      // Exactly the events used in the statements – options never mention anything that was not introduced.
+      const vars = d === 1 ? 2 : d === 2 ? 3 : 4
       const ev = rng.sample(EVENTS, vars)
       const order = rng.shuffle(Array.from({ length: vars }, (_, i) => i))
       const chainLen = d === 1 ? 1 : d === 2 ? 2 : 3

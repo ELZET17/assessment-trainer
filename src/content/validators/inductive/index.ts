@@ -174,26 +174,91 @@ export function solveMatrix(cells: (Panel | null)[]): string | null {
 
 type Feature = (p: Panel) => V
 
+const row = (c: number) => Math.floor(c / 3)
+const col = (c: number) => c % 3
+const zone = (c: number) => (c === 4 ? 'centre' : c % 2 === 0 ? 'corner' : 'edge')
+const sign = (x: number) => Math.sign(x)
+const count = (p: Panel, f: (e: FigEl) => boolean) => p.els.filter(f).length
+const allSame = (xs: V[]) => (xs.every((x) => x === xs[0]) ? 1 : 0)
+const CONCAVE: FigEl['shape'][] = ['star', 'cross', 'arrow', 'lshape']
+
+/**
+ * Everything a candidate could notice when looking for the odd one out
+ * (Gate 3 showed that a small library misses competing rules such as
+ * "the only black diamond" or "the only pair in diagonal corners").
+ */
 export const ODD_FEATURES: Record<string, Feature> = {
   shapeSet: (p) => p.els.map((e) => e.shape).sort().join(','),
   elementCount: (p) => p.els.length,
   tickCount: (p) => p.ticks ?? 0,
   tickParity: (p) => (p.ticks ?? 0) % 2,
-  solidCount: (p) => p.els.filter((e) => e.fill === 'solid').length,
+  solidCount: (p) => count(p, (e) => e.fill === 'solid'),
+  emptyCount: (p) => count(p, (e) => e.fill === 'empty'),
+  stripedCount: (p) => count(p, (e) => e.fill === 'striped'),
+  dottedCount: (p) => count(p, (e) => e.fill === 'dotted'),
   fillSet: (p) => [...new Set(p.els.map((e) => e.fill))].sort().join(','),
+  sameFill: (p) => allSame(p.els.map((e) => e.fill)),
   sizeSet: (p) => [...new Set(p.els.map((e) => e.size))].sort().join(','),
-  mirrored: (p) => p.els.filter((e) => e.shape === 'lshape' && e.mirror).length,
+  sameSize: (p) => allSame(p.els.map((e) => e.size)),
+  sameShape: (p) => allSame(p.els.map((e) => e.shape)),
+  roundCount: (p) => count(p, (e) => e.shape === 'circle'),
+  concaveCount: (p) => count(p, (e) => CONCAVE.includes(e.shape)),
+  mirrored: (p) => count(p, (e) => e.shape === 'lshape' && !!e.mirror),
   sidesSum: (p) => p.els.reduce((s, e) => s + SIDES[e.shape], 0),
   sidesParity: (p) => p.els.reduce((s, e) => s + SIDES[e.shape], 0) % 2,
-  centre: (p) => (p.els.some((e) => e.cell === 4) ? 1 : 0),
+  centre: (p) => count(p, (e) => e.cell === 4),
+  cornerCount: (p) => count(p, (e) => zone(e.cell) === 'corner'),
+  edgeCount: (p) => count(p, (e) => zone(e.cell) === 'edge'),
+  ...Object.fromEntries([0, 1, 2].flatMap((r) => [
+    [`row${r}`, (p: Panel) => count(p, (e) => row(e.cell) === r)],
+    [`col${r}`, (p: Panel) => count(p, (e) => col(e.cell) === r)],
+  ])),
+  arrangement: (p) => {
+    if (p.els.length !== 2) return '-'
+    const [a, b] = p.els
+    const dr = row(a.cell) - row(b.cell)
+    const dc = col(a.cell) - col(b.cell)
+    return dr === 0 ? 'row' : dc === 0 ? 'col' : Math.abs(dr) === Math.abs(dc) ? 'diag' : 'other'
+  },
+  adjacent: (p) => (p.els.length === 2 ? (Math.max(Math.abs(row(p.els[0].cell) - row(p.els[1].cell)), Math.abs(col(p.els[0].cell) - col(p.els[1].cell))) === 1 ? 1 : 0) : '-'),
   lineCount: (p) => (p.lines ?? []).length,
+}
+
+/** Attributes of one particular shape – only meaningful if every panel contains that shape exactly once. */
+const PER_SHAPE: Record<string, (e: FigEl) => V> = {
+  fill: (e) => e.fill,
+  solid: (e) => (e.fill === 'solid' ? 1 : 0),
+  size: (e) => e.size,
+  row: (e) => row(e.cell),
+  col: (e) => col(e.cell),
+  zone: (e) => zone(e.cell),
+}
+
+function featureColumns(panels: Panel[]): V[][] {
+  const cols = Object.values(ODD_FEATURES).map((f) => panels.map(f))
+  const shapes = [...new Set(panels.flatMap((p) => p.els.map((e) => e.shape)))]
+  const common = shapes.filter((s) => panels.every((p) => count(p, (e) => e.shape === s) === 1))
+  const of = (p: Panel, s: string) => p.els.find((e) => e.shape === s) as FigEl
+  for (const s of common) for (const f of Object.values(PER_SHAPE)) cols.push(panels.map((p) => f(of(p, s))))
+  // Relative position of two shapes that occur in every panel ("the hexagon is below the pentagon").
+  for (const a of common)
+    for (const b of common) {
+      if (a >= b) continue
+      cols.push(panels.map((p) => sign(row(of(p, a).cell) - row(of(p, b).cell))))
+      cols.push(panels.map((p) => sign(col(of(p, a).cell) - col(of(p, b).cell))))
+    }
+  // Presence of a shape in four panels but not in the fifth ("all but D contain a hexagon").
+  for (const s of shapes) {
+    const has = panels.map((p) => (p.els.some((e) => e.shape === s) ? 1 : 0))
+    if (has.filter((h) => h === 1).length === 4) cols.push(has)
+  }
+  return cols
 }
 
 /** Indices singled out by some feature (exactly one panel differs, the other four agree). */
 export function oddCandidates(panels: Panel[]): Set<number> {
   const out = new Set<number>()
-  for (const f of Object.values(ODD_FEATURES)) {
-    const vals = panels.map(f)
+  for (const vals of featureColumns(panels)) {
     for (let i = 0; i < vals.length; i++) {
       const others = vals.filter((_, j) => j !== i)
       if (others.every((x) => x === others[0]) && vals[i] !== others[0]) out.add(i)

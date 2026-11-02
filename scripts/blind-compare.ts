@@ -1,13 +1,15 @@
 /**
  * Gate 3 – compares the blind solvers' answers with the keys.
  * Usage: npx tsx scripts/blind-compare.ts → gate-output/blind-report.md
+ * (BLIND_ROUND=2 → gate-output/blind2-report.md)
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { DigitEquation } from '../src/content/generators/aon/digitTypes'
 import { digitValid } from '../src/content/validators/aon'
 
+const ROUND = process.env.BLIND_ROUND ?? ''
 type Key = { key: unknown; itemKey: string; gen?: string }
-const lines: string[] = ['# Gate 3 – Blind-Lösen: Abgleich', '']
+const lines: string[] = [`# Gate 3 – Blind-Lösen${ROUND ? ` (Runde ${ROUND})` : ''}: Abgleich`, '']
 let totalItems = 0
 let totalMismatch = 0
 let totalNotes = 0
@@ -27,9 +29,9 @@ function agrees(key: unknown, ans: unknown): boolean {
   return false
 }
 
-for (const g of readdirSync('gate-output/blind').sort()) {
-  const keyFile = `gate-output/blind-keys/${g}.json`
-  const ansFile = `gate-output/blind/${g}/answers.json`
+for (const g of readdirSync(`gate-output/blind${ROUND}`).sort()) {
+  const keyFile = `gate-output/blind${ROUND}-keys/${g}.json`
+  const ansFile = `gate-output/blind${ROUND}/${g}/answers.json`
   if (!existsSync(ansFile)) {
     lines.push(`## ${g}`, '', '_Noch keine Antworten._', '')
     continue
@@ -48,5 +50,5 @@ for (const g of readdirSync('gate-output/blind').sort()) {
   lines.push('')
 }
 lines.splice(2, 0, `**Gesamt:** ${totalItems} Items, ${totalMismatch} Abweichungen, ${totalNotes} Hinweise.`, '')
-writeFileSync('gate-output/blind-report.md', lines.join('\n'))
+writeFileSync(`gate-output/blind${ROUND}-report.md`, lines.join('\n'))
 console.log(lines.slice(0, 4).join('\n'))
