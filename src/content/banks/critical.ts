@@ -15,7 +15,7 @@ const I2 =
 const I3 =
   'A survey of 2,000 commuters in the city of Darrow found that 62% would cycle to work if there were safe, separate cycle lanes on their route. Currently, 8% of commuters in Darrow cycle to work. The city has a budget for 30 kilometres of new cycle lanes over the next five years, while its main roads are about 240 kilometres long in total.'
 const I4 =
-  'Moreland Electronics sells headphones online and in its own shops. Last year, the company permanently cut the price of its most popular model by 20% in all of its sales channels; the price had not changed in the year before. Unit sales of this model in the following six months were 35% higher than in the six months before the price cut, while unit sales of the company’s other models stayed roughly the same.'
+  'Moreland Electronics sells headphones online and in its own shops. Last year, the company permanently cut the price of its most popular model by 20%; the model costs the same online and in the shops, and its price had not changed in the year before. Unit sales of this model in the following six months were 35% higher than in the six months before the price cut, while unit sales of the company’s other models stayed roughly the same.'
 const A1 = 'Statement: “We should advertise our new savings account on the radio, because many of our potential customers listen to the radio while driving to work.”'
 const A2 = 'Statement: “The council should close the old swimming pool, since the new leisure centre opening next year will have a larger pool.”'
 const A3 = 'Statement: “Our online training course must be effective: 90% of participants said they enjoyed it.”'

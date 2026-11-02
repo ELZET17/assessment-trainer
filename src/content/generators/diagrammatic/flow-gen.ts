@@ -51,6 +51,8 @@ export const flowchart: GeneratorDef = {
       if (d === 1 || d === 3) {
         const chain = d === 1 ? rng.sample(used, 2) : rng.shuffle(used).slice(0, rng.int(2, 3))
         const out = apply(input, chain)
+        // Operators that cancel each other would make the answer the unchanged input.
+        if (word(out) === word(input)) return null
         const examples: FlowRow[] = []
         if (d === 3) {
           // Each operator appears alone or in a pair in the examples.
@@ -115,6 +117,7 @@ export const flowchart: GeneratorDef = {
       const chain = rng.sample(used, 3)
       const missingAt = rng.int(0, 2)
       const out = apply(input, chain)
+      if (word(out) === word(input)) return null
       const question: FlowRow = { input, ops: chain.map((o, i) => (i === missingAt ? null : symOf(o))), output: out }
       const spec: FlowSpec = { examples: [], question, legend, symbols }
       const optionOps = used

@@ -14,7 +14,7 @@ import type { Difficulty, Item } from '../src/content/types'
 import { describe, setMdLang } from './item-md'
 
 const base = process.argv[2] ?? 'http://127.0.0.1:5173/'
-const OUT = 'gate-output/g4'
+const OUT = process.env.G4_OUT ?? 'gate-output/g4'
 rmSync(OUT, { recursive: true, force: true })
 mkdirSync(OUT, { recursive: true })
 setMdLang('de')
@@ -41,7 +41,7 @@ function withKey(id: string, it: Item, image?: string): string {
 let n = 0
 for (const [i, gen] of GENERATORS.entries()) {
   const d = ((i % 3) + 1) as Difficulty
-  const it = gen.generate(deriveSeed(0x6a7e, gen.id, d, 0), d, 'de')
+  const it = gen.generate(deriveSeed(Number(process.env.G4_SALT ?? 0x6a7e), gen.id, d, 0), d, 'de')
   const id = `${String(++n).padStart(2, '0')}-${gen.id}-L${d}`
   let image: string | undefined
   if (it.exhibits.some((e) => e.kind === 'figures') || (it.type === 'mcq' && it.options.some((o) => o.panel))) {

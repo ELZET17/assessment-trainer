@@ -614,8 +614,8 @@ export const projection: GeneratorDef = {
         exhibits: [ex],
         prompt: tr(
           lang,
-          `If ${subject} ${pl ? 'keep' : 'keeps'} ${up ? 'growing' : 'falling'} at the same compound annual ${up ? 'growth' : 'rate of decline'} (CAGR) as from ${ds.years[1]} to ${y4}, what will ${pl ? 'they' : 'it'} be in ${y4 + 2}?`,
-          `Angenommen, ${subject} ${up ? (plDe ? 'wachsen' : 'wächst') : plDe ? 'sinken' : 'sinkt'} weiter mit derselben durchschnittlichen jährlichen ${up ? 'Wachstumsrate' : 'Rate'} (CAGR) wie von ${ds.years[1]} bis ${y4}. Welcher Wert ergibt sich für ${y4 + 2}?`,
+          `If ${subject} ${pl ? 'continue' : 'continues'} to change at the same compound annual growth rate (CAGR) as from ${ds.years[1]} to ${y4}${up ? '' : ' (a negative rate)'}, what will ${pl ? 'they' : 'it'} be in ${y4 + 2}?`,
+          `Angenommen, ${subject} ${plDe ? 'entwickeln' : 'entwickelt'} sich weiter mit derselben durchschnittlichen jährlichen Wachstumsrate (CAGR) wie von ${ds.years[1]} bis ${y4}${up ? '' : ' (eine negative Rate)'}. Welcher Wert ergibt sich für ${y4 + 2}?`,
         ),
         query: { family: 'num', op: 'projectCagr', a: { ex: 0, row: labels[r], col: String(ds.years[1]) }, b: { ex: 0, row: labels[r], col: String(y4) }, periods: 2, ahead: 2 },
         value,

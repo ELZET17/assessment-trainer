@@ -132,7 +132,7 @@ export const THEMES: Theme[] = [
     title: { en: 'Operating costs by category', de: 'Betriebskosten nach Kategorie' },
     unit: { en: 'EUR thousand', de: 'Tsd. EUR' },
     rows: [
-      ['Personnel', 'Personal'],
+      ['Travel', 'Reisen'],
       ['Materials', 'Material'],
       ['Logistics', 'Logistik'],
       ['Marketing', 'Marketing'],

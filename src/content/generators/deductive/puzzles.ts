@@ -437,7 +437,8 @@ export const orderingTfc: GeneratorDef = {
         return v.size === 2 ? 'C' : v.has(true) ? 'T' : 'F'
       }
       const isClueText = (f: Fact) => p.clues.some((c) => t.clue(c) === t.fact(f))
-      const cands = facts.filter((f) => cls(f) === target && !isClueText(f) && (d === 1 || target === 'C' || !trivial(f, p.clues, p.n, false)))
+      // Gate 3: a statement that a single clue already settles is no deduction, also not at level 1.
+      const cands = facts.filter((f) => cls(f) === target && !isClueText(f) && (target === 'C' || !trivial(f, p.clues, p.n, false)))
       if (cands.length === 0) return null
       const fact = rng.pick(cands)
       const opts = lang === 'de' ? ['Wahr', 'Falsch', 'Nicht bestimmbar'] : ['True', 'False', 'Cannot say']
