@@ -86,10 +86,10 @@ export const LESSONS: Lesson[] = [
     title: 'Kopfrechnen & Speed Math',
     category: 'speed',
     summary: 'Rechentricks für Tests ohne Taschenrechner (BCG Cognitive Test: laut Berichten ca. 22 Sekunden pro Frage).',
-    usedBy: 'BCG Cognitive Test (ohne Rechner), Kearney Recruitment Test (Quant-Teil, ohne Rechner)',
+    usedBy: 'BCG Cognitive Test (ohne Hilfsmittel), Kearney Recruitment Test (Quant-Teil, laut Berichten ohne Rechner)',
     blocks: [
       { t: 'h', text: 'Was wird getestet?' },
-      { t: 'p', text: 'Schnelles, sicheres Rechnen ohne Hilfsmittel: Grundrechenarten, Prozent, Brüche, Überschlag, Dreisatz, Zahlenreihen und kurze Textaufgaben. Beim BCG Cognitive Test (offiziell 30 Minuten; laut Berichten 80 Fragen) bleiben im Schnitt 22,5 Sekunden pro Frage.' },
+      { t: 'p', text: 'Schnelles, sicheres Rechnen ohne Hilfsmittel: Grundrechenarten, Prozent, Brüche, Überschlag, Dreisatz, Zahlenreihen und kurze Textaufgaben. Beim BCG Cognitive Test (30 Minuten laut BCG Schweiz; 80 Fragen laut Berichten, auch aus deutschen Büros) bleiben im Schnitt 22,5 Sekunden pro Frage.' },
       { t: 'h', text: 'Bruch-Prozent-Tabelle (auswendig lernen)' },
       {
         t: 'table',
@@ -176,7 +176,7 @@ export const LESSONS: Lesson[] = [
       { t: 'h', text: 'Was wird getestet?' },
       { t: 'p', text: 'Du erkennst Regeln in abstrakten Figuren und wendest sie an. Schwierig wird es, wenn mehrere Regeln gleichzeitig laufen und Ablenkelemente dazukommen.' },
       { t: 'h', text: 'Checkliste für Figurenreihen' },
-      { t: 'list', ordered: true, items: ['Anzahl der Elemente zählen.', 'Positionen verfolgen (wandert etwas im oder gegen den Uhrzeigersinn? Wie viele Schritte?).', 'Drehung prüfen (45°, 90°, 180°).', 'Füllung/Muster (leer, schwarz, gestreift, gepunktet).', 'Abwechselnde Regeln (jedes zweite Bild).', 'Mehrere Regeln parallel – jede einzeln bestätigen.', 'Ausschlussverfahren über die Optionen: Jede Regel streicht mindestens eine Option.'] },
+      { t: 'list', ordered: true, items: ['Anzahl der Elemente zählen.', 'Positionen verfolgen (wandert etwas im oder gegen den Uhrzeigersinn? Wie viele Schritte?).', 'Drehung prüfen (45°, 90°, 180°).', 'Füllung/Muster (leer, schwarz, gestreift, gepunktet).', 'Abwechselnde Regeln (jedes zweite Bild).', 'Mehrere Regeln parallel – jede einzeln bestätigen.', 'Ausschlussverfahren über die Optionen: Nach jeder erkannten Regel die Optionen streichen, die sie verletzen.'] },
       { t: 'h', text: 'Typische Regeltypen' },
       {
         t: 'table',
@@ -355,11 +355,11 @@ export const LESSONS: Lesson[] = [
         t: 'table',
         head: ['Test', 'Format', 'Zeit pro Frage'],
         rows: [
-          ['BCG Cognitive Test', '30 Min. (offiziell), 80 Fragen (berichtet)', '≈ 22,5 s'],
+          ['BCG Cognitive Test', '30 Min. (offiziell für BCG Schweiz), 80 Fragen (berichtet)', '≈ 22,5 s'],
           ['Kearney Recruitment Test', '40 Fragen / 60 Min.', '≈ 90 s'],
           ['SHL Verify Interactive G+ (Deutsche Bank)', '24 Fragen / 36 Min.', '≈ 90 s'],
           ['Allianz Numerical', '≈ 1 Min. pro Frage', '≈ 60 s'],
-          ['Bain TestGorilla', 'Blöcke à 8–15 Min. mit 6–10 Fragen', '≈ 50–150 s (typisch 60–90 s)'],
+          ['Bain TestGorilla', 'Blöcke à 8–15 Min. mit 6–10 Fragen', '≈ 50–150 s'],
           ['P&G Aon-Games', 'Switch 6 Min., Digit 5 Min., Grid 6–9 Min.', 'so viele wie möglich'],
         ],
       },
@@ -369,7 +369,7 @@ export const LESSONS: Lesson[] = [
         items: [
           'Ohne Negativwertung: immer antworten. Eine leere Antwort bringt sicher 0 Punkte.',
           'Kearney (+5 / −1 / 0, berichtet): Blindes Raten hat bei 5 Optionen einen Erwartungswert von 1/5 × 5 − 4/5 × 1 = +0,2 Punkten, bei 4 Optionen +0,5. Kannst du eine Option ausschließen, steigt er bei 5 Optionen auf 1/4 × 5 − 3/4 × 1 = +0,5.',
-          'Folgerung für Kearney: keine Frage leer lassen. Erst die lösbaren Fragen, vor Ablauf alle offenen ankreuzen; jede ausgeschlossene Option erhöht den Erwartungswert weiter. Nennt deine Einladung eine andere Wertung, neu rechnen: Bei k Optionen lohnt Raten, solange der Abzug kleiner als Punkte ÷ (k − 1) ist (hier 5 ÷ 4 = 1,25).',
+          'Folgerung für Kearney: keine Frage leer lassen. Ist Zurückspringen möglich, erst die lösbaren Fragen und vor Ablauf alle offenen ankreuzen; sonst jede Frage beim ersten Mal beantworten, notfalls raten. Jede ausgeschlossene Option erhöht den Erwartungswert weiter. Nennt deine Einladung eine andere Wertung, neu rechnen: Bei k Optionen lohnt Raten, solange der Abzug kleiner als Punkte ÷ (k − 1) ist (hier 5 ÷ 4 = 1,25).',
         ],
       },
       { t: 'h', text: 'Überspringen und Zurückspringen' },

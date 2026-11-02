@@ -683,8 +683,8 @@ export const bigNumbers: GeneratorDef = {
         distractors: [
           { value: value * 10, tag: 'zeros', why: 'Eine Null zu viel.' },
           { value: value / 10, tag: 'zeros', why: 'Eine Null zu wenig.' },
-          { value: value * 1000, tag: 'units', why: 'Einheit verwechselt (Tausend/Million).' },
-          { value: value / 1000, tag: 'units', why: 'Einheit verwechselt (Tausend/Million).' },
+          { value: value * 1000, tag: 'units', why: 'Um den Faktor 1.000 zu groß – z. B. durch eine Zahl ohne ihre „Tausend“ geteilt.' },
+          { value: value / 1000, tag: 'units', why: 'Um den Faktor 1.000 zu klein – z. B. eine Zahl in Tausend statt in Einern gerechnet.' },
           { value: value * 100, tag: 'zeros', why: 'Zwei Nullen zu viel.' },
         ],
         steps,

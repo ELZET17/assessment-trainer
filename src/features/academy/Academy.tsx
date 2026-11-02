@@ -17,7 +17,7 @@ export function AcademyIndex() {
           <Link key={l.id} to={`/academy/${l.id}`} className="card block p-4 no-underline hover:bg-[var(--surface-2)]">
             <div className="text-[16px] font-semibold text-[var(--text)]">{l.title}</div>
             <div className="muted text-sm">{l.summary}</div>
-            <div className="muted mt-1 text-xs">{l.usedBy}</div>
+            <div className="muted mt-1 text-xs">{l.id === 'tactics' ? l.usedBy : `Laut Recherche: ${l.usedBy}`}</div>
           </Link>
         ))}
       </div>

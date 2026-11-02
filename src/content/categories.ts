@@ -32,7 +32,7 @@ export const CATEGORIES: CategoryMeta[] = [
     name: 'Speed Math & Kopfrechnen',
     short: 'Kopfrechnen',
     description: 'Kopfrechnen ohne Taschenrechner: Grundrechenarten, Prozent, Brüche, Überschlag, Zahlenreihen.',
-    usedBy: 'BCG Cognitive Test (ohne Rechner), Kearney Recruitment Test (Quant-Teil, ohne Rechner)',
+    usedBy: 'BCG Cognitive Test (ohne Hilfsmittel), Kearney Recruitment Test (Quant-Teil, laut Berichten ohne Rechner)',
     targetSec: { 1: 15, 2: 22, 3: 30 },
     calculator: 'never',
     academy: 'speed',

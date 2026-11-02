@@ -3,12 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker, useNavigate, useParams } from 'react-router'
 import { checkAnswer } from '../../content/check'
 import { resolveItem } from '../../content/items'
-import { adaptiveNext, pickFrom, refForGen, weighted } from '../../content/picker'
+import { adaptiveNext, pickForSection } from '../../content/picker'
 import { getProfile, type Profile, type SectionSpec } from '../../content/profiles'
-import { getGenerator } from '../../content/registry'
-import { createRng, randomSeed, type Rng } from '../../content/rng'
-import type { Answer, Difficulty, Item, ItemRef } from '../../content/types'
-import { refKey } from '../../content/types'
+import { createRng, randomSeed } from '../../content/rng'
+import type { Answer, Difficulty, Item } from '../../content/types'
+import { db } from '../../data/db'
 import { saveAttempts } from '../../data/repo'
 import type { Attempt, Session } from '../../data/types'
 import { useSettings } from '../../state/settings'
@@ -24,22 +23,6 @@ interface Slot {
   timeMs: number
 }
 
-function pickRef(rng: Rng, sec: SectionSpec, d: Difficulty, used: Set<string>): ItemRef | null {
-  for (let i = 0; i < 30; i++) {
-    const m = weighted(rng, sec.mix.map((x) => ({ item: x, w: x.weight })))
-    const diff = m.d ?? d
-    let ref: ItemRef | null
-    if (m.bank) ref = pickFrom(m.bank, m.sub ?? null, diff, { used, rng })
-    else if (m.gen && getGenerator(m.gen)) ref = refForGen(m.gen, diff, rng)
-    else ref = null
-    if (ref && !used.has(refKey(ref))) {
-      used.add(refKey(ref))
-      return ref
-    }
-  }
-  return null
-}
-
 export default function SimRunner() {
   const { profileId = '' } = useParams()
   const profile = getProfile(profileId) as Profile
@@ -47,6 +30,7 @@ export default function SimRunner() {
   const { settings } = useSettings()
   const rng = useRef(createRng(randomSeed()))
   const used = useRef(new Set<string>())
+  const seen = useRef(new Set<string>())
   const [session, setSession] = useState<Session | null>(null)
   const [secIdx, setSecIdx] = useState(0)
   const [slots, setSlots] = useState<Slot[][]>([])
@@ -67,7 +51,7 @@ export default function SimRunner() {
 
   const makeItem = useCallback(
     (s: SectionSpec, d: Difficulty): Item | null => {
-      const ref = pickRef(rng.current, s, d, used.current)
+      const ref = pickForSection(rng.current, s.mix, d, used.current, seen.current)
       return ref ? resolveItem(ref, settings.itemLang) : null
     },
     [settings.itemLang],
@@ -76,28 +60,37 @@ export default function SimRunner() {
   // Pre-build all sections for non-adaptive profiles; adaptive ones grow item by item.
   useEffect(() => {
     if (!profile || session) return
-    const built: Slot[][] = profile.sections.map((s) => {
-      if (s.game || s.count === null) return []
-      const n = profile.adaptive ? 1 : s.count
-      const list: Slot[] = []
-      for (let i = 0; i < n; i++) {
-        const it = makeItem(s, profile.difficulty)
-        if (it) list.push({ item: it, answer: null, timeMs: 0 })
-      }
-      return list
-    })
-    setSlots(built)
-    void startSession({
-      mode: 'simulation',
-      title: profile.name,
-      profileId: profile.id,
-      sections: profile.sections.map((s) => ({ id: s.id, title: s.title, planned: s.count, timeLimitSec: total ? null : s.timeLimitSec })),
-    }).then((s) => {
+    let cancelled = false
+    void (async () => {
+      // Bank texts answered in earlier runs are drawn last, so repeated simulations do not reuse them.
+      const earlier = await db.attempts.toArray()
+      if (cancelled) return
+      seen.current = new Set(earlier.flatMap((a) => (a.ref.kind === 'bank' ? [a.ref.id] : [])))
+      const built: Slot[][] = profile.sections.map((s) => {
+        if (s.game || s.count === null) return []
+        const n = profile.adaptive ? 1 : s.count
+        const list: Slot[] = []
+        for (let i = 0; i < n; i++) {
+          const it = makeItem(s, profile.difficulty)
+          if (it) list.push({ item: it, answer: null, timeMs: 0 })
+        }
+        return list
+      })
+      setSlots(built)
+      const s = await startSession({
+        mode: 'simulation',
+        title: profile.name,
+        profileId: profile.id,
+        sections: profile.sections.map((s) => ({ id: s.id, title: s.title, planned: s.count, timeLimitSec: total ? null : s.timeLimitSec })),
+      })
       setSession(s)
       const now = Date.now()
       setSectionEnds(now + (total ? (profile.totalTimeSec as number) : profile.sections[0].timeLimitSec) * 1000)
       setShownAt(now)
-    })
+    })()
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

@@ -108,7 +108,7 @@ export default function Home() {
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent)]">{c.letter}</span>
                   <span className="text-[15px] font-semibold text-[var(--text)]">{c.name}</span>
                 </div>
-                <span className="muted text-xs">{c.usedBy}</span>
+                <span className="muted text-xs">Laut Recherche: {c.usedBy}</span>
                 <div className="flex items-center gap-2">
                   <Progress value={agg?.accuracy ?? 0} label={`Trefferquote ${c.name}`} />
                   <span className="tabnums muted w-24 text-right text-xs">{agg?.answered ? `${pctText(agg.accuracy)} · ${agg.answered}` : 'noch offen'}</span>

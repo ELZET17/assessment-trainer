@@ -5,9 +5,11 @@
 import { CRITICAL_IDS, criticalDifficulty, VERBAL_IDS, verbalDifficulty } from './banks'
 import { CRITICAL } from './banks/critical'
 import { VERBAL } from './banks/verbal'
+import { resolveItem } from './items'
+import type { MixEntry } from './profiles'
 import { GENERATORS, getGenerator } from './registry'
 import { createRng, randomSeed, type Rng } from './rng'
-import type { CategoryId, Difficulty, ItemRef } from './types'
+import { refKey, type CategoryId, type Difficulty, type ItemRef } from './types'
 
 export type DifficultyChoice = Difficulty | 'adaptive'
 
@@ -66,6 +68,33 @@ export function refForGen(genId: string, d: Difficulty, rng: Rng): ItemRef {
   const g = getGenerator(genId)
   if (!g) throw new Error(`unknown generator ${genId}`)
   return { kind: 'gen', gen: g.id, v: g.version, seed: (rng.next() * 2 ** 32) >>> 0, d }
+}
+
+const CHART_KINDS = new Set(['bar', 'line', 'pie', 'combo'])
+
+function exhibitFits(ref: ItemRef, want: MixEntry['exhibit']): boolean {
+  if (!want) return true
+  const kinds = resolveItem(ref, 'en')?.exhibits.map((e) => e.kind) ?? []
+  return kinds.length > 0 && kinds.every((k) => (want === 'table' ? k === 'table' : CHART_KINDS.has(k)))
+}
+
+/**
+ * One item for a simulation section: weighted mix entry, no repetition within
+ * the run (`used`), bank items seen in earlier runs last (`seen`), exhibit filter.
+ */
+export function pickForSection(rng: Rng, mix: MixEntry[], d: Difficulty, used: Set<string>, seen?: Set<string>): ItemRef | null {
+  for (let i = 0; i < 80; i++) {
+    const m = weighted(rng, mix.map((x) => ({ item: x, w: x.weight })))
+    const diff = m.d ?? d
+    let ref: ItemRef | null = null
+    if (m.bank) ref = pickFrom(m.bank, m.sub ?? null, diff, { used, rng, seen })
+    else if (m.gen && getGenerator(m.gen)) ref = refForGen(m.gen, diff, rng)
+    if (ref && !used.has(refKey(ref)) && exhibitFits(ref, m.exhibit)) {
+      used.add(refKey(ref))
+      return ref
+    }
+  }
+  return null
 }
 
 /** Weighted random choice. */

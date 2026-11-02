@@ -97,7 +97,7 @@ export const pctChange: GeneratorDef = {
         format: (v) => pct(v, lang, 1),
         distractors,
         steps,
-        shortcut: `Überschlag zuerst: ${f(b)} ÷ ${f(a)} ≈ ${fmt(b / a, lang, 2)} → etwa ${pct(Math.abs(b / a - 1) * 100, lang, 0)}. Das schließt meist schon drei Optionen aus. Immer durch den ALTEN Wert teilen.`,
+        shortcut: `Immer durch den ALTEN Wert teilen: ${f(Math.abs(b - a))} ÷ ${f(a)}. Wer durch den neuen Wert (${f(b)}) teilt, kommt auf ${pct((Math.abs(b - a) / b) * 100, lang, 1)} – die typische Falle.`,
       })
     })
   },
@@ -299,7 +299,7 @@ export const share: GeneratorDef = {
         format: (v) => pct(v, lang, 1),
         distractors: [
           { value: (part / (total - part)) * 100, tag: 'exclude-self', why: 'Durch die Summe der ANDEREN geteilt statt durch die Gesamtsumme.' },
-          ...(ds.years.length > 1 ? [{ value: otherYearShare, tag: 'wrong-year', why: `Anteil im Jahr ${ds.years[c2]} berechnet.` }] : []),
+          ...(d !== 1 && ds.years.length > 1 ? [{ value: otherYearShare, tag: 'wrong-year', why: `Anteil im Jahr ${ds.years[c2]} berechnet.` }] : []),
           { value: 100 - value, tag: 'complement', why: 'Anteil aller anderen statt des gesuchten.' },
           { value: (part / Math.max(...ds.values.map((row) => row[c]))) * 100, tag: 'vs-max', why: 'Durch den größten Einzelwert statt durch die Summe geteilt.' },
           { value: (ds.values[(r + 2) % ds.rows.length][c] / total) * 100, tag: 'wrong-row', why: 'Falsche Zeile.' },
@@ -350,7 +350,8 @@ export const ratio: GeneratorDef = {
           distractors: [
             { value: B / A, tag: 'inverse', why: 'Verhältnis umgedreht.' },
             { value: (A - B) / B, tag: 'excess', why: 'Nur den Überschuss (wie viel MEHR) berechnet, nicht das Vielfache.' },
-            ...(ds.years.length > 1 ? [{ value: ds.values[ra][c2] / ds.values[rb][c2], tag: 'wrong-year', why: `Werte von ${ds.years[c2]} verwendet.` }] : []),
+            // Only a real error if the other year is visible in the exhibit (level 1 shows one year).
+            ...(d !== 1 && ds.years.length > 1 ? [{ value: ds.values[ra][c2] / ds.values[rb][c2], tag: 'wrong-year', why: `Werte von ${ds.years[c2]} verwendet.` }] : []),
             { value: A / ds.values[(rb + 1) % 4 === ra ? (rb + 2) % 4 : (rb + 1) % 4][c], tag: 'wrong-row', why: 'Falsche Vergleichszeile.' },
           ],
           steps: [`${labels[ra]}: ${f(A)}, ${labels[rb]}: ${f(B)}`, `${f(A)} ÷ ${f(B)} = ${fmt(value, lang, 3)}`],

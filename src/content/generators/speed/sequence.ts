@@ -178,7 +178,7 @@ export const sequence: GeneratorDef = {
         allowNegative: b.next < 6 || b.terms.some((x) => x < 0),
         distractors: b.wrong.filter((w) => Number.isInteger(w.value)),
         steps: [...b.rule, `Nächste Zahl: ${fmt(b.next, lang, 0)}`],
-        shortcut: 'Prüfreihenfolge: 1. Differenzen, 2. Verhältnisse, 3. Differenzen der Differenzen, 4. abwechselnde Muster (jede zweite Zahl), 5. Summe der Vorgänger.',
+        shortcut: 'Prüfreihenfolge: 1. Differenzen, 2. Verhältnisse, 3. Differenzen der Differenzen, 4. abwechselnde Muster (jede zweite Zahl), 5. Summe der Vorgänger, 6. Quadrat- bzw. Kubikzahlen ± k, 7. „× a + b“.',
       })
     })
   },

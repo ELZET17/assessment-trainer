@@ -13,6 +13,8 @@ export interface MixEntry {
   bank?: 'verbal' | 'critical'
   /** Restrict a bank to one subcategory, e.g. 'critical.inference' (5 answer options). */
   sub?: string
+  /** Only items whose exhibits are all tables / all charts (e.g. Kearney "reading a table" vs. "reading a graph"). */
+  exhibit?: 'table' | 'chart'
   weight: number
   d?: Difficulty
 }
@@ -116,7 +118,7 @@ export const PROFILES: Profile[] = [
       'Ob Sova oder TestGorilla kommt, steht in deiner Einladung. Berichtet: Sova vor allem in Europa und im Nahen Osten; eigene DACH-Berichte gibt es nicht.',
       'Numerical Reasoning mit Tabellen und Diagrammen, Taschenrechner erlaubt.',
       'Logical Reasoning: Zahlen- und Figurenreihen, Deduktion, visuelle Induktion.',
-      'Gesamtdauer laut Bain ca. 30–40 Minuten (Kandidaten berichten teils länger, inkl. Persönlichkeit/SJT – nicht Teil dieser Simulation).',
+      'Gesamtdauer laut Berichten ca. 30–40 Minuten (Bain-Angabe, nicht selbst verifiziert; Kandidaten berichten teils länger, inkl. Persönlichkeit/SJT – nicht Teil dieser Simulation).',
     ],
     status: [
       { label: 'Inhalte', value: 'Numerical + Logical', status: 'berichtet' },
@@ -126,7 +128,7 @@ export const PROFILES: Profile[] = [
     ],
     caveats: [
       'Verbal Reasoning ist in neueren Durchgängen oft entfallen, kann aber vorkommen.',
-      'Im echten Sova-Test läuft teils kein sichtbarer Timer je Abschnitt, die Bearbeitungszeit fließt aber in die Wertung ein; laut Berichten muss er nicht in einer Sitzung bearbeitet werden. Die festen Zeitlimits hier sind eine Annahme.',
+      'Im echten Sova-Test läuft laut Berichten teils kein sichtbarer Timer je Abschnitt, die Bearbeitungszeit fließt aber in die Wertung ein. Die festen Zeitlimits hier sind eine Annahme.',
     ],
   },
   {
@@ -184,7 +186,7 @@ export const PROFILES: Profile[] = [
       'BCG Schweiz (offiziell): 30-minütiger Cognitive Test mit numerischen, verbalen und logischen Aufgaben, Multiple Choice, ohne Hilfsmittel, ca. einen Monat vor dem ersten Interview.',
       'Berichtet: 80 Fragen in 30 Minuten (≈ 22 Sekunden pro Frage), ca. 60–70 % numerisch, 30–40 % logisch.',
       'Berichtet: kein Taschenrechner, Papier und Stift erlaubt, Live-Aufsicht per Zoom.',
-      'Berichtet (Kandidatenberichte bis Mai 2026): eingesetzt u. a. in allen deutschen Büros, Österreich, Teilen der Schweiz und den Nordics.',
+      'Berichtet (StrategyCase, Stand Mai 2026): eingesetzt u. a. in allen deutschen Büros, Österreich, Teilen der Schweiz und den Nordics.',
     ],
     status: [
       { label: 'Dauer 30 Min., Multiple Choice, ohne Hilfsmittel (Angabe BCG Schweiz)', value: 'ja', status: 'offiziell' },
@@ -240,11 +242,11 @@ export const PROFILES: Profile[] = [
     sections: [
       // Section sizes 8/6/6/8/6/6 as reported by StrategyCase; no calculator (pen and paper, candidate reports).
       { id: 'q1', title: 'Quantitativ: logisches Rechnen', timeLimitSec: 0, count: 8, mix: [...SPEED_ALL, { gen: 'num.pctchange', weight: 2 }], calculator: false },
-      { id: 'q2', title: 'Quantitativ: Aussagen', timeLimitSec: 0, count: 6, mix: [{ gen: 'speed.word', weight: 3 }, { gen: 'speed.equation', weight: 2 }, { gen: 'speed.rule3', weight: 2 }, { gen: 'speed.percent', weight: 1 }], calculator: false },
+      { id: 'q2', title: 'Quantitativ II (Textaufgaben)', timeLimitSec: 0, count: 6, mix: [{ gen: 'speed.word', weight: 3 }, { gen: 'speed.equation', weight: 2 }, { gen: 'speed.rule3', weight: 2 }, { gen: 'speed.percent', weight: 1 }], calculator: false },
       { id: 'v1', title: 'Verbal: logische Texte', timeLimitSec: 0, count: 6, mix: [{ gen: 'ded.rules', weight: 2 }, { gen: 'ded.syllogism', weight: 2 }, { bank: 'critical', sub: 'critical.inference', weight: 2 }], calculator: false },
       { id: 'v2', title: 'Verbal: Textverständnis', timeLimitSec: 0, count: 8, mix: [{ bank: 'verbal', weight: 2 }, { bank: 'critical', sub: 'critical.inference', weight: 1 }], calculator: false },
-      { id: 'c1', title: 'Case: Tabellen', timeLimitSec: 0, count: 6, mix: NUM_ALL, calculator: false },
-      { id: 'c2', title: 'Case: Grafiken', timeLimitSec: 0, count: 6, mix: NUM_ALL.map((m) => ({ ...m, d: 3 as Difficulty })), calculator: false },
+      { id: 'c1', title: 'Case: Tabellen', timeLimitSec: 0, count: 6, mix: NUM_ALL.map((m) => ({ ...m, exhibit: 'table' as const })), calculator: false },
+      { id: 'c2', title: 'Case: Grafiken', timeLimitSec: 0, count: 6, mix: NUM_ALL.map((m) => ({ ...m, d: 3 as Difficulty, exhibit: 'chart' as const })), calculator: false },
     ],
     info: [
       '40 Fragen in 60 Minuten (≈ 1:30 Min. pro Frage), sechs Abschnitte: quantitativ, verbal und Case-Datenauswertung.',

@@ -95,7 +95,7 @@ export const switchChallenge: GeneratorDef = {
             `Code = **${codeText(target)}**`,
           ],
           distractors: shuffled.map((o, i) => ({ o, i })).filter(({ i }) => i !== correct).map(({ o, i }) => `**${String.fromCharCode(65 + i)}** (${codeText(o.c)}): ${o.why}`),
-          shortcut: 'Nicht alle vier Symbole verfolgen: Ein Symbol reicht oft, um drei Optionen zu streichen (z. B. „das erste Ausgangssymbol stand an Position 3 → Code beginnt mit 3“).',
+          shortcut: `Nicht alle vier Symbole verfolgen: Erst ein Symbol nehmen und die Optionen streichen, die nicht passen. Hier: ${SYM_DE[after[0]]} steht danach an Position 1 und stand vorher an Position ${before.indexOf(after[0]) + 1} → der Code beginnt mit ${before.indexOf(after[0]) + 1}.`,
         },
       }
       return item

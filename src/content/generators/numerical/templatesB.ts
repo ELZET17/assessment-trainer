@@ -419,7 +419,7 @@ export const cagr: GeneratorDef = {
           `Faktor gesamt: ${f(b)} ÷ ${f(a)} = ${fmt(b / a, lang, 4)}`,
           `CAGR = ${fmt(b / a, lang, 4)}^(1/${periods}) − 1 = ${pct(value, lang, 2)}`,
         ],
-        shortcut: `Optionen rückwärts prüfen: (1 + Option)^${periods} muss ≈ ${fmt(b / a, lang, 3)} ergeben. Näherung: CAGR ≈ Gesamtwachstum ÷ Jahre, aber etwas kleiner.`,
+        shortcut: `Optionen rückwärts prüfen: (1 + Option)^${periods} muss ≈ ${fmt(b / a, lang, 3)} ergeben. Die einfache Näherung Gesamtwachstum ÷ Jahre (hier ${pct(((b / a - 1) / periods) * 100, lang, 1)}) liegt immer über der CAGR – bei starkem Wachstum deutlich.`,
       })
     })
   },
@@ -624,7 +624,7 @@ export const projection: GeneratorDef = {
           { value: v[3] * Math.sqrt(v[3] / v[1]), tag: 'one-year', why: 'Nur ein Jahr hochgerechnet.' },
           { value: v[3] + 2 * ((v[3] - v[1]) / 2), tag: 'absolute', why: 'Linear (absolut) statt mit der Rate fortgeschrieben.' },
           { value: v[3] * (v[3] / v[2]) ** 2, tag: 'last-year-rate', why: 'Nur die Rate des letzten Jahres verwendet.' },
-          { value: v[3] * (v[3] / v[1]) ** 2, tag: 'squared', why: 'Faktor doppelt quadriert.' },
+          { value: v[3] * (v[3] / v[1]) ** 2, tag: 'squared', why: 'Den Gesamtfaktor der zwei Jahre quadriert – das schreibt vier statt zwei Jahre fort.' },
         ],
         steps: [
           `Faktor über 2 Jahre (${ds.years[1]} → ${y4}): ${f(v[3])} ÷ ${f(v[1])} = ${fmt(v[3] / v[1], lang, 4)}`,
