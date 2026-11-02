@@ -28,7 +28,8 @@ export default function Settings() {
     const file = new File([blob], name, { type: 'application/json' })
     const summary = `${data.attempts.length} Antworten, ${data.sessions.length} Sitzungen`
     // iPhone/iPad (home-screen app): the share sheet is the reliable way to save or AirDrop the file.
-    if (navigator.canShare?.({ files: [file] })) {
+    // On the Mac (no touch) a normal download is more convenient.
+    if (navigator.maxTouchPoints > 0 && navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Assessment Trainer – Export' })
         setMsg(`Export geteilt: ${summary}.`)

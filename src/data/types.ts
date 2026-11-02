@@ -69,7 +69,7 @@ export const DEFAULT_SETTINGS: Settings = {
   id: 'settings',
   itemLang: 'en',
   theme: 'system',
-  calculatorDefault: true,
+  calculatorDefault: false,
   sound: false,
   haptics: true,
   targetAccuracy: 80,

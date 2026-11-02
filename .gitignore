@@ -30,3 +30,4 @@ blob-report
 .lighthouseci
 coverage
 gate-output
+dist-e2e

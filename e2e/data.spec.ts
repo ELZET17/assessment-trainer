@@ -21,6 +21,8 @@ test('Gate 8: 7 of 10 correct in Numerical → dashboard shows 7/10 and 70 %; da
   await tab.close()
 
   // Export → reset → import → identical; second import adds nothing.
+  // (The touch path uses the share sheet; the test checks the download fallback.)
+  await page.evaluate(() => Object.defineProperty(navigator, 'canShare', { value: undefined, configurable: true }))
   await page.goto('#/settings')
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Exportieren/ }).click()])
   const file = info.outputPath('export.json')

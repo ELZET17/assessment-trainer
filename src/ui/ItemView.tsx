@@ -65,7 +65,8 @@ export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       if (t && (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || t.isContentEditable)) return
       // An open dialog (abort confirmation, calculator) owns the keyboard.
-      if (document.querySelector('[role="alertdialog"], [role="dialog"]')) return
+      // An open modal dialog (e.g. abort confirmation) owns the keyboard; the calculator panel is not modal.
+      if (document.querySelector('[aria-modal="true"]')) return
       const k = e.key.toLowerCase()
       let i = -1
       if (/^[1-9]$/.test(k)) i = Number(k) - 1

@@ -53,7 +53,7 @@ export function Calculator({ onClose }: { onClose: () => void }) {
   }
   const keys: (string | Op)[] = ['7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '−', '0', ',', '=', '+']
   return (
-    <div role="dialog" aria-label="Taschenrechner" className="card safe-bottom fixed right-3 bottom-20 z-40 w-[264px] p-3 shadow-2xl lg:bottom-6">
+    <div role="dialog" aria-label="Taschenrechner" className="card fixed right-3 bottom-[calc(env(safe-area-inset-bottom)+6rem)] z-40 w-[264px] p-3 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-semibold">Taschenrechner</span>
         <button type="button" onClick={onClose} aria-label="Taschenrechner schließen" className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[var(--surface-2)]">
