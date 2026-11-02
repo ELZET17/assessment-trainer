@@ -48,7 +48,7 @@ export function CategoryPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title={meta.name} subtitle={meta.description} back="/practice" />
-      <p className="muted -mt-2 mb-4 text-sm">Kommt vor bei: {meta.usedBy}</p>
+      <p className="muted -mt-2 mb-4 text-sm">Kommt laut Recherche vor bei: {meta.usedBy}</p>
       <Card className="mb-4 space-y-4">
         <div>
           <div className="mb-1.5 text-sm font-semibold">Schwierigkeit</div>

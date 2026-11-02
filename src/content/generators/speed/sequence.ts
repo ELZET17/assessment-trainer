@@ -146,7 +146,7 @@ function finish(terms: number[], next: number, rule: string[]): Built | null {
   const prev = terms[terms.length - 2]
   const wrong: Distractor[] = [
     { value: last + (last - prev), tag: 'naive-diff', why: 'Letzte Differenz einfach wiederholt – die Regel ist komplexer.' },
-    { value: next + (next - last), tag: 'skip', why: 'Einen Schritt zu weit gerechnet.' },
+    { value: next + (next - last), tag: 'skip', why: 'Nach dem richtigen Glied die letzte Differenz noch einmal addiert – ein Schritt zu weit.' },
     { value: next + 1, tag: 'slip', why: 'Um eins verrechnet.' },
     { value: next - 1, tag: 'slip', why: 'Um eins verrechnet.' },
     { value: next + 2, tag: 'slip', why: 'Rechenfehler.' },

@@ -122,7 +122,7 @@ export function LessonPage() {
   return (
     <article className="mx-auto max-w-3xl">
       <PageHeader title={l.title} subtitle={l.summary} back="/academy" />
-      <p className="muted -mt-2 text-sm">Kommt vor bei: {l.usedBy}</p>
+      <p className="muted -mt-2 text-sm">Kommt laut Recherche vor bei: {l.usedBy}</p>
       {l.blocks.map((b, i) => (
         <BlockView key={i} b={b} />
       ))}

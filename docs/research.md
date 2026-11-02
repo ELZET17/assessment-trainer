@@ -1,6 +1,6 @@
 # Recherche: Kognitive Online-Tests der Zielunternehmen
 
-**Stand:** 31.10.2026 · **Methode:** Websuche + direkter Abruf der offiziellen Seiten, wo verfügbar.
+**Stand:** 02.11.2026 (Erstrecherche 31.10.2026; Nachprüfung Kearney/Allianz am 02.11.2026 im Rahmen von Gate 5) · **Methode:** Websuche + direkter Abruf der offiziellen Seiten, wo verfügbar.
 
 **Legende Status**
 - **offiziell** – auf einer Seite des Unternehmens bzw. des Testanbieters selbst nachgelesen (direkt abgerufen).
@@ -70,11 +70,11 @@ Quellen:
 
 | Merkmal | Inhalt | Status |
 |---|---|---|
-| Variante 1: Kearney Recruitment Test | **40 Fragen in 60 Min.**, 6 Abschnitte (Quellen uneinheitlich: 2× quantitativ, 2× verbal, 2× Case-Datenauswertung), Multiple Choice mit 4–5 Optionen, ~1:30 Min./Frage. | berichtet (mehrere Prep-Quellen übereinstimmend) |
-| Wertung | **+5 richtig, −1 falsch, 0 leer** (max. 200 Punkte). Empfehlung: nur raten, wenn Optionen sinnvoll eliminiert sind. | berichtet |
+| Variante 1: Kearney Recruitment Test | **40 Fragen in 60 Min.**, 6 Abschnitte (Quellen uneinheitlich: 2× quantitativ, 2× verbal, 2× Case-Datenauswertung; StrategyCase: 8 logisches Rechnen, 6 Data Sufficiency, 6 logische Texte, 8 Textverständnis, 6 Tabellen, 6 Grafiken), Multiple Choice mit 4–5 Optionen, ~1:30 Min./Frage, keine Zeitlimits je Abschnitt. | berichtet (mehrere Prep-Quellen übereinstimmend) |
+| Wertung | **+5 richtig, −1 falsch, 0 leer** (max. 200 Punkte). Folgerung (Erwartungswert, auch StrategyCase): Raten schlägt leer lassen immer (+0,2 bei 5 Optionen), also keine Frage leer lassen. | berichtet |
 | Variante 2: SHL General Ability | Drei Tests (Numerical, Deductive, Inductive), je ca. 20 Min. (Kandidatenbericht). | berichtet (Einzelquelle) |
 | Variante 3 | Früher Watson-Glaser + Advanced Numerical Reasoning; manche Büros Excel-Test. | berichtet |
-| Taschenrechner | Recruitment Test: keine eindeutige Angabe → App: erlaubt (Annahme, umschaltbar). SHL: erlaubt. | Annahme |
+| Taschenrechner | Recruitment Test: laut Kandidatenberichten **kein Rechner** (Papier und Stift; StrategyCase: „Assume not“, abgerufen 02.11.2026) → App: ohne Rechner. SHL-Variante: erlaubt (Annahme). | berichtet |
 | Zurückspringen | Keine Angabe → App: erlaubt innerhalb des Tests (Annahme). | Annahme |
 | DACH | Keine DACH-spezifischen Quellen gefunden. Kearney bietet laut Prep-Quellen einen kostenlosen Mock-Test auf der Website an. | berichtet |
 
@@ -117,7 +117,7 @@ Quellen:
 
 | Merkmal | Inhalt | Status |
 |---|---|---|
-| Ablauf (DE) | Nach der Online-Bewerbung Zugang zum **Online-Assessment-Center** per E-Mail, **14 Tage** Bearbeitungszeit, danach Gespräch. | Unternehmensangabe (Allianz-FAQ auf ausbildung.de) |
+| Ablauf (DE) | Nach der Online-Bewerbung Zugang zum **Online-Assessment-Center** per E-Mail, **14 Tage** Bearbeitungszeit, danach Gespräch. Die FAQ richtet sich an Bewerber für **Ausbildung und duales Studium** (Stichprobe 02.11.2026); für andere Einstiege nicht belegt. | Unternehmensangabe auf Drittportal (Allianz-FAQ auf ausbildung.de) → in der App „berichtet“ |
 | Inhalte | Numerical (Diagramme/Tabellen lesen, ca. **1 Min./Frage**), Verbal (kurze Texte, Aussagen bewerten), teils Logical Reasoning. | berichtet |
 | Anbieter | Nicht belastbar ermittelbar; Format Aon-ähnlich. | berichtet |
 | Taschenrechner / Zurück / Negativwertung | Keine Angaben → App: Rechner an, kein Zurück, keine Negativwertung. | Annahme |

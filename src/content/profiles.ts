@@ -11,6 +11,8 @@ export interface MixEntry {
   /** Generator id, or a bank. */
   gen?: string
   bank?: 'verbal' | 'critical'
+  /** Restrict a bank to one subcategory, e.g. 'critical.inference' (5 answer options). */
+  sub?: string
   weight: number
   d?: Difficulty
 }
@@ -91,7 +93,8 @@ const DEDUCTIVE: MixEntry[] = [
   { gen: 'ded.tfc', weight: 1 },
 ]
 
-const RD = '31.10.2026'
+/** Date of docs/research.md – shown on the simulation pages. */
+export const RD = '02.11.2026'
 
 export const PROFILES: Profile[] = [
   {
@@ -110,7 +113,7 @@ export const PROFILES: Profile[] = [
       { id: 'log', title: 'Logical Reasoning', timeLimitSec: 12 * 60, count: 12, mix: [...INDUCTIVE, { gen: 'ded.syllogism', weight: 1 }, { gen: 'ded.ordering', weight: 1 }, { gen: 'speed.sequence', weight: 2 }], calculator: false },
     ],
     info: [
-      'Anbieter Sova, vor allem in Europa und im Nahen Osten.',
+      'Ob Sova oder TestGorilla kommt, steht in deiner Einladung. Berichtet: Sova vor allem in Europa und im Nahen Osten; eigene DACH-Berichte gibt es nicht.',
       'Numerical Reasoning mit Tabellen und Diagrammen, Taschenrechner erlaubt.',
       'Logical Reasoning: Zahlen- und Figurenreihen, Deduktion, visuelle Induktion.',
       'Gesamtdauer laut Bain ca. 30–40 Minuten (Kandidaten berichten teils länger, inkl. Persönlichkeit/SJT – nicht Teil dieser Simulation).',
@@ -121,7 +124,10 @@ export const PROFILES: Profile[] = [
       { label: 'Fragenzahl/Zeit je Teil', value: '12 Fragen / 16 bzw. 12 Min.', status: 'Annahme' },
       { label: 'Zurückspringen', value: 'nein', status: 'Annahme' },
     ],
-    caveats: ['Verbal Reasoning ist in neueren Durchgängen oft entfallen, kann aber vorkommen.', 'Bei Sova fließt teils die Bearbeitungszeit in die Wertung ein.'],
+    caveats: [
+      'Verbal Reasoning ist in neueren Durchgängen oft entfallen, kann aber vorkommen.',
+      'Im echten Sova-Test läuft teils kein sichtbarer Timer je Abschnitt, die Bearbeitungszeit fließt aber in die Wertung ein; laut Berichten muss er nicht in einer Sitzung bearbeitet werden. Die festen Zeitlimits hier sind eine Annahme.',
+    ],
   },
   {
     id: 'bain-tg',
@@ -150,7 +156,7 @@ export const PROFILES: Profile[] = [
       { label: 'Zurückspringen', value: 'nein', status: 'berichtet' },
       { label: 'Fragenzahl/Zeit', value: '10/10/8 Fragen, 10/10/12 Min.', status: 'Annahme' },
     ],
-    caveats: ['Gesamtdauer berichtet zwischen ca. 45 und 52 Minuten; die genaue Blockzusammensetzung variiert.'],
+    caveats: ['Gesamtdauer berichtet zwischen ca. 45 und 52 Minuten; die genaue Blockzusammensetzung variiert. Die Simulation bildet nur die drei berichteten Blöcke ab (≈ 32 Min.) – der echte Test hat mehr bzw. längere Blöcke.'],
   },
   {
     id: 'bcg-cognitive',
@@ -169,23 +175,27 @@ export const PROFILES: Profile[] = [
         title: 'Cognitive Test',
         timeLimitSec: 30 * 60,
         count: 80,
+        // Number sequences (speed.sequence) count as "logical": ≈ 67 % arithmetic, 33 % logic, as reported.
         mix: [...SPEED_ALL.map((m) => ({ ...m, weight: m.weight * 2 })), { gen: 'ded.syllogism', weight: 4, d: 1 }, { gen: 'ded.ordering', weight: 2, d: 1 }, { gen: 'ded.rules', weight: 3, d: 1 }, { gen: 'ded.tfc', weight: 2, d: 1 }, { gen: 'ind.series', weight: 2, d: 1 }],
         calculator: false,
       },
     ],
     info: [
-      'BCG Schweiz (offiziell): 30-minütiger Cognitive Test mit numerischen, verbalen und logischen Aufgaben, Multiple Choice, ohne Hilfsmittel.',
+      'BCG Schweiz (offiziell): 30-minütiger Cognitive Test mit numerischen, verbalen und logischen Aufgaben, Multiple Choice, ohne Hilfsmittel, ca. einen Monat vor dem ersten Interview.',
       'Berichtet: 80 Fragen in 30 Minuten (≈ 22 Sekunden pro Frage), ca. 60–70 % numerisch, 30–40 % logisch.',
-      'Kein Taschenrechner; Papier und Stift erlaubt; Live-Aufsicht per Video.',
-      'Eingesetzt u. a. in allen deutschen Büros, Österreich, Teilen der Schweiz und den Nordics.',
+      'Berichtet: kein Taschenrechner, Papier und Stift erlaubt, Live-Aufsicht per Zoom.',
+      'Berichtet (Kandidatenberichte bis Mai 2026): eingesetzt u. a. in allen deutschen Büros, Österreich, Teilen der Schweiz und den Nordics.',
     ],
     status: [
-      { label: 'Dauer 30 Min., ohne Hilfsmittel', value: 'ja', status: 'offiziell' },
+      { label: 'Dauer 30 Min., Multiple Choice, ohne Hilfsmittel (Angabe BCG Schweiz)', value: 'ja', status: 'offiziell' },
       { label: 'Fragenzahl', value: '80', status: 'berichtet' },
       { label: 'Zurückspringen/Überspringen', value: 'erlaubt', status: 'Annahme' },
       { label: 'Negativwertung', value: 'keine', status: 'Annahme' },
     ],
-    caveats: ['80 Fragen sind kaum vollständig lösbar – Überspringen ist Teil der Strategie.', 'Der Anteil verbaler Aufgaben ist unklar (Quellen widersprüchlich).'],
+    caveats: [
+      '80 Fragen sind kaum vollständig lösbar – Überspringen ist Teil der Strategie.',
+      'Diese Simulation enthält keine Verbal-Aufgaben. BCG Schweiz nennt offiziell auch verbale Fähigkeiten, Prep-Quellen berichten von wenig bis keinem Verbal-Anteil – Verbal Reasoning separat üben.',
+    ],
   },
   {
     id: 'bcg-cca',
@@ -209,6 +219,8 @@ export const PROFILES: Profile[] = [
     status: [
       { label: 'Anbieter SHL', value: 'ja', status: 'berichtet' },
       { label: 'Fragenzahl/Zeit', value: '15 Fragen / 20 Min.', status: 'Annahme' },
+      { label: 'Taschenrechner', value: 'erlaubt', status: 'Annahme' },
+      { label: 'Interaktive SHL-Formate', value: 'enthalten', status: 'Annahme' },
       { label: 'Zurückspringen', value: 'nein', status: 'Annahme' },
     ],
     caveats: ['Der genaue Aufbau des CCA ist nicht öffentlich; Work-Style-Teile sind nicht Teil der App.'],
@@ -226,25 +238,33 @@ export const PROFILES: Profile[] = [
     scoring: { correct: 5, wrong: -1, blank: 0 },
     difficulty: 2,
     sections: [
-      { id: 'q1', title: 'Quantitativ I', timeLimitSec: 0, count: 7, mix: [...SPEED_ALL, { gen: 'num.pctchange', weight: 2 }], calculator: true },
-      { id: 'v1', title: 'Verbal I', timeLimitSec: 0, count: 7, mix: [{ bank: 'verbal', weight: 3 }, { bank: 'critical', weight: 1 }], calculator: true },
-      { id: 'c1', title: 'Case-Daten I', timeLimitSec: 0, count: 6, mix: NUM_ALL, calculator: true },
-      { id: 'q2', title: 'Quantitativ II', timeLimitSec: 0, count: 7, mix: [...SPEED_ALL, { gen: 'ded.rules', weight: 2 }, { gen: 'ded.syllogism', weight: 2 }], calculator: true },
-      { id: 'v2', title: 'Verbal II', timeLimitSec: 0, count: 7, mix: [{ bank: 'verbal', weight: 2 }, { bank: 'critical', weight: 2 }], calculator: true },
-      { id: 'c2', title: 'Case-Daten II', timeLimitSec: 0, count: 6, mix: NUM_ALL.map((m) => ({ ...m, d: 3 as Difficulty })), calculator: true },
+      // Section sizes 8/6/6/8/6/6 as reported by StrategyCase; no calculator (pen and paper, candidate reports).
+      { id: 'q1', title: 'Quantitativ: logisches Rechnen', timeLimitSec: 0, count: 8, mix: [...SPEED_ALL, { gen: 'num.pctchange', weight: 2 }], calculator: false },
+      { id: 'q2', title: 'Quantitativ: Aussagen', timeLimitSec: 0, count: 6, mix: [{ gen: 'speed.word', weight: 3 }, { gen: 'speed.equation', weight: 2 }, { gen: 'speed.rule3', weight: 2 }, { gen: 'speed.percent', weight: 1 }], calculator: false },
+      { id: 'v1', title: 'Verbal: logische Texte', timeLimitSec: 0, count: 6, mix: [{ gen: 'ded.rules', weight: 2 }, { gen: 'ded.syllogism', weight: 2 }, { bank: 'critical', sub: 'critical.inference', weight: 2 }], calculator: false },
+      { id: 'v2', title: 'Verbal: Textverständnis', timeLimitSec: 0, count: 8, mix: [{ bank: 'verbal', weight: 2 }, { bank: 'critical', sub: 'critical.inference', weight: 1 }], calculator: false },
+      { id: 'c1', title: 'Case: Tabellen', timeLimitSec: 0, count: 6, mix: NUM_ALL, calculator: false },
+      { id: 'c2', title: 'Case: Grafiken', timeLimitSec: 0, count: 6, mix: NUM_ALL.map((m) => ({ ...m, d: 3 as Difficulty })), calculator: false },
     ],
     info: [
       '40 Fragen in 60 Minuten (≈ 1:30 Min. pro Frage), sechs Abschnitte: quantitativ, verbal und Case-Datenauswertung.',
       'Wertung: +5 Punkte richtig, −1 Punkt falsch, 0 Punkte leer (max. 200).',
-      'Raten: Bei +5/−1 hat schon blindes Raten einen leicht positiven Erwartungswert (+0,2 Punkte bei 5 Optionen); nach Ausschluss einer Option lohnt es sich deutlich.',
+      'Raten: Bei +5/−1/0 hat schon blindes Raten einen positiven Erwartungswert (+0,2 Punkte bei 5 Optionen, +0,5 bei 4), leer lassen bringt sicher 0. Also keine Frage leer lassen: lösbare zuerst, vor Ablauf alle offenen ankreuzen. Jede ausgeschlossene Option macht Raten noch lohnender.',
+      'Laut Kandidatenberichten ohne Taschenrechner (Papier und Stift) – nicht offiziell bestätigt.',
+      'Kearney bietet laut Prep-Quellen einen kostenlosen Übungstest auf der eigenen Website an.',
     ],
     status: [
       { label: '40 Fragen / 60 Min.', value: 'ja', status: 'berichtet' },
       { label: 'Wertung +5/−1/0', value: 'ja', status: 'berichtet' },
-      { label: 'Taschenrechner', value: 'erlaubt', status: 'Annahme' },
+      { label: 'Taschenrechner', value: 'nicht erlaubt (Papier + Stift)', status: 'berichtet' },
       { label: 'Zurückspringen', value: 'erlaubt', status: 'Annahme' },
     ],
-    caveats: ['Keine offizielle Kearney-Quelle gefunden; die Abschnittsaufteilung wird unterschiedlich beschrieben.', 'Manche Büros nutzen stattdessen SHL-Tests oder einen Excel-Test.'],
+    caveats: [
+      'Keine offizielle Kearney-Quelle gefunden; die Abschnittsaufteilung wird unterschiedlich beschrieben.',
+      'Das Format „Data Sufficiency“ (berichtet im zweiten Quant-Teil) gibt es in der App nicht; dort kommen Textaufgaben.',
+      'Die Textverständnis-Aufgaben haben hier 3 Optionen (Wahr/Falsch/Nicht bestimmbar), im echten Test laut Berichten 4–5 – Raten bringt hier also mehr als im Original.',
+      'Manche Büros nutzen stattdessen SHL-Tests oder einen Excel-Test, früher Watson-Glaser (→ Kategorie F üben).',
+    ],
   },
   {
     id: 'kearney-shl',
@@ -262,12 +282,15 @@ export const PROFILES: Profile[] = [
       { id: 'ded', title: 'Deductive', timeLimitSec: 20 * 60, count: 16, mix: DEDUCTIVE, calculator: false },
       { id: 'ind', title: 'Inductive', timeLimitSec: 20 * 60, count: 18, mix: INDUCTIVE, calculator: false },
     ],
-    info: ['Drei SHL-Tests: Numerical, Deductive und Inductive Reasoning, je ca. 20 Minuten (Kandidatenbericht).', 'Positive Wertung, keine Abzüge.'],
+    info: ['Drei SHL-Tests: Numerical, Deductive und Inductive Reasoning, je ca. 20 Minuten (Kandidatenbericht).', 'Annahme: keine Abzüge für falsche Antworten (bei SHL-Tests üblich, für Kearney nicht belegt).'],
     status: [
-      { label: '3 × ca. 20 Min.', value: 'ja', status: 'berichtet' },
+      { label: '3 × ca. 20 Min. (Einzelquelle)', value: 'ja', status: 'berichtet' },
       { label: 'Fragenzahl je Test', value: '14 / 16 / 18', status: 'Annahme' },
+      { label: 'Negativwertung', value: 'keine', status: 'Annahme' },
+      { label: 'Adaptiv', value: 'nein', status: 'Annahme' },
+      { label: 'Zurückspringen', value: 'nein', status: 'Annahme' },
     ],
-    caveats: ['Beruht auf einem einzelnen Kandidatenbericht; SHL G+ wird sonst als ein gemischter 36-Minuten-Test beschrieben.'],
+    caveats: ['Beruht auf einem einzelnen Kandidatenbericht; SHL G+ wird sonst als ein gemischter 36-Minuten-Test beschrieben.', 'SHL-Verify-Tests sind laut SHL teils adaptiv – die Simulation ist es nicht.'],
   },
   {
     id: 'pg-interactive',
@@ -287,16 +310,23 @@ export const PROFILES: Profile[] = [
     ],
     info: [
       'P&G (offiziell): Interactive Assessment, ca. 30 Minuten, kurze kognitive Aufgaben, mobil nutzbar.',
-      'Berichtet: drei Aon-Spiele – Switch (~6 Min.), Digit (~5 Min.), Grid (~6–9 Min.); so viele Aufgaben wie möglich, Schwierigkeit steigt bei richtigen Antworten.',
+      'Berichtet: drei Aon-Spiele – Switch (~6 Min.), Digit (~5 Min.), Grid (~6–9 Min.). Switch: so viele Aufgaben wie möglich, adaptiv. Digit und Grid sind in der App genauso umgesetzt (Annahme).',
       'Kein Zurückspringen.',
     ],
     status: [
       { label: 'ca. 30 Min., kognitive Aufgaben', value: 'ja', status: 'offiziell' },
       { label: 'Spiele Switch/Digit/Grid', value: 'ja', status: 'berichtet' },
-      { label: 'Zeiten 6/5/6 Min.', value: 'ja', status: 'berichtet' },
+      { label: 'Zeiten 6/5/6 Min. (Grid berichtet 6–9, App: 6)', value: 'ja', status: 'berichtet' },
+      { label: 'Adaptiv (Digit/Grid)', value: 'ja', status: 'Annahme' },
+      { label: 'Digit: ohne Rechner', value: 'ja', status: 'Annahme' },
       { label: 'Digit: Punkt vor Strich', value: 'ja', status: 'Annahme' },
     ],
-    caveats: ['Je nach Rolle werden ein, zwei oder alle drei Spiele verlangt.', 'PEAK Performance (Persönlichkeit/SJT) ist nicht Teil der App.'],
+    caveats: [
+      'Je nach Rolle werden ein, zwei oder alle drei Spiele verlangt – einzelne Spiele übst du unter Üben → Aon-Spiele.',
+      'Offiziell ca. 30 Min. insgesamt (vermutlich inkl. Anleitungen und Übungsrunden); die reine Spielzeit hier beträgt 17 Min.',
+      'Eine Quelle nennt bei Digit einen Taschenrechner als erlaubt; bei einstelligen Ziffern kaum relevant.',
+      'PEAK Performance (Persönlichkeit/SJT) ist nicht Teil der App.',
+    ],
   },
   {
     id: 'allianz',
@@ -315,16 +345,18 @@ export const PROFILES: Profile[] = [
       { id: 'log', title: 'Logical Reasoning', timeLimitSec: 12 * 60, count: 12, mix: [...INDUCTIVE, { gen: 'speed.sequence', weight: 2 }], calculator: false },
     ],
     info: [
-      'Allianz Deutschland (offiziell): Online-Assessment-Center per E-Mail-Link, 14 Tage Bearbeitungszeit.',
+      'Laut Allianz-FAQ auf ausbildung.de (für Ausbildung und duales Studium): Zugang zum Online-Assessment-Center per E-Mail, 14 Tage Bearbeitungszeit. Ob das für Trainee- oder Direkteinstieg genauso gilt, ist nicht belegt.',
       'Berichtet: Numerical mit Diagrammen und Tabellen (≈ 1 Minute pro Frage), Verbal (Aussagen zu kurzen Texten), teils Logical Reasoning.',
     ],
     status: [
-      { label: 'Online-Assessment, 14 Tage Frist', value: 'ja', status: 'offiziell' },
+      { label: 'Online-Assessment, 14 Tage (Allianz-FAQ, Ausbildung/duales Studium)', value: 'ja', status: 'berichtet' },
       { label: 'Numerical ≈ 1 Min./Frage', value: 'ja', status: 'berichtet' },
-      { label: 'Fragenzahl/Zeit', value: '15/16/12 Fragen', status: 'Annahme' },
+      { label: 'Fragenzahl/Zeit', value: '15/16/12 Fragen, 15/12/12 Min.', status: 'Annahme' },
+      { label: 'Taschenrechner', value: 'erlaubt', status: 'Annahme' },
+      { label: 'Negativwertung', value: 'keine', status: 'Annahme' },
       { label: 'Zurückspringen', value: 'nein', status: 'Annahme' },
     ],
-    caveats: ['Anbieter und genaue Zusammensetzung sind nicht belastbar bekannt.'],
+    caveats: ['Anbieter und genaue Zusammensetzung sind nicht belastbar bekannt; Logical Reasoning kommt laut Berichten nur teils vor.'],
   },
   {
     id: 'db-shl',
@@ -349,15 +381,39 @@ export const PROFILES: Profile[] = [
     ],
     info: [
       'Berichtet: SHL Verify Interactive G+ mit ca. 24 Fragen in 36 Minuten, gemischt aus Numerical, Inductive und Deductive Reasoning.',
-      'Interaktive Antwortformate (Balken ziehen, Elemente anordnen, Werte eintragen) statt nur Multiple Choice.',
-      'Adaptiv: Die Schwierigkeit passt sich an. Kein Zurückspringen. Dazu SJT und OPQ (nicht Teil der App).',
+      'Berichtet: interaktive Antwortformate (Balken oder Linien ziehen, Diagramme anpassen, Elemente anordnen, Felder antippen) statt nur Multiple Choice. Die App übt Balken, Reihenfolge und Tabellenzelle.',
+      'Berichtet: adaptiv (laut SHL-Factsheet), kein Zurückspringen. Dazu SJT und OPQ (nicht Teil der App).',
     ],
     status: [
       { label: '24 Fragen / 36 Min.', value: 'ja', status: 'berichtet' },
       { label: 'Adaptiv', value: 'ja', status: 'berichtet' },
       { label: 'Taschenrechner', value: 'erlaubt', status: 'berichtet' },
     ],
-    caveats: ['Keine offizielle Deutsche-Bank-Quelle gefunden; einzelne Quellen nennen zusätzlich Verbal Reasoning.'],
+    caveats: [
+      'Keine offizielle Deutsche-Bank-Quelle gefunden.',
+      'Teils kommt stattdessen die Multiple-Choice-Version von G+ (30 Fragen / 36 Min.) oder ein separater Numerical-Test (18–25 Fragen, 12–25 Min., Profil „Deutsche Bank – Numerical“).',
+    ],
+  },
+  {
+    id: 'db-numerical',
+    company: 'Deutsche Bank',
+    name: 'Deutsche Bank – Numerical (separat)',
+    provider: 'SHL',
+    researchDate: RD,
+    allowBack: false,
+    allowSkip: false,
+    adaptive: false,
+    scoring: { correct: 1, wrong: 0, blank: 0 },
+    difficulty: 2,
+    sections: [{ id: 'num', title: 'Numerical Reasoning', timeLimitSec: 20 * 60, count: 20, mix: NUM_ALL, calculator: true }],
+    info: ['Berichtet: separater Numerical-Test mit 18–25 Fragen in 12–25 Minuten, Taschenrechner erlaubt, keine Abzüge.'],
+    status: [
+      { label: '18–25 Fragen / 12–25 Min.', value: 'ja', status: 'berichtet' },
+      { label: 'Fragenzahl/Zeit hier', value: '20 Fragen / 20 Min.', status: 'Annahme' },
+      { label: 'Taschenrechner', value: 'erlaubt', status: 'berichtet' },
+      { label: 'Adaptiv / Zurückspringen', value: 'nein / nein', status: 'Annahme' },
+    ],
+    caveats: ['Keine offizielle Deutsche-Bank-Quelle gefunden; Fragenzahl und Zeit schwanken in den Berichten stark.'],
   },
 ]
 

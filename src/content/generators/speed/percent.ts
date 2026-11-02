@@ -223,7 +223,7 @@ export const fractions: GeneratorDef = {
             { value: (den / num) * 100 < 1000 ? (den / num) * 100 : exact * 2, tag: 'inverse', why: 'Bruch umgedreht.' },
             { value: exact / 10, tag: 'decimal', why: 'Komma verschoben.' },
             { value: 100 - exact, tag: 'complement', why: 'Gegenwahrscheinlichkeit/Rest berechnet.' },
-            { value: num * 10 + den / 10, tag: 'concat', why: 'Zähler und Nenner falsch kombiniert.' },
+            { value: (num / (num + den)) * 100, tag: 'part-whole', why: `Durch Zähler + Nenner geteilt (${num} ÷ ${num + den}) statt durch den Nenner.` },
             { value: exact + 5, tag: 'slip', why: 'Überschlagsfehler.' },
             { value: exact - 5, tag: 'slip', why: 'Überschlagsfehler.' },
           ],
@@ -232,7 +232,7 @@ export const fractions: GeneratorDef = {
             ...(num > 1 ? [`${num}/${den} = ${num} × 1/${den} = ${pct(exact, lang, Math.min(decimalsOf(exact), 3))}${decimalsOf(exact) > 3 ? '…' : ''}`] : []),
             ...(rounded ? [`Gerundet: ${pct(exact, lang, dp)}`] : []),
           ],
-          shortcut: 'Stammbrüche auswendig: 1/3 = 33,3 %, 1/6 = 16,7 %, 1/8 = 12,5 %, 1/9 = 11,1 %, 1/12 = 8,3 %, 1/16 = 6,25 %. Dann nur noch mit dem Zähler multiplizieren.',
+          shortcut: `Stammbrüche auswendig: 1/3 = 33,3 %, 1/6 = 16,7 %, 1/7 ≈ 14,3 %, 1/8 = 12,5 %, 1/9 = 11,1 %, 1/11 ≈ 9,1 %, 1/12 = 8,3 %, 1/16 = 6,25 %. Hier: 1/${den} × ${num}.`,
         })
       }
       if (kind === 'ofNumber') {

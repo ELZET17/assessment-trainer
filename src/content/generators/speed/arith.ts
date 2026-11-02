@@ -72,13 +72,22 @@ export const addSub: GeneratorDef = {
       const unit = 10 ** -dp
       const firstOp = ops[0]
       const distractors: Distractor[] = []
-      if (firstOp === '+' || ops.includes('+')) {
-        distractors.push({ value: value - 10 * unit, tag: 'carry', why: 'Einen Übertrag vergessen.' })
-        distractors.push({ value: value - 100 * unit, tag: 'carry', why: 'Einen Übertrag an einer höheren Stelle vergessen.' })
-      }
-      if (ops.includes('-')) {
-        distractors.push({ value: value + 10 * unit, tag: 'borrow', why: 'Beim Abziehen das Borgen (Stellenübergang) vergessen.' })
-        distractors.push({ value: value + 100 * unit, tag: 'borrow', why: 'Beim Abziehen das Borgen an einer höheren Stelle vergessen.' })
+      if (terms.length === 2) {
+        // Only carries/borrows that really occur in this sum (Gate 4: no invented carry errors).
+        const [A, B] = terms.map((t) => Math.round(t * 10 ** dp))
+        const placeName = (k: number) => ['Hundertstel', 'Zehntel', 'Einer', 'Zehner', 'Hunderter', 'Tausender', 'Zehntausender'][k - dp + 2]
+        let carry = 0
+        for (let k = 0; k < 6; k++) {
+          const da = Math.floor(A / 10 ** k) % 10
+          const db = Math.floor(B / 10 ** k) % 10
+          if (firstOp === '+') {
+            carry = da + db + carry >= 10 ? 1 : 0
+            if (carry) distractors.push({ value: value - 10 ** (k + 1) * unit, tag: 'carry', why: `Übertrag in die ${placeName(k + 1)}stelle vergessen.` })
+          } else {
+            carry = da - db - carry < 0 ? 1 : 0
+            if (carry) distractors.push({ value: value + 10 ** (k + 1) * unit, tag: 'borrow', why: `Beim Abziehen das Borgen aus der ${placeName(k + 1)}stelle vergessen.` })
+          }
+        }
       }
       if (terms.length === 2) {
         const other = firstOp === '+' ? terms[0] - terms[1] : terms[0] + terms[1]
@@ -90,7 +99,7 @@ export const addSub: GeneratorDef = {
       }
       const swapped = dp === 0 ? swapLastDigits(value) : null
       if (swapped !== null) distractors.push({ value: swapped, tag: 'transpose', why: 'Zahlendreher in den letzten beiden Ziffern.' })
-      distractors.push({ value: value + 1000 * unit, tag: 'carry', why: 'Eine höhere Stelle falsch übertragen.' })
+      distractors.push({ value: value + 1000 * unit, tag: 'slip', why: 'Rechenfehler.' })
 
       const dps = terms.map(() => dp)
       const expr = exprText(terms, ops, lang, dps)
@@ -168,11 +177,11 @@ export const multiply: GeneratorDef = {
         ...(tens > 0 && ones > 0 ? [{ value: (aInt * tens + ones) * scale, tag: 'partial', why: 'Nur den Zehneranteil multipliziert und die Einer bloß addiert.' }] : []),
         { value: aInt * (bInt + 1) * scale, tag: 'row', why: 'Eine Zeile zu viel gerechnet (Faktor um 1 zu groß).' },
         { value: aInt * (bInt - 1) * scale, tag: 'row', why: 'Eine Zeile zu wenig gerechnet (Faktor um 1 zu klein).' },
-        { value: value + 10 * unit, tag: 'carry', why: 'Übertrag beim Addieren der Teilprodukte doppelt gezählt.' },
-        { value: value - 10 * unit, tag: 'carry', why: 'Übertrag beim Addieren der Teilprodukte vergessen.' },
+        { value: value + 10 * unit, tag: 'slip', why: 'Fehler beim Addieren der Teilprodukte.' },
+        { value: value - 10 * unit, tag: 'slip', why: 'Fehler beim Addieren der Teilprodukte.' },
         { value: value * 10, tag: 'place', why: 'Stellenwert/Komma um eine Stelle verschoben.' },
         { value: value / 10, tag: 'place', why: 'Stellenwert/Komma um eine Stelle verschoben.' },
-        { value: value + 100 * unit, tag: 'carry', why: 'Fehler in der Hunderterstelle.' },
+        { value: value + 100 * unit, tag: 'slip', why: 'Rechenfehler.' },
       ]
       const f = (x: number, k = dp) => fmt(x, lang, k)
       const expr = `${f(a, dpA)} × ${f(b, dpB)}`
@@ -250,12 +259,12 @@ export const divide: GeneratorDef = {
       const dpDividend = decimalsOf(dividend)
       const dpDivisor = decimalsOf(divisor)
       const distractors: Distractor[] = [
-        { value: q + unit, tag: 'estimate', why: 'Letzte Stelle beim Schätzen um 1 zu hoch.' },
-        { value: q - unit, tag: 'estimate', why: 'Letzte Stelle beim Schätzen um 1 zu niedrig.' },
+        { value: q + unit, tag: 'slip', why: 'Letzte Stelle falsch.' },
+        { value: q - unit, tag: 'slip', why: 'Letzte Stelle falsch.' },
         { value: q * 10, tag: 'place', why: 'Stellenwert verschoben (Faktor 10).' },
         { value: q / 10, tag: 'place', why: 'Stellenwert verschoben (Faktor 10).' },
-        { value: q + 10 * unit, tag: 'estimate', why: 'Zehnerstelle falsch geschätzt.' },
-        { value: q - 10 * unit, tag: 'estimate', why: 'Zehnerstelle falsch geschätzt.' },
+        { value: q + 10 * unit, tag: 'slip', why: 'Beim schriftlichen Teilen eine Stelle falsch.' },
+        { value: q - 10 * unit, tag: 'slip', why: 'Beim schriftlichen Teilen eine Stelle falsch.' },
       ]
       if (divisor < 1) distractors.unshift({ value: dividend * divisor, tag: 'wrong-op', why: 'Multipliziert statt dividiert (durch eine Zahl < 1 zu teilen macht das Ergebnis größer).' })
       const expr = `${f(dividend, dpDividend)} ÷ ${f(divisor, dpDivisor)}`
@@ -266,7 +275,7 @@ export const divide: GeneratorDef = {
         steps.push(`Beide Zahlen mit ${k} multiplizieren, damit der Divisor ganz wird: ${f(dividend * k, decimalsOf(dividend * k))} ÷ ${f(divisor * k, 0)}`)
         steps.push(`${f(dividend * k, decimalsOf(dividend * k))} ÷ ${f(divisor * k, 0)} = ${f(q)}`)
         const recip: Record<string, string> = { '0.2': '5', '0.25': '4', '0.4': '5/2', '0.5': '2', '0.75': '4/3', '1.5': '2/3', '2.5': '2/5' }
-        shortcut = `Durch eine Dezimalzahl teilen heißt mit dem Kehrwert malnehmen: ÷ ${f(divisor, dpDivisor)} ist dasselbe wie × ${recip[String(divisor)] ?? `1/${f(divisor, dpDivisor)}`}. Das Ergebnis muss größer werden, wenn der Divisor kleiner als 1 ist.`
+        shortcut = `Durch eine Dezimalzahl teilen heißt mit dem Kehrwert malnehmen: ÷ ${f(divisor, dpDivisor)} ist dasselbe wie × ${recip[String(divisor)] ?? `1/${f(divisor, dpDivisor)}`}. ${divisor < 1 ? 'Der Divisor ist kleiner als 1 – das Ergebnis muss also größer werden als der Dividend.' : 'Plausibilitätscheck: Der Divisor liegt über 1, das Ergebnis also unter dem Dividenden.'}`
       } else if (!Number.isInteger(q)) {
         const whole = Math.floor(q)
         const rest = dividend - whole * divisor

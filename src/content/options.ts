@@ -4,7 +4,7 @@
  * the displayed precision, options are far enough apart that rounding can
  * never make two options correct.
  */
-import { roundTo } from './format'
+import { fmt, roundTo } from './format'
 import type { McqOption } from './types'
 import type { Rng } from './rng'
 
@@ -43,6 +43,31 @@ export function minGap(value: number, decimals: number, rel: number): number {
   return Math.max(2 * 10 ** -decimals, rel * Math.abs(value))
 }
 
+const PLACE: Record<number, string> = { [-3]: 'Tausendstel', [-2]: 'Hundertstel', [-1]: 'Zehntel', 0: 'Einer', 1: 'Zehner', 2: 'Hunderter', 3: 'Tausender', 4: 'Zehntausender', 5: 'Hunderttausender' }
+const GENERIC_WHY = new Set(['Rechenfehler.', 'Rechenfehler im letzten Schritt.', 'Flüchtigkeitsfehler in einer Stelle.', 'Überschlagsfehler.', 'Um eins verrechnet.'])
+
+/**
+ * Concrete, checkable description of a near-miss distractor (Gate 4: "Rechenfehler"
+ * alone teaches nothing). Describes only what is certain: direction and size of the gap.
+ */
+export function describeSlip(v: number, c: number, format: (x: number) => string, decimals: number): string {
+  const dir = v > c ? 'zu hoch' : 'zu niedrig'
+  const both = `${format(v)} statt ${format(c)}`
+  const near = (x: number, y: number) => Math.abs(x - y) < 1e-9 * Math.max(1, Math.abs(y))
+  if (c !== 0) {
+    const r = v / c
+    for (const k of [1, 2, 3]) if (near(r, 10 ** k) || near(r, 10 ** -k)) return `Um den Faktor ${fmt(10 ** k, 'de', 0)} ${dir} (${both}) – Komma bzw. Nullen verschoben.`
+    if (near(r, 2)) return `Doppelt so groß wie richtig (${both}) – ein Faktor 2 zu viel.`
+    if (near(r, 0.5)) return `Nur halb so groß wie richtig (${both}) – ein Faktor 2 fehlt.`
+  }
+  const d = roundTo(Math.abs(v - c), decimals)
+  const p = Math.floor(Math.log10(d) + 1e-9)
+  const m = d / 10 ** p
+  if (Math.abs(m - Math.round(m)) < 1e-6 && Math.round(m) <= 5 && PLACE[p]) return `Um ${fmt(d, 'de', Math.max(0, -p))} ${dir} (${both}) – Flüchtigkeitsfehler in der ${PLACE[p]}stelle.`
+  if (c !== 0) return `Um rund ${Math.round(Math.abs(v / c - 1) * 100)} % ${dir} (${both}) – typisch für zu grobes Überschlagen oder einen Fehler in einem Zwischenschritt.`
+  return `${dir.charAt(0).toUpperCase()}${dir.slice(1)} (${both}).`
+}
+
 /** Generic near-miss errors used when the error models run out. */
 function fallbackDistractors(value: number, decimals: number, rng: Rng): Distractor[] {
   const out: Distractor[] = []
@@ -52,7 +77,7 @@ function fallbackDistractors(value: number, decimals: number, rng: Rng): Distrac
     out.push({
       value: value * f,
       tag: 'estimate-slip',
-      why: `Überschlags- oder Rechenfehler (um etwa ${Math.round(Math.abs(1 - f) * 100)} % daneben).`,
+      why: 'Überschlagsfehler.',
     })
   }
   out.push({ value: value + 10 * unit, tag: 'slip', why: 'Flüchtigkeitsfehler in einer Stelle.' })
@@ -104,7 +129,14 @@ export function buildNumericOptions(rng: Rng, spec: NumericOptionSpec): BuiltOpt
   const notes = ordered
     .map((c, i) => ({ c, i }))
     .filter(({ c }) => c.tag !== 'correct')
-    .map(({ c, i }) => `**${String.fromCharCode(65 + i)}** (${spec.format(c.value)}): ${c.why}`)
+    .map(({ c, i }) => {
+      let why = c.why
+      if (c.tag === 'slip' || c.tag === 'estimate-slip') {
+        const concrete = describeSlip(c.value, correct, spec.format, spec.decimals)
+        why = GENERIC_WHY.has(why) ? concrete : `${why.replace(/\.$/, '')}: ${concrete.charAt(0).toLowerCase()}${concrete.slice(1)}`
+      }
+      return `**${String.fromCharCode(65 + i)}** (${spec.format(c.value)}): ${why}`
+    })
   return { options, correct: correctIdx, notes }
 }
 

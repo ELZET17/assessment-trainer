@@ -354,7 +354,7 @@ export const ratio: GeneratorDef = {
             { value: A / ds.values[(rb + 1) % 4 === ra ? (rb + 2) % 4 : (rb + 1) % 4][c], tag: 'wrong-row', why: 'Falsche Vergleichszeile.' },
           ],
           steps: [`${labels[ra]}: ${f(A)}, ${labels[rb]}: ${f(B)}`, `${f(A)} ÷ ${f(B)} = ${fmt(value, lang, 3)}`],
-          shortcut: '„Wie viel Mal so groß“ = Division. „Um wie viel größer“ wäre (A − B) ÷ B – genau lesen.',
+          shortcut: '„Wie viel Mal so groß“ = Division A ÷ B. „Um wie viel größer“ wäre die Differenz A − B, „um wie viel Prozent größer“ wäre (A − B) ÷ B – genau lesen.',
         })
       }
       // d3: ratio of absolute increases

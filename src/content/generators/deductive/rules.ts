@@ -44,6 +44,21 @@ const EVENTS: EventText[] = [
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 const neg = (l: Lit): Lit => ({ v: l.v, neg: !l.neg })
+/** Logical negation of a distractor statement (used to tell "false" from "not certain"). */
+function negate(p: Prop): Prop {
+  switch (p.t) {
+    case 'lit':
+      return { t: 'lit', l: neg(p.l) }
+    case 'and':
+      return { t: 'notBoth', a: p.a, b: p.b }
+    case 'notBoth':
+      return { t: 'and', a: p.a, b: p.b }
+    case 'if':
+      return { t: 'and', a: p.a, b: neg(p.b) }
+    case 'or':
+      return { t: 'and', a: neg(p.a), b: neg(p.b) }
+  }
+}
 const lit = (v: number, n: boolean): Lit => ({ v, neg: n })
 
 function render(p: Prop, ev: EventText[], lang: Lang): string {
@@ -184,8 +199,10 @@ export const rules: GeneratorDef = {
         .map((o, i) => ({ o, i }))
         .filter(({ i }) => i !== correct)
         .map(({ o, i }) => {
-          const why =
-            o.t === 'if'
+          // Gate 4: a statement whose negation follows is not merely "not certain" but false.
+          const why = entails(vars, premises, negate(o))
+            ? 'Widerspricht den Aussagen – unter den gegebenen Regeln ist diese Aussage sicher falsch.'
+            : fallacies.some((f) => JSON.stringify(f) === JSON.stringify(o))
               ? 'Umkehrung bzw. Verneinung einer Wenn-dann-Regel – folgt nicht (aus „Wenn A, dann B“ folgt weder „Wenn B, dann A“ noch „Wenn nicht A, dann nicht B“).'
               : 'Folgt nicht zwingend – es gibt eine Konstellation, in der alle Aussagen gelten, diese aber nicht.'
           return `**${String.fromCharCode(65 + i)}**: ${why}`

@@ -27,6 +27,8 @@ interface Pattern {
 }
 
 const c = (q: Quant, a: number, b: number): Cat => ({ q, a, b })
+/** Contradictory statement ("all" ↔ "some … not", "some" ↔ "no"). */
+const NEGATE: Record<Quant, Quant> = { all: 'someNot', someNot: 'all', some: 'no', no: 'some' }
 
 const TWO: Pattern[] = [
   { premises: [c('all', 0, 1), c('all', 1, 2)], conclusion: c('all', 0, 2), why: 'Alle {0} sind {1}, und alle {1} sind {2} – also sind alle {0} auch {2}.' },
@@ -119,9 +121,17 @@ export const syllogism: GeneratorDef = {
         .filter(({ i }) => i !== correct)
         .map(({ o, i }) => {
           const isConverse = premises.some((p) => p.q === 'all' && o.q === 'all' && p.a === o.b && p.b === o.a)
-          const why = isConverse
-            ? 'Umkehrfehler: Aus „Alle X sind Y“ folgt nicht „Alle Y sind X“.'
-            : 'Kann wahr sein, muss es aber nicht: Es gibt eine Anordnung (Venn-Diagramm), in der alle Aussagen gelten, diese aber nicht.'
+          // Gate 4: distinguish "impossible" from "possible but not certain" (checked, not assumed).
+          const negation = c(NEGATE[o.q], o.a, o.b)
+          const impossible = follows(k, premises, negation, false) && follows(k, premises, negation, true)
+          const possible = !follows(k, premises, negation, false) && !follows(k, premises, negation, true)
+          const why = impossible
+            ? `Widerspricht den Aussagen: In jeder erlaubten Anordnung (Venn-Diagramm) gilt das Gegenteil – „${sentence(negation, nouns, lang).replace(/\.$/, '')}“.`
+            : isConverse
+              ? 'Umkehrfehler: Aus „Alle X sind Y“ folgt nicht „Alle Y sind X“.'
+              : possible
+                ? 'Kann wahr sein, muss es aber nicht: Es gibt eine Anordnung (Venn-Diagramm), in der alle Aussagen gelten, diese aber nicht.'
+                : 'Folgt nicht zwingend aus den Aussagen.'
           return `**${String.fromCharCode(65 + i)}** (${sentence(o, nouns, lang)}): ${why}`
         })
       const item: McqItem = {

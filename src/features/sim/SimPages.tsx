@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { resolveItem } from '../../content/items'
-import { getProfile, PROFILES } from '../../content/profiles'
+import { getProfile, PROFILES, RD } from '../../content/profiles'
 import type { Item } from '../../content/types'
 import { db } from '../../data/db'
 import { simulationResults } from '../../data/stats'
@@ -20,7 +20,7 @@ export function SimIndex() {
   const byCompany = PROFILES.reduce<Record<string, typeof PROFILES>>((acc, p) => ((acc[p.company] ??= []).push(p), acc), {})
   return (
     <div>
-      <PageHeader title="Test-Simulationen" subtitle="Vorkonfigurierte Durchgänge pro Unternehmen – Formate laut Recherche (Stand 31.10.2026), je Büro verschieden." />
+      <PageHeader title="Test-Simulationen" subtitle={`Vorkonfigurierte Durchgänge pro Unternehmen – Formate laut Recherche (Stand ${RD}), je Büro verschieden.`} />
       <div className="grid gap-4 md:grid-cols-2">
         {Object.entries(byCompany).map(([company, list]) => (
           <Card key={company}>

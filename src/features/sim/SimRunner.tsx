@@ -29,7 +29,7 @@ function pickRef(rng: Rng, sec: SectionSpec, d: Difficulty, used: Set<string>): 
     const m = weighted(rng, sec.mix.map((x) => ({ item: x, w: x.weight })))
     const diff = m.d ?? d
     let ref: ItemRef | null
-    if (m.bank) ref = pickFrom(m.bank, null, diff, { used, rng })
+    if (m.bank) ref = pickFrom(m.bank, m.sub ?? null, diff, { used, rng })
     else if (m.gen && getGenerator(m.gen)) ref = refForGen(m.gen, diff, rng)
     else ref = null
     if (ref && !used.has(refKey(ref))) {

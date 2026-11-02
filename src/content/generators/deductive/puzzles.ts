@@ -45,7 +45,7 @@ function texts(ctx: Ctx, lang: Lang, n: number): Texts {
           case 'notAdjacent':
             return de ? `${N(c.a)} und ${N(c.b)} belegten keine aufeinanderfolgenden Plätze.` : `${N(c.a)} and ${N(c.b)} did not finish in consecutive places.`
           case 'gap':
-            return de ? `Zwischen ${N(c.a)} und ${N(c.b)} kam ${people(c.n)} ins Ziel.` : `${cap(people(c.n))} finished between ${N(c.a)} and ${N(c.b)}.`
+            return de ? `Zwischen ${N(c.a)} und ${N(c.b)} ${c.n === 1 ? 'kam' : 'kamen'} ${people(c.n)} ins Ziel.` : `${cap(people(c.n))} finished between ${N(c.a)} and ${N(c.b)}.`
           case 'notEnd':
             return de ? `${N(c.a)} belegte weder den ersten noch den letzten Platz.` : `${N(c.a)} finished neither first nor last.`
         }
@@ -286,10 +286,17 @@ function explain(p: Puzzle, lang: Lang, conclusion: string): string[] {
   const fixed: Clue[] = p.clues.filter((c) => c.t === 'pos')
   const blocks: Clue[] = p.clues.filter((c) => c.t === 'justBefore' || c.t === 'gap' || c.t === 'adjacent')
   const steps: string[] = []
-  if (fixed.length) steps.push(`Feste Angaben zuerst eintragen: ${fixed.map((c) => t.clue(c)).join(' ')}`)
-  if (blocks.length) steps.push(`Dann Paare/Blöcke platzieren: ${blocks.map((c) => t.clue(c)).join(' ')}`)
+  // Each step reports how many arrangements are still possible (counted by the solver) – checkable narrowing.
+  const used: Clue[] = []
+  const left = (cs: Clue[]) => {
+    used.push(...cs)
+    const k = solveOrdering(p.n, used, p.circular).length
+    return k === 1 ? ' → nur noch 1 Anordnung möglich.' : ` → noch ${k} Anordnungen möglich.`
+  }
+  if (fixed.length) steps.push(`Feste Angaben zuerst eintragen: ${fixed.map((c) => t.clue(c)).join(' ')}${left(fixed)}`)
+  if (blocks.length) steps.push(`${fixed.length ? 'Dann' : 'Zuerst'} Paare/Blöcke platzieren: ${blocks.map((c) => t.clue(c)).join(' ')}${left(blocks)}`)
   const others = p.clues.filter((c) => !fixed.includes(c) && !blocks.includes(c))
-  if (others.length) steps.push(`Mit den übrigen Hinweisen Möglichkeiten streichen: ${others.map((c) => t.clue(c)).join(' ')}`)
+  if (others.length) steps.push(`Mit den übrigen Hinweisen Möglichkeiten streichen: ${others.map((c) => t.clue(c)).join(' ')}${left(others)}`)
   if (p.sols.length === 1) steps.push(`Einzige mögliche Anordnung: ${orderText(p, lang, p.sols[0])}`)
   else steps.push(`Es bleiben ${p.sols.length} Anordnungen möglich, z. B. ${orderText(p, lang, p.sols[0])} und ${orderText(p, lang, p.sols[1])}`)
   steps.push(conclusion)

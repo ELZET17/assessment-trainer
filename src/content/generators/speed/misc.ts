@@ -12,6 +12,9 @@ const money = (x: number, lang: Lang) => (lang === 'de' ? `${fmt(x, lang, Number
 
 const sig2 = (v: number) => Number(v.toPrecision(2))
 
+const factorOf = (v: number, best: number) => Math.max(v / best, best / v)
+const isPow10 = (f: number) => Math.abs(Math.log10(f) - Math.round(Math.log10(f))) < 1e-9
+
 export const estimate: GeneratorDef = {
   id: 'speed.estimate',
   version: 1,
@@ -72,7 +75,7 @@ export const estimate: GeneratorDef = {
           distractors: values
             .map((v, i) => ({ v, i }))
             .filter(({ v }) => v !== best)
-            .map(({ v, i }) => `**${String.fromCharCode(65 + i)}** (${fmtAuto(v, lang, dp)}): um den Faktor ${fmtAuto(Math.max(v / best, best / v), lang, 1)} daneben – typischer Stellenwert-/Nullenfehler.`),
+            .map(({ v, i }) => `**${String.fromCharCode(65 + i)}** (${fmtAuto(v, lang, dp)}): um den Faktor ${fmtAuto(factorOf(v, best), lang, 1)} daneben – ${isPow10(factorOf(v, best)) ? 'Nullen bzw. Komma verschoben.' : 'beim Runden zu stark verzerrt oder eine Zahl falsch überschlagen.'}`),
           shortcut: 'Die Optionen liegen um Faktoren auseinander – es kommt nur auf die Größenordnung an. Runde mutig und zähle die Nullen getrennt.',
         },
       }
