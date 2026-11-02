@@ -1,0 +1,28 @@
+import { describe, expect, it } from 'vitest'
+import { checkAnswer } from './check'
+import { gridChallenge } from './generators/aon/games'
+import { digitChallenge } from './generators/aon/games'
+import { generate } from './registry'
+
+describe('checkAnswer', () => {
+  it('accepts every valid digit solution, rejects repeats', () => {
+    const it = digitChallenge.generate(7, 2, 'en')
+    if (it.type !== 'digit') throw new Error('type')
+    expect(checkAnswer(it, { type: 'digit', digits: it.sample }).correct).toBe(true)
+    expect(checkAnswer(it, { type: 'digit', digits: it.sample.map(() => 1) }).correct).toBe(false)
+  })
+  it('grid gives partial credit', () => {
+    const it = gridChallenge.generate(3, 1, 'en')
+    if (it.type !== 'grid') throw new Error('type')
+    const j = it.round.judgements.map((x) => x.answer ?? null)
+    expect(checkAnswer(it, { type: 'grid', positions: it.round.dots, judgements: j })).toEqual({ correct: true, credit: 1 })
+    const wrong = [...it.round.dots].reverse()
+    expect(checkAnswer(it, { type: 'grid', positions: wrong, judgements: j }).correct).toBe(false)
+  })
+  it('free numeric input for speed math', () => {
+    const it = generate('speed.mul', 5, 2, 'en')
+    if (it.type !== 'mcq' || !it.free) throw new Error('type')
+    expect(checkAnswer(it, { type: 'numeric', value: it.free.answer }).correct).toBe(true)
+    expect(checkAnswer(it, { type: 'numeric', value: it.free.answer + 1 }).correct).toBe(false)
+  })
+})

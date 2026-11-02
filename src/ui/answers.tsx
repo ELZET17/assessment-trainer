@@ -143,8 +143,12 @@ export function BarDrag({ item, value, onChange, disabled, lang, reveal }: { ite
           onPointerDown={(e) => {
             if (disabled) return
             dragging.current = true
-            ;(e.target as Element).setPointerCapture?.(e.pointerId)
             setFromY(e.clientY)
+            try {
+              ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
+            } catch {
+              /* synthetic or already-released pointer */
+            }
           }}
           onPointerMove={(e) => dragging.current && !disabled && setFromY(e.clientY)}
           onPointerUp={() => (dragging.current = false)}
@@ -231,8 +235,12 @@ export function DragOrder({ item, order, onChange, disabled, reveal }: { item: O
               style={{ touchAction: 'none' }}
               onPointerDown={(e) => {
                 if (disabled) return
-                ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
                 setDrag({ idx: pos, startY: e.clientY, dy: 0 })
+                try {
+                  ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
+                } catch {
+                  /* synthetic or already-released pointer */
+                }
               }}
               onPointerMove={(e) => {
                 if (!drag || drag.idx !== pos) return

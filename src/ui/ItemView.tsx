@@ -83,14 +83,14 @@ export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed
   )
   if (!twoCol) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4" data-item-key={item.key}>
         {item.type === 'tablefill' && <TableView ex={item.table} lang={lang} blank={(r, c) => (r === item.blank.row && c === item.blank.col ? <span className="font-bold text-[var(--accent)]">?</span> : null)} />}
         {question}
       </div>
     )
   }
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start" data-item-key={item.key}>
       <div className="min-w-0 space-y-4 lg:sticky lg:top-4">
         {exhibits.map((ex, i) => (
           <ExhibitView key={i} ex={ex} lang={lang} />

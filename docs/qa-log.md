@@ -8,3 +8,10 @@
 | 31.10.2026 | G2 | `aon.grid`: 87 von 3.000 Durchgängen mit falschem Symmetrie-Schlüssel | Asymmetrie-Erzeugung konnte dieselbe Zelle zweimal kippen → wieder symmetrisch | Zwei *verschiedene* Zellen kippen (`rng.sample`) |
 | 31.10.2026 | Review | Numerical-Distraktor „0,00“ bei Einheitenaufgaben | Theme mit zu kleinen Werten (Tsd. Stück) | Einheiten-Generator nur noch mit Kosten-Theme, Ergebnis ≥ 1 |
 | 31.10.2026 | Review | Extremwert-Frage „kleinste absolute Veränderung“ mehrdeutig (Betrag vs. negativster Wert) | Formulierung | Nur noch „größter Zuwachs“; „kleinster“ nur für Niveauwerte |
+| 31.10.2026 | G7/E2E | Nach automatischer Abgabe (Zeitablauf) blieb die Simulation hängen | `useBlocker` las den Zustand `finished` vor dem Re-Render → eigene Weiterleitung zum Ergebnis wurde blockiert | Ref `finishedRef` wird vor der Navigation gesetzt (Simulation und Drill); Regressionstest `e2e/sim.spec.ts` |
+| 31.10.2026 | E2E | Balken ziehen reagierte nicht auf synthetische Touch-Events | `setPointerCapture` warf vor dem Setzen des Werts | Wert zuerst setzen, Capture in try/catch; Regressionstest `e2e/interaction.spec.ts` |
+| 31.10.2026 | Review | „costs for Rent was …“ / „die Kosten … verändert sich“ | Verb-Kongruenz bei Plural-Themen | Plural-Verben für das Kosten-Theme (EN/DE) |
+| 31.10.2026 | G6 | Figuren: Muster sahen wie „halb gefüllt“ aus, Formen sehr klein | Füllmuster wurden über `transform: scale` mitskaliert | Punkte im Nutzerkoordinatensystem skaliert, größere Formen, Einzelfiguren in Matrizen vergrößert |
+| 31.10.2026 | G6 | Kombi-Diagramm: Linienwerte überlagerten Balkenbeschriftungen | gemeinsamer Zeichenbereich | Linie in eigenem Band über den Balken |
+| 31.10.2026 | Smoke | Trainings-Route zeigte nach Wechsel der Kategorie die alte Aufgabe | Komponente wurde bei geändertem Query-String nicht neu gemountet | `Fresh`-Wrapper mit `key = pathname + search` |
+| 31.10.2026 | Review | Verbal v22-2 hatte falschen Schlüssel (F statt T) | Schreibfehler beim Erstellen | korrigiert (11 von 42 = 26,2 % > 25 %) |

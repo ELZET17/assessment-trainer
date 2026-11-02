@@ -34,6 +34,7 @@ export default function DrillRunner() {
   const [calc, setCalc] = useState(false)
   const [askQuit, setAskQuit] = useState(false)
   const busy = useRef(false)
+  const doneRef = useRef(false)
 
   useEffect(() => {
     const used = new Set<string>()
@@ -55,7 +56,7 @@ export default function DrillRunner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const blocker = useBlocker(({ currentLocation, nextLocation }) => !done && !!session && currentLocation.pathname !== nextLocation.pathname)
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => !doneRef.current && !!session && currentLocation.pathname !== nextLocation.pathname)
 
   const end = useCallback(
     async (finalResults: Attempt[]) => {
@@ -65,6 +66,7 @@ export default function DrillRunner() {
       const all = [...finalResults, ...missing]
       await saveAttempts(missing)
       await finishSession(session)
+      doneRef.current = true
       setResults(all)
       setDone(true)
     },
@@ -173,6 +175,7 @@ export default function DrillRunner() {
         onConfirm={() => {
           setAskQuit(false)
           void finishSession(session, 'aborted').then(() => {
+            doneRef.current = true
             setDone(true)
             if (blocker.state === 'blocked') blocker.proceed()
             else nav(`/practice/${cat}`)

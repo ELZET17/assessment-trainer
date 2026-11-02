@@ -30,14 +30,14 @@ export const barDrag: GeneratorDef = {
       if (d === 1) {
         const delta = rng.pick([-1, 1]) * rng.int(2, 12) * step
         answer = last + delta
-        prompt = tr(lang, `In 2025, ${subject} was ${f(Math.abs(delta))} ${delta > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag ${subject} um ${f(Math.abs(delta))} ${delta > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
+        prompt = tr(lang, `In 2025, ${subject} ${theme.dePlural ? 'were' : 'was'} ${f(Math.abs(delta))} ${delta > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag${theme.dePlural ? 'en' : ''} ${subject} um ${f(Math.abs(delta))} ${delta > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
         steps = [`2024: ${f(last)}`, `${f(last)} ${delta > 0 ? '+' : '−'} ${f(Math.abs(delta))} = ${f(answer)}`]
         query = { family: 'bar', kind: 'delta', delta }
       } else if (d === 2) {
         const p = rng.pick([-20, -15, -10, -5, 5, 10, 15, 20, 25, 30, 40])
         answer = last * (1 + p / 100)
         if (!Number.isInteger(answer / step)) return null
-        prompt = tr(lang, `In 2025, ${subject} was ${pct(Math.abs(p), lang)} ${p > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag ${subject} um ${pct(Math.abs(p), lang)} ${p > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
+        prompt = tr(lang, `In 2025, ${subject} ${theme.dePlural ? 'were' : 'was'} ${pct(Math.abs(p), lang)} ${p > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag${theme.dePlural ? 'en' : ''} ${subject} um ${pct(Math.abs(p), lang)} ${p > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
         steps = [`2024: ${f(last)}`, `${f(last)} × ${fmt(1 + p / 100, lang, 2)} = ${f(answer)}`]
         query = { family: 'bar', kind: 'pct', p }
       } else {

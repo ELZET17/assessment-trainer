@@ -30,6 +30,12 @@ export default defineConfig({
       name: 'desktop',
       use: { browserName: 'webkit', viewport: { width: 1440, height: 900 } },
     },
+    {
+      // Extra offline coverage in a second engine (WebKit runs the same test above).
+      name: 'chromium-offline',
+      testMatch: /offline\.spec\.ts/,
+      use: { browserName: 'chromium', viewport: { width: 393, height: 852 } },
+    },
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined

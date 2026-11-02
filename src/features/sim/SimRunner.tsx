@@ -60,6 +60,8 @@ export default function SimRunner() {
   const [finished, setFinished] = useState(false)
   const gameResults = useRef<GameResult[][]>([])
   const ending = useRef(false)
+  // Ref (not state): the blocker must see the finish immediately, before React re-renders.
+  const finishedRef = useRef(false)
   const total = !!profile?.totalTimeSec
   const sec = profile?.sections[secIdx]
 
@@ -99,7 +101,7 @@ export default function SimRunner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const blocker = useBlocker(({ currentLocation, nextLocation }) => !finished && !!session && currentLocation.pathname !== nextLocation.pathname)
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => !finishedRef.current && !!session && currentLocation.pathname !== nextLocation.pathname)
 
   // Flattened view for the total-timer mode (Kearney): navigation across all sections.
   const flat = useMemo(() => slots.flatMap((list, si) => list.map((s, i) => ({ si, i, s }))), [slots])
@@ -144,6 +146,7 @@ export default function SimRunner() {
     })
     await saveAttempts(attempts)
     await finishSession(session)
+    finishedRef.current = true
     setFinished(true)
     nav(`/sim/result/${session.id}`, { replace: true })
   }, [session, profile, slots, nav])
