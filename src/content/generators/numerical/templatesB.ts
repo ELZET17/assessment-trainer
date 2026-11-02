@@ -64,7 +64,7 @@ export const exchangeRates: GeneratorDef = {
             { value: amount * ra * 10, tag: 'decimal', why: 'Komma verschoben.' },
           ],
           steps: [`Kurs ${qName}: 1 EUR = ${f3(ra)} ${A}`, `${f0(amount)} × ${f3(ra)} = ${fmt(value, lang, 2)} ${A}`],
-          shortcut: 'Richtung prüfen: Bekommt man pro EUR mehr als 1 Einheit, muss der Betrag in der Fremdwährung größer werden.',
+          shortcut: `Richtung prüfen: Hier ist 1 EUR = ${f3(ra)} ${A} – ${ra > 1 ? 'mehr' : 'weniger'} als 1 Einheit, also muss der ${A}-Betrag ${ra > 1 ? 'größer' : 'kleiner'} als ${f0(amount)} sein.`,
         })
       }
       if (d === 2) {
@@ -367,7 +367,10 @@ export const cagr: GeneratorDef = {
       let vals: number[]
       if (d === 1) {
         const g = rng.pick([0.1, 0.2, 0.5, 0.25])
-        const base = rng.pick([100, 200, 400, 500, 800, 1000, 1600])
+        // Base value within the theme's realistic range (Gate 4: no 780 million passengers per airport).
+        const bases = [2, 4, 5, 8, 10, 16, 20, 25, 40, 50, 80, 100, 200, 400, 500, 800, 1000, 1600].filter((b) => b >= theme.range[0] && b * (1 + g) ** 2 <= theme.range[1] * 1.2)
+        if (bases.length === 0) return null
+        const base = rng.pick(bases)
         vals = years.map((_, k) => roundTo(base * (1 + g) ** Math.max(0, k - start) * (k < start ? 1 - 0.03 * (start - k) : 1), theme.decimals))
         if (!Number.isInteger(vals[end] * 10 ** theme.decimals)) return null
       } else {

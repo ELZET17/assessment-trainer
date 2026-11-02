@@ -153,7 +153,7 @@ export const VERBAL_2: VerbalPassage[] = [
     statements: [
       { id: 'v20-1', text: { en: 'Fewer than 1,000 Halden employees used the app regularly in 2024.' }, answer: 'T', trap: 'quantity', reason: 'Satz 3–4: 40 % von 2.300 = 920 regelmäßige Nutzer – weniger als 1.000.' },
       { id: 'v20-2', text: { en: 'Halden employees must pay for the app themselves.' }, answer: 'F', trap: 'none', reason: 'Satz 1: Der Zugang ist kostenlos („free access“).' },
-      { id: 'v20-3', text: { en: 'English was used by more employees than any other language.' }, answer: 'C', trap: 'comparison', reason: 'Satz 5 nennt die drei beliebtesten Sprachen, aber keine Reihenfolge. Ob Englisch auf Platz 1 liegt, ist offen.' },
+      { id: 'v20-3', text: { en: 'English was used by more employees than any other language.' }, answer: 'C', trap: 'comparison', reason: 'Satz 5 nennt die drei beliebtesten Sprachen, aber keine Rangfolge. Ob Englisch auf Platz 1 liegt, ist offen.' },
       { id: 'v20-4', text: { en: 'Halden has already linked the app to its internal career system.' }, answer: 'F', trap: 'temporal', reason: 'Satz 6: Die Verknüpfung ist erst für 2025 geplant („plans to link“) – sie besteht also noch nicht.' },
     ],
   },

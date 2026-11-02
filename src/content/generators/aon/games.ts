@@ -191,7 +191,7 @@ export const digitChallenge: GeneratorDef = {
         sample,
         explanation: {
           steps: [`Eine mögliche Lösung: ${show(eq.lhs, sample.slice(0, nl))} = ${show(eq.rhs, sample.slice(nl))}`, 'Jede andere Belegung, die die Gleichung erfüllt und keine Ziffer doppelt verwendet, zählt ebenfalls als richtig.'],
-          shortcut: 'Mit dem restriktivsten Teil beginnen: Bei Produkten zuerst Teiler des Ergebnisses suchen, große Ergebnisse brauchen große Faktoren. Danach mit den Plus/Minus-Lücken feinjustieren.',
+          shortcut: 'Mit dem restriktivsten Teil beginnen, meist dem Produkt: Steht es allein, Teiler des Ergebnisses suchen; folgt noch ein Summand (1–9), muss das Produkt knapp unter bzw. über dem Ergebnis liegen. Danach mit den Plus/Minus-Lücken feinjustieren.',
         },
       }
       return item

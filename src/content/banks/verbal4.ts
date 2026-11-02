@@ -43,7 +43,7 @@ export const VERBAL_4: VerbalPassage[] = [
     statements: [
       { id: 'v33-1', text: { en: 'A business founded six months ago can obtain a microloan from Kivora.' }, answer: 'F', trap: 'temporal', reason: 'Satz 2: Antragsteller müssen seit mindestens einem Jahr tätig sein.' },
       { id: 'v33-2', text: { en: 'Microloans at Kivora were twice as likely as conventional small-business loans to be more than 90 days overdue.' }, answer: 'T', trap: 'quantity', reason: 'Satz 4: 6 % gegenüber 3 % – doppelt so hoch.' },
-      { id: 'v33-3', text: { en: 'Microloans carry a higher interest rate than Kivora’s conventional small-business loans.' }, answer: 'T', trap: 'paraphrase', reason: 'Satz 5 spricht vom „higher interest rate on microloans“, das das höhere Ausfallrisiko kompensiert – gemeint ist im Vergleich zu den konventionellen Krediten.' },
+      { id: 'v33-3', text: { en: 'Microloans carry a higher interest rate than Kivora’s conventional small-business loans.' }, answer: 'T', trap: 'paraphrase', reason: 'Satz 4 vergleicht Mikrokredite mit Kivoras konventionellen Krediten; auf diesen Vergleich bezieht sich Satz 5: Die „higher interest rate on microloans“ gleicht das höhere Ausfallrisiko aus. Mikrokredite haben also einen höheren Zins als die konventionellen Kredite.' },
       { id: 'v33-4', text: { en: 'Most microloans granted by Kivora were for the maximum amount of 25,000 euros.' }, answer: 'C', trap: 'quantity', reason: 'Der Text nennt nur den Höchstbetrag, nicht die Verteilung der Kreditsummen.' },
     ],
   },

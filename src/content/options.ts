@@ -63,7 +63,10 @@ export function describeSlip(v: number, c: number, format: (x: number) => string
   const d = roundTo(Math.abs(v - c), decimals)
   const p = Math.floor(Math.log10(d) + 1e-9)
   const m = d / 10 ** p
-  if (Math.abs(m - Math.round(m)) < 1e-6 && Math.round(m) <= 5 && PLACE[p]) return `Um ${fmt(d, 'de', Math.max(0, -p))} ${dir} (${both}) – Flüchtigkeitsfehler in der ${PLACE[p]}stelle.`
+  // Percentages differ by percentage points, not by "5".
+  const isPct = format(0).includes('%')
+  const gapText = `${fmt(d, 'de', Math.max(0, -p))}${isPct ? (d === 1 ? ' Prozentpunkt' : ' Prozentpunkte') : ''}`
+  if (Math.abs(m - Math.round(m)) < 1e-6 && Math.round(m) <= 5 && PLACE[p]) return isPct ? `Um ${gapText} ${dir} (${both}) – Flüchtigkeitsfehler.` : `Um ${gapText} ${dir} (${both}) – Flüchtigkeitsfehler in der ${PLACE[p]}stelle.`
   if (c !== 0) return `Um rund ${Math.round(Math.abs(v / c - 1) * 100)} % ${dir} (${both}) – typisch für zu grobes Überschlagen oder einen Fehler in einem Zwischenschritt.`
   return `${dir.charAt(0).toUpperCase()}${dir.slice(1)} (${both}).`
 }

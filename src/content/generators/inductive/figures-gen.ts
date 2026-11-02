@@ -122,7 +122,12 @@ export const series: GeneratorDef = {
       if (rules.includes('shape')) vary('Form stimmt nicht – der Formzyklus wurde nicht fortgesetzt.', (p) => (main(p).shape = shapeCycle[4 % 3]))
       if (rules.includes('flip')) vary('Spiegelung stimmt nicht – die Figur wechselt jedes Mal zwischen normal und gespiegelt.', (p) => (main(p).mirror = !main(p).mirror))
       // Generic one-attribute variants on the stable attributes as well.
-      vary('Füllung verändert, obwohl sie gleich bleibt bzw. anders wechselt.', (p) => (main(p).fill = FILLS.find((f) => f !== main(p).fill && !fillCycle.includes(f)) ?? FILLS.find((f) => f !== main(p).fill) ?? 'empty'))
+      const curFill = main(answer).fill
+      const newFill = FILLS.find((f) => f !== curFill && !fillCycle.includes(f)) ?? FILLS.find((f) => f !== curFill) ?? 'empty'
+      vary(
+        rules.includes('fill') ? `Füllung „${FILL_DE[newFill]}“ kommt im Füllungswechsel (${fillCycle.map((f) => FILL_DE[f]).join(' → ')}) nicht vor.` : `Füllung „${FILL_DE[newFill]}“ – die Füllung bleibt in der ganzen Reihe „${FILL_DE[curFill]}“.`,
+        (p) => (main(p).fill = newFill),
+      )
       vary('Größe verändert.', (p) => (main(p).size = main(p).size === 2 ? 1 : 2))
       if (needsRot) vary('Ausrichtung falsch.', (p) => (main(p).rot = (main(p).rot + 4) % 8))
       if (hasNoise) vary('Das Element in der Mitte bleibt in der Reihe unverändert – hier wurde es verändert.', (p) => (p.els[1].fill = FILLS.find((f) => f !== p.els[1].fill) ?? 'empty'))
@@ -236,7 +241,12 @@ export const matrix: GeneratorDef = {
         const m = lineOp === 'xor' ? a | b : a ^ b
         p.lines = LINE_SETS.map((x, i) => (m & x ? i : -1)).filter((i) => i >= 0)
       })
-      vary('Füllung verändert, obwohl sie konstant ist bzw. nicht passt.', (p) => (p.els[0].fill = FILLS.find((f) => f !== p.els[0].fill) ?? 'empty'))
+      const ansFill = answer.els[0].fill
+      const otherFill = FILLS.find((f) => f !== ansFill && !(attrs.includes('fill') && fills.includes(f))) ?? FILLS.find((f) => f !== ansFill) ?? 'empty'
+      vary(
+        attrs.includes('fill') ? `Füllung „${FILL_DE[otherFill]}“ kommt in der Matrix gar nicht vor.` : `Füllung „${FILL_DE[otherFill]}“ – die Füllung bleibt in allen Feldern „${FILL_DE[ansFill]}“.`,
+        (p) => (p.els[0].fill = otherFill),
+      )
       vary('Größe verändert.', (p) => (p.els[0].size = p.els[0].size === 2 ? 1 : 2))
       const built = finishOptions(rng, answer, variants)
       if (!built) return null
@@ -248,6 +258,12 @@ export const matrix: GeneratorDef = {
         steps.push(tickMode === 'latin' ? `Striche: ${tickVals.join(', ')} – in jeder Zeile genau einmal.` : tickMode === 'prog' ? `Striche: von links nach rechts jeweils +${tickStep}.` : 'Striche: Feld 3 = Feld 1 + Feld 2.')
       if (attrs.includes('rot')) steps.push(`Drehung: von links nach rechts jeweils ${deg(Math.abs(rotStep))} ${dirDe(rotStep)}.`)
       if (attrs.includes('lines')) steps.push(lineOp === 'xor' ? 'Linien: Feld 3 enthält die Linien, die in GENAU EINEM der ersten beiden Felder vorkommen (gemeinsame verschwinden).' : 'Linien: Feld 3 enthält alle Linien aus Feld 1 und Feld 2 zusammen.')
+      const constant = [
+        ...(attrs.includes('shape') || useRot ? [] : [`Form (${SHAPE_DE[baseShape]})`]),
+        ...(attrs.includes('size') ? [] : [`Größe (${SIZE_DE[constSize]})`]),
+        ...(attrs.includes('fill') ? [] : [`Füllung (${FILL_DE[constFill]})`]),
+      ]
+      if (constant.length) steps.push(`In allen Feldern gleich: ${constant.join(', ')}.`)
       steps.push('Regeln auf die dritte Zeile anwenden → fehlendes Feld.')
       return item(this, seed, d, lang, 'matrix', shown, built.options, built.correctIdx, steps, 'Zeilenweise UND spaltenweise prüfen. Typische Regeln: jedes Merkmal einmal pro Zeile (Verteilung), Fortschreitung (+1, +45°) oder Überlagerung (Feld 1 + Feld 2, gemeinsame Linien fallen weg). Optionen, die eine Kopie eines Nachbarfeldes sind, sind fast immer falsch.', tr(lang, 'Which figure completes the matrix?', 'Welche Figur vervollständigt die Matrix?'))
     })

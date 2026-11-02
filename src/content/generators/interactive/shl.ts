@@ -2,11 +2,21 @@
 import { fmt, pct, roundTo } from '../../format'
 import { core, tr, type GeneratorDef } from '../../generator'
 import { firstAccepted } from '../../pipeline'
-import type { BarDragItem, OrderItem, TableExhibit, TableFillItem } from '../../types'
+import type { BarDragItem, Lang, OrderItem, TableExhibit, TableFillItem } from '../../types'
 import { makeDataset, rowLabels, tableOf } from '../numerical/dataset'
 import { subjOf, THEMES, unitOf } from '../numerical/themes'
 
 // --------------------------------------------------------------- bar drag
+
+/** Which whole numbers the tolerance accepts – stated for this item, not in general (Gate 4). */
+function acceptedText(exact: number, tol: number, change: number, lang: Lang): string {
+  const ok: number[] = []
+  for (let k = Math.ceil(exact - tol); k <= Math.floor(exact + tol); k++) ok.push(k)
+  const ch = `${change < 0 ? '−' : '+'}${fmt(Math.abs(change), lang, 1)} %`
+  return ok.length === 1
+    ? `Nur ${fmt(ok[0], lang, 0)} ergibt gerundet ${ch}.`
+    : `Die Veränderung ist nur auf eine Nachkommastelle gerundet angezeigt: ${ok.map((k) => fmt(k, lang, 0)).join(', ')} ergeben alle gerundet ${ch} und zählen als richtig.`
+}
 
 export const barDrag: GeneratorDef = {
   id: 'int.bar',
@@ -30,7 +40,7 @@ export const barDrag: GeneratorDef = {
       if (d === 1) {
         const delta = rng.pick([-1, 1]) * rng.int(2, 12) * step
         answer = last + delta
-        prompt = tr(lang, `In 2025, ${subject} ${theme.enPlural ? 'were' : 'was'} ${f(Math.abs(delta))} ${delta > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag${theme.dePlural ? 'en' : ''} ${subject} um ${f(Math.abs(delta))} ${delta > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
+        prompt = tr(lang, `In 2025, ${subject} ${theme.enPlural ? 'were' : 'was'} ${f(Math.abs(delta))} ${unitOf(theme, lang)} ${delta > 0 ? 'higher' : 'lower'} than in 2024. Drag the 2025 bar to the correct value.`, `Im Jahr 2025 lag${theme.dePlural ? 'en' : ''} ${subject} um ${f(Math.abs(delta))} ${unitOf(theme, lang)} ${delta > 0 ? 'höher' : 'niedriger'} als 2024. Ziehe den Balken für 2025 auf den richtigen Wert.`)
         steps = [`2024: ${f(last)}`, `${f(last)} ${delta > 0 ? '+' : '−'} ${f(Math.abs(delta))} = ${f(answer)}`]
         query = { family: 'bar', kind: 'delta', delta }
       } else if (d === 2) {
@@ -238,7 +248,7 @@ export const tableFill: GeneratorDef = {
           steps: [
             `${fmt(v0[r], lang, 0)} × (1 ${changes[r] >= 0 ? '+' : '−'} ${fmt(Math.abs(changes[r]) / 100, lang, 3)}) = ${fmt(exact, lang, 2)}`,
             `Gerundet: **${fmt(Math.round(exact), lang, 0)}**`,
-            'Da die Veränderung nur auf eine Nachkommastelle gerundet angezeigt wird, zählen auch benachbarte ganze Zahlen als richtig, deren Veränderung ebenfalls so gerundet würde.',
+            acceptedText(exact, Math.max(0.5, v0[r] * 0.0005) + 1e-9, changes[r], lang),
           ],
           shortcut: 'Neuer Wert = alter Wert × (1 + Veränderung). Bei negativer Veränderung wird der Faktor kleiner als 1.',
         },

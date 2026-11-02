@@ -15,6 +15,30 @@ const sig2 = (v: number) => Number(v.toPrecision(2))
 const factorOf = (v: number, best: number) => Math.max(v / best, best / v)
 const isPow10 = (f: number) => Math.abs(Math.log10(f) - Math.round(Math.log10(f))) < 1e-9
 
+const sgnNum = (n: number) => (n < 0 ? `−${Math.abs(n)}` : String(n))
+
+/** Worked elimination for a 2×2 system (Gate 4: the actual arithmetic, not just "eliminate"). */
+function eliminationSteps(a1: number, b1: number, c1: number, a2: number, b2: number, c2: number, ask: 'x' | 'y', x: number, y: number): string[] {
+  if (ask === 'y') {
+    // a2·(I) − a1·(II) removes x.
+    const k = a2 * b1 - a1 * b2
+    const r = a2 * c1 - a1 * c2
+    return [
+      `x eliminieren: ${a2} × (I) − ${a1} × (II) → (${a2 * b1} − ${sgnNum(a1 * b2)})·y = ${a2 * c1} − ${sgnNum(a1 * c2)}`,
+      `${sgnNum(k)}·y = ${sgnNum(r)} → y = ${y}`,
+      `In (I) einsetzen: ${a1}·x = ${c1} − ${b1}·${y} = ${c1 - b1 * y} → x = ${x}`,
+    ]
+  }
+  // b2·(I) − b1·(II) removes y.
+  const k = b2 * a1 - b1 * a2
+  const r = b2 * c1 - b1 * c2
+  return [
+    `y eliminieren: ${sgnNum(b2)} × (I) − ${b1} × (II) → (${sgnNum(b2 * a1)} − ${b1 * a2})·x = ${sgnNum(b2 * c1)} − ${b1 * c2}`,
+    `${sgnNum(k)}·x = ${sgnNum(r)} → x = ${x}`,
+    `In (I) einsetzen: ${b1}·y = ${c1} − ${a1}·${x} = ${c1 - a1 * x} → y = ${y}`,
+  ]
+}
+
 export const estimate: GeneratorDef = {
   id: 'speed.estimate',
   version: 1,
@@ -329,8 +353,7 @@ export const equation: GeneratorDef = {
           { value: val + 2, tag: 'slip', why: 'Rechenfehler.' },
         ].filter((t) => t.value > 0),
         steps: [
-          `Eine Variable eliminieren (z. B. Gleichungen so multiplizieren, dass ${ask === 'x' ? 'y' : 'x'} wegfällt).`,
-          `Ergebnis: x = ${x}, y = ${y}`,
+          ...eliminationSteps(a1, b1, c1, a2, b2, c2, ask, x, y),
           `Probe: ${a1}·${x} + ${b1}·${y} = ${c1} ✓ und ${a2}·${x} ${b2 < 0 ? '−' : '+'} ${Math.abs(b2)}·${y} = ${c2} ✓`,
         ],
         shortcut: 'Unter Zeitdruck: Optionen für die gesuchte Variable in die einfachere Gleichung einsetzen, die andere Variable ausrechnen und mit der zweiten Gleichung prüfen.',
