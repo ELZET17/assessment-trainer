@@ -247,10 +247,13 @@ function featureColumns(panels: Panel[]): V[][] {
       cols.push(panels.map((p) => sign(row(of(p, a).cell) - row(of(p, b).cell))))
       cols.push(panels.map((p) => sign(col(of(p, a).cell) - col(of(p, b).cell))))
     }
-  // Presence of a shape in four panels but not in the fifth ("all but D contain a hexagon").
+  // Presence of a shape in four panels but not in the fifth ("all but D contain a hexagon"), and –
+  // with several shapes per panel – in only one panel ("E is the only figure with a triangle").
+  const multi = panels.every((p) => p.els.length >= 2)
   for (const s of shapes) {
     const has = panels.map((p) => (p.els.some((e) => e.shape === s) ? 1 : 0))
-    if (has.filter((h) => h === 1).length === 4) cols.push(has)
+    const n = has.filter((h) => h === 1).length
+    if (n === 4 || (multi && n === 1)) cols.push(has)
   }
   return cols
 }

@@ -31,7 +31,20 @@
   --c6: #be185d;
   --fig: #111827;
   --fig-bg: #ffffff;
+  /* One width for every figure panel (series, matrix and answer options). */
+  --fig-w: 100px;
   color-scheme: light;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --fig-w: 120px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --fig-w: 136px;
+  }
 }
 
 .dark {

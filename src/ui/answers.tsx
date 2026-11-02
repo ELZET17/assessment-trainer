@@ -17,7 +17,7 @@ export interface Reveal {
 export function McqOptions({ options, selected, onSelect, reveal, disabled, largeFigures }: { options: McqOption[]; selected: number | null; onSelect: (i: number) => void; reveal?: Reveal; disabled?: boolean; largeFigures?: boolean }) {
   const withPanels = options.some((o) => o.panel)
   return (
-    <div role="radiogroup" aria-label="Antwortoptionen" className={withPanels ? 'grid grid-cols-3 gap-2 sm:grid-cols-5' : 'grid gap-2'}>
+    <div role="radiogroup" aria-label="Antwortoptionen" className={withPanels ? 'flex flex-wrap gap-2' : 'grid gap-2'}>
       {options.map((o, i) => {
         const isSel = selected === i
         const isRight = reveal && reveal.correct === i
@@ -31,11 +31,11 @@ export function McqOptions({ options, selected, onSelect, reveal, disabled, larg
             aria-checked={isSel}
             disabled={disabled}
             onClick={() => onSelect(i)}
-            className={`relative flex min-h-12 items-center gap-3 rounded-xl border-2 px-3 py-2 text-left text-[15px] transition ${state} ${withPanels ? 'flex-col justify-center px-2' : ''}`}
+            className={`relative flex min-h-12 items-center rounded-xl border-2 py-2 text-left text-[15px] transition ${state} ${withPanels ? 'flex-col justify-center gap-2 px-0.5' : 'gap-3 px-3'}`}
           >
             <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${isSel ? 'bg-[var(--accent)] text-[var(--accent-contrast)]' : 'bg-[var(--surface-2)] text-[var(--muted)]'}`}>{String.fromCharCode(65 + i)}</span>
             {o.panel ? (
-              <span className="w-full max-w-[120px]">
+              <span className="block w-[var(--fig-w)]">
                 <FigurePanel panel={o.panel} large={largeFigures} label={`Option ${String.fromCharCode(65 + i)}`} />
               </span>
             ) : (

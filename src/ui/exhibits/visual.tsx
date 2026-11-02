@@ -33,20 +33,21 @@ function FigDefs({ id }: { id: string }) {
     <defs>
       <pattern id={`${id}-striped`} patternUnits="userSpaceOnUse" width="4.5" height="4.5" patternTransform="rotate(45)">
         <rect width="4.5" height="4.5" fill="var(--fig-bg)" />
-        <line x1="0" y1="0" x2="0" y2="4.5" stroke="var(--fig)" strokeWidth="1.8" />
+        <line x1="0" y1="0" x2="0" y2="4.5" stroke="var(--fig)" strokeWidth="2" />
       </pattern>
-      <pattern id={`${id}-dotted`} patternUnits="userSpaceOnUse" width="4.5" height="4.5">
-        <rect width="4.5" height="4.5" fill="var(--fig-bg)" />
-        <circle cx="2.25" cy="2.25" r="1.05" fill="var(--fig)" />
+      {/* Dense, bold dots so that "dotted" stays recognisable on small shapes. */}
+      <pattern id={`${id}-dotted`} patternUnits="userSpaceOnUse" width="4" height="4">
+        <rect width="4" height="4" fill="var(--fig-bg)" />
+        <circle cx="2" cy="2" r="1.3" fill="var(--fig)" />
       </pattern>
     </defs>
   )
 }
 
-const SIZE_SCALE = [8.5, 12.5, 16.5]
+const SIZE_SCALE = [10, 13.5, 17]
 /** Cell centres of the 3×3 grid; the strip below y = 116 is reserved for tick marks. */
-const CX = [20, 60, 100]
-const CY = [20, 58, 96]
+const CX = [21, 60, 99]
+const CY = [21, 58, 95]
 
 /** Large rendering only if EVERY panel of the item is a single centred element without lines (consistent sizes). */
 export const largeFigures = (panels: (Panel | null | undefined)[]) =>
@@ -125,7 +126,8 @@ export function FigurePanel({ panel, label, large }: { panel: Panel | null; labe
 export function FiguresView({ layout, panels, large }: { layout: 'series' | 'matrix' | 'odd'; panels: (Panel | null)[]; large?: boolean }) {
   if (layout === 'matrix') {
     return (
-      <div className="mx-auto grid max-w-[420px] grid-cols-3 gap-2">
+      // Fixed panel width (--fig-w) shared with the answer options: sizes can be compared across both.
+      <div className="mx-auto grid w-fit grid-cols-[repeat(3,var(--fig-w))] gap-2">
         {panels.map((p, i) => (
           <FigurePanel key={i} panel={p} large={large} label={p ? `Feld ${i + 1}` : 'Fehlendes Feld'} />
         ))}
@@ -134,9 +136,9 @@ export function FiguresView({ layout, panels, large }: { layout: 'series' | 'mat
   }
   if (layout === 'odd') return null
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="flex flex-wrap gap-2">
       {panels.map((p, i) => (
-        <div key={i}>
+        <div key={i} className="w-[var(--fig-w)]">
           <FigurePanel panel={p} large={large} label={p ? `Figur ${i + 1}` : 'Gesuchte Figur'} />
           <div className="muted mt-1 text-center text-xs tabnums">{i + 1}</div>
         </div>
