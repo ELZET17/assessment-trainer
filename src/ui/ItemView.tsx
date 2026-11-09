@@ -64,7 +64,7 @@ export function ItemView({ item, mode, draft = null, onDraft, onSubmit, revealed
       const t = e.target as HTMLElement | null
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       if (t && (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || t.isContentEditable)) return
-      if (t?.closest?.('[aria-label="Taschenrechner"]')) return
+      if (t?.closest?.('[role="dialog"][aria-label="Taschenrechner"]')) return
       // An open dialog (abort confirmation, calculator) owns the keyboard.
       // An open modal dialog (e.g. abort confirmation) owns the keyboard; the calculator panel is not modal.
       if (document.querySelector('[aria-modal="true"]')) return

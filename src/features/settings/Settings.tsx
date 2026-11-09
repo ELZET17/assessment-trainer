@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { exportAll, importMerge, ImportError, resetAll } from '../../data/repo'
+import { importMerge, ImportError, resetAll } from '../../data/repo'
+import { saveBackupFile } from './backupFile'
 import { useSettings } from '../../state/settings'
 import { Button, Card, Confirm, PageHeader, Segmented } from '../../ui/kit'
 
@@ -22,32 +23,9 @@ export default function Settings() {
   const file = useRef<HTMLInputElement>(null)
 
   const doExport = async () => {
-    const data = await exportAll()
-    const name = `assessment-trainer-${new Date().toISOString().slice(0, 10)}.json`
-    const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' })
-    const file = new File([blob], name, { type: 'application/json' })
-    const summary = `${data.attempts.length} Antworten, ${data.sessions.length} Sitzungen`
-    // iPhone/iPad (home-screen app): the share sheet is the reliable way to save or AirDrop the file.
-    // On the Mac (no touch) a normal download is more convenient.
-    if (navigator.maxTouchPoints > 0 && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: 'Assessment Trainer – Export' })
-        setMsg(`Export geteilt: ${summary}.`)
-        return
-      } catch (e) {
-        if ((e as Error).name === 'AbortError') return
-        // e.g. NotAllowedError (user activation expired): fall back to the download below.
-      }
-    }
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = name
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 10_000)
-    setMsg(`Export erstellt: ${summary}.`)
+    const r = await saveBackupFile()
+    if (r.kind === 'shared') setMsg(`Export geteilt: ${r.summary}.`)
+    else if (r.kind === 'downloaded') setMsg(`Export erstellt: ${r.summary}.`)
   }
 
   const doImport = async (f: File) => {

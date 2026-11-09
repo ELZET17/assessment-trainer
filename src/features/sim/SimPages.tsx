@@ -27,7 +27,7 @@ export function SimIndex() {
             <h2 className="mb-2 text-lg font-bold">{company}</h2>
             <ul className="m-0 list-none space-y-2 p-0">
               {list.map((p) => {
-                const last = results.find((r) => r.session.profileId === p.id)
+                const last = results.find((r) => r.session.profileId === p.id && !r.aborted)
                 const minutes = Math.round((p.totalTimeSec ?? p.sections.reduce((s, x) => s + x.timeLimitSec, 0)) / 60)
                 return (
                   <li key={p.id}>
@@ -138,7 +138,7 @@ export function SimResult() {
   const [res] = simulationResults([session], attempts, () => profile?.scoring.correct ?? 1)
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Ergebnis" subtitle={session.title} back="/sim" />
+      <PageHeader title="Ergebnis" subtitle={session.status === 'finished' ? session.title : `${session.title} · abgebrochen (Teilergebnis)`} back="/sim" />
       <Card className="mb-4">
         {res ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

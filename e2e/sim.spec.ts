@@ -11,8 +11,10 @@ test('simulation: timer expiry auto-submits and shows the result with negative m
   // One right, one wrong, then let the clock run out.
   await answerMcq(page, true)
   await page.getByRole('button', { name: /Weiter/ }).click()
+  await page.waitForTimeout(400) // double-tap protection window
   await answerMcq(page, false)
   await page.getByRole('button', { name: /Weiter/ }).click()
+  await page.waitForTimeout(400) // double-tap protection window
   await page.clock.fastForward(61 * 60 * 1000)
   await expect(page).toHaveURL(/sim\/result\//)
   await expect(page.getByText('Ergebnis')).toBeVisible()

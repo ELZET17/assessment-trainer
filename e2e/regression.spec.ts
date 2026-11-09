@@ -43,6 +43,7 @@ test('simulation result lists the questions in test order', async ({ page }) => 
   for (let i = 0; i < 3; i++) {
     await answerMcq(page, i !== 1)
     await page.getByRole('button', { name: /Weiter/ }).click()
+    await page.waitForTimeout(400) // double-tap protection window
   }
   await page.clock.fastForward(61 * 60 * 1000)
   await expect(page).toHaveURL(/sim\/result\//)
@@ -80,7 +81,11 @@ test('drill: an answer exactly at the time limit is stored once, every item exac
   await page.goto('#/run/drill?cat=speed&d=1&n=3')
   await expect(page.locator('[data-item-key]').first()).toBeVisible()
   // Jump to the last moment, answer, let the timer fire.
-  const text = (await page.getByText(/⏱ \d+:\d\d/).first().textContent()) ?? ''
+  const text =
+    (await page
+      .getByText(/⏱ \d+:\d\d/)
+      .first()
+      .textContent()) ?? ''
   const [, m, sec] = /(\d+):(\d\d)/.exec(text) as RegExpExecArray
   await page.clock.fastForward((Number(m) * 60 + Number(sec)) * 1000 - 150)
   await page.getByRole('radiogroup', { name: 'Antwortoptionen' }).getByRole('radio').first().click()

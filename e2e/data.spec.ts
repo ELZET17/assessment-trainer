@@ -7,6 +7,8 @@ test('Gate 8: 7 of 10 correct in Numerical → dashboard shows 7/10 and 70 %; da
     await answerMcq(page, i < 7)
     await expect(page.getByRole('region', { name: 'Lösungserklärung' })).toBeVisible()
     await page.getByRole('button', { name: /Weiter/ }).click()
+    // Taps in the first 350 ms after "Weiter" are ignored on purpose (double-tap protection).
+    await page.waitForTimeout(400)
   }
   await page.goto('#/stats')
   await expect(page.getByTestId('cat-numerical-count')).toHaveText('7/10')

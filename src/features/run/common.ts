@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { checkAnswer, type CheckResult } from '../../content/check'
 import { CATEGORY_BY_ID } from '../../content/categories'
+import { subsOf } from '../../content/items'
 import { GENERATORS } from '../../content/registry'
 import type { Answer, CategoryId, Difficulty, Item } from '../../content/types'
 import { abortStaleSessions, localDay, saveSession, uuid } from '../../data/repo'
@@ -105,10 +106,10 @@ export function beep(ok: boolean, enabled: boolean): void {
 /** Deep-link parameters are validated: unknown values fall back to sensible defaults. */
 export function parseRunParams(params: URLSearchParams): { cat: CategoryId; sub: string | null; d: Difficulty | 'adaptive'; n: number } {
   const rawCat = params.get('cat') ?? 'speed'
-  const cat = (rawCat in CATEGORY_BY_ID ? rawCat : 'speed') as CategoryId
+  const cat = (Object.hasOwn(CATEGORY_BY_ID, rawCat) ? rawCat : 'speed') as CategoryId
   const rawSub = params.get('sub')
   // Generator subcategories must exist in this category; bank subcategories (verbal.*, critical.*) are filtered by the picker.
-  const sub = rawSub && (GENERATORS.some((g) => g.id === rawSub && g.category === cat) || rawSub.startsWith(`${cat}.`)) ? rawSub : null
+  const sub = rawSub && (GENERATORS.some((g) => g.id === rawSub && g.category === cat) || subsOf(cat).some((x) => x.id === rawSub)) ? rawSub : null
   const rawD = params.get('d') ?? '2'
   const d = rawD === 'adaptive' ? 'adaptive' : (['1', '2', '3'].includes(rawD) ? Number(rawD) : 2) as Difficulty
   const rawN = Number(params.get('n') ?? 10)

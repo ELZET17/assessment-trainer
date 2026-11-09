@@ -23,10 +23,13 @@ function show(v: number): string {
   return s.replace('.', ',')
 }
 
-export function Calculator({ onClose }: { onClose: () => void }) {
+export function Calculator({ onClose, autoFocus = true }: { onClose: () => void; autoFocus?: boolean }) {
   const panel = useRef<HTMLDivElement>(null)
-  // Focus on open: digits typed right away go to the calculator.
-  useEffect(() => panel.current?.focus({ preventScroll: true }), [])
+  // Focus when opened by the user: digits typed right away go to the calculator.
+  // Not when opened automatically – an answer input field keeps its focus.
+  useEffect(() => {
+    if (autoFocus) panel.current?.focus({ preventScroll: true })
+  }, [autoFocus])
   const [display, setDisplay] = useState('0')
   const [acc, setAcc] = useState<number | null>(null)
   const [op, setOp] = useState<Op | null>(null)
@@ -63,7 +66,7 @@ export function Calculator({ onClose }: { onClose: () => void }) {
     if (/^[0-9]$/.test(k)) digit(k)
     else if (k === ',' || k === '.') digit(',')
     else if (OPS[k]) operator(OPS[k])
-    else if (k === 'Enter' || k === '=') equals()
+    else if (k === '=' || (k === 'Enter' && !(e.target instanceof HTMLButtonElement))) equals()
     else if (k === 'Backspace') setDisplay(fresh ? display : display.length > 1 ? display.slice(0, -1) : '0')
     else if (k === 'Escape') onClose()
     else handled = false

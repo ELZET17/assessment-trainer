@@ -45,9 +45,11 @@ export default function SimRunner() {
   const [sectionEnds, setSectionEnds] = useState(0)
   const [shownAt, setShownAt] = useState(() => Date.now())
   const [history, setHistory] = useState<boolean[]>([])
-  const [calc, setCalc] = useState(false)
+  // 'auto' = opened by the setting (no focus grab), 'user' = opened by the button (keyboard goes to it)
+  const [calc, setCalc] = useState<false | 'auto' | 'user'>(false)
   const [confirmEnd, setConfirmEnd] = useState(false)
   const [finished, setFinished] = useState(false)
+  const [saveError, setSaveError] = useState(false)
   const gameResults = useRef<GameResult[][]>([])
   const ending = useRef(false)
   // Ref (not state): the blocker must see the finish immediately, before React re-renders.
@@ -91,7 +93,7 @@ export default function SimRunner() {
       })
       setSession(s)
       const now = Date.now()
-      setSectionEnds(now + (total ? (profile.totalTimeSec as number) : profile.sections[0].timeLimitSec) * 1000)
+      setSectionEnds(!total && profile.sections[0].game ? 0 : now + (total ? (profile.totalTimeSec as number) : profile.sections[0].timeLimitSec) * 1000)
       setShownAt(now)
     })()
     return () => {
@@ -166,8 +168,15 @@ export default function SimRunner() {
       }
       ;(slotsRef.current[si] ?? []).forEach((sl, i) => attempts.push(slotAttempt(si, i, sl)))
     })
-    await saveAttempts(attempts)
-    await finishSession(session)
+    try {
+      await saveAttempts(attempts)
+      await finishSession(session)
+    } catch {
+      // e.g. storage full: nothing is lost from memory – allow another try.
+      ending.current = false
+      setSaveError(true)
+      return
+    }
     finishedRef.current = true
     setFinished(true)
     nav(`/sim/result/${session.id}`, { replace: true })
@@ -229,7 +238,7 @@ export default function SimRunner() {
   const calcAllowed = !!(total ? profile?.sections[flat[pos]?.si ?? 0]?.calculator : sec?.calculator)
   // Setting "Taschenrechner standardmäßig öffnen": open it in every section that allows it.
   useEffect(() => {
-    if (calcAllowed && settings.calculatorDefault) setCalc(true)
+    if (calcAllowed && settings.calculatorDefault) setCalc('auto')
   }, [calcAllowed, secIdx, settings.calculatorDefault])
 
   if (!profile) return <p className="p-6">Unbekanntes Profil.</p>
@@ -238,6 +247,11 @@ export default function SimRunner() {
   const sectionTitle = total ? profile.sections[flat[pos]?.si ?? 0]?.title : sec.title
   const header = (
     <div className="mb-3 flex flex-wrap items-center gap-2">
+      {saveError && (
+        <p role="alert" className="w-full rounded-xl bg-[var(--bad-bg)] p-3 text-sm text-[var(--bad)]">
+          Speichern fehlgeschlagen (Gerätespeicher voll?). Deine Antworten sind noch da – bitte Speicher freigeben und erneut abgeben.
+        </p>
+      )}
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold">{profile.name}</div>
         <div className="muted truncate text-xs">
@@ -252,7 +266,7 @@ export default function SimRunner() {
         </Badge>
       )}
       {(total ? profile.sections[flat[pos]?.si ?? 0]?.calculator : sec.calculator) && (
-        <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => !c)}>
+        <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => (c ? false : 'user'))}>
           <Icon name="calc" />
         </Button>
       )}
@@ -332,7 +346,7 @@ export default function SimRunner() {
           {pos + 1 >= (total ? flat.length : (sec.count ?? curList.length)) ? (total || secIdx + 1 >= profile.sections.length ? 'Test abgeben' : 'Nächster Teil →') : 'Weiter →'}
         </Button>
       </div>
-      {calc && calcAllowed && <Calculator onClose={() => setCalc(false)} />}
+      {calc && calcAllowed && <Calculator autoFocus={calc === 'user'} onClose={() => setCalc(false)} />}
       {confirm}
     </div>
   )

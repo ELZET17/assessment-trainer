@@ -44,9 +44,11 @@ export default function TrainingRunner() {
   const [draft, setDraft] = useState<Answer | null>(null)
   const [log, setLog] = useState<{ correct: boolean; timeMs: number }[]>([])
   const [done, setDone] = useState(false)
-  const [calc, setCalc] = useState(false)
+  // 'auto' = opened by the setting (no focus grab), 'user' = opened by the button (keyboard goes to it)
+  const [calc, setCalc] = useState<false | 'auto' | 'user'>(false)
   const calcOpened = useRef(false)
   const advancing = useRef(false)
+  const lockUntil = useRef(0)
   const used = useRef(new Set<string>())
   const index = useRef(0)
   const submitting = useRef(false)
@@ -113,7 +115,8 @@ export default function TrainingRunner() {
 
   const submit = useCallback(
     async (a: Answer) => {
-      if (!item || !session || result || submitting.current) return
+      // Ignore taps in the first 350 ms after "Weiter" (second tap of a double tap on the new item).
+      if (!item || !session || result || submitting.current || Date.now() < lockUntil.current) return
       submitting.current = true
       const r = checkAnswer(item, a)
       const timeMs = Date.now() - shownAt
@@ -132,6 +135,7 @@ export default function TrainingRunner() {
     // One advance per answer (a double press must not skip a planned item).
     if (!result || advancing.current) return
     advancing.current = true
+    lockUntil.current = Date.now() + 350
     let d = difficulty
     if (adaptive) {
       d = adaptiveLevel(ADAPTIVE_START, log.map((l) => l.correct))
@@ -149,7 +153,7 @@ export default function TrainingRunner() {
   useEffect(() => {
     if (item?.calculator === 'allowed' && settings.calculatorDefault && !calcOpened.current) {
       calcOpened.current = true
-      setCalc(true)
+      setCalc('auto')
     }
   }, [item, settings.calculatorDefault])
 
@@ -232,7 +236,7 @@ export default function TrainingRunner() {
           </span>
         </Badge>
         {item.calculator === 'allowed' && (
-          <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => !c)}>
+          <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => (c ? false : 'user'))}>
             <Icon name="calc" />
           </Button>
         )}
@@ -255,7 +259,7 @@ export default function TrainingRunner() {
           </div>
         </>
       )}
-      {calc && item?.calculator === 'allowed' && <Calculator onClose={() => setCalc(false)} />}
+      {calc && item?.calculator === 'allowed' && <Calculator autoFocus={calc === 'user'} onClose={() => setCalc(false)} />}
     </div>
   )
 }

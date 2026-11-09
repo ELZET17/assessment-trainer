@@ -29,7 +29,9 @@ export default function DrillRunner() {
   const [endsAt, setEndsAt] = useState(0)
   const [shownAt, setShownAt] = useState(() => Date.now())
   const [done, setDone] = useState(false)
-  const [calc, setCalc] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+  // 'auto' = opened by the setting (no focus grab), 'user' = opened by the button (keyboard goes to it)
+  const [calc, setCalc] = useState<false | 'auto' | 'user'>(false)
   const [askQuit, setAskQuit] = useState(false)
   const busy = useRef(false)
   const doneRef = useRef(false)
@@ -71,8 +73,13 @@ export default function DrillRunner() {
     const given = resultsRef.current
     const missing = items.slice(given.length).map((it, k) => makeAttempt(it, { mode: 'drill', sessionId: session.id, answer: null, timeMs: 0, id: idOf(session, given.length + k), seq: given.length + k }))
     const all = [...given, ...missing]
-    await saveAttempts(missing)
-    await finishSession(session)
+    try {
+      await saveAttempts(missing)
+      await finishSession(session)
+    } catch {
+      // e.g. storage full: show the result from memory anyway, with a note.
+      setSaveError(true)
+    }
     doneRef.current = true
     setResults(all)
     setDone(true)
@@ -84,18 +91,21 @@ export default function DrillRunner() {
       const index = resultsRef.current.length
       if (index !== pos) return
       busy.current = true
-      const att = makeAttempt(items[index], { mode: 'drill', sessionId: session.id, answer: a, timeMs: Date.now() - shownAt, id: idOf(session, index), seq: index })
-      resultsRef.current = [...resultsRef.current, att]
-      setResults(resultsRef.current)
-      setDraft(null)
-      await saveAttempts([att])
-      if (index + 1 >= items.length) await end()
-      else {
-        lockUntil.current = Date.now() + 350
-        setPos(index + 1)
-        setShownAt(Date.now())
+      try {
+        const att = makeAttempt(items[index], { mode: 'drill', sessionId: session.id, answer: a, timeMs: Date.now() - shownAt, id: idOf(session, index), seq: index })
+        resultsRef.current = [...resultsRef.current, att]
+        setResults(resultsRef.current)
+        setDraft(null)
+        await saveAttempts([att]).catch(() => setSaveError(true))
+        if (index + 1 >= items.length) await end()
+        else {
+          lockUntil.current = Date.now() + 350
+          setPos(index + 1)
+          setShownAt(Date.now())
+        }
+      } finally {
+        busy.current = false
       }
-      busy.current = false
     },
     [items, session, pos, shownAt, end],
   )
@@ -111,7 +121,7 @@ export default function DrillRunner() {
   useEffect(() => {
     if (items?.[pos]?.calculator === 'allowed' && settings.calculatorDefault && !calcOpened.current) {
       calcOpened.current = true
-      setCalc(true)
+      setCalc('auto')
     }
   }, [items, pos, settings.calculatorDefault])
 
@@ -123,6 +133,7 @@ export default function DrillRunner() {
   }, [remaining, done, endsAt, end])
 
   if (!items || !session) return <p className="muted p-6">Lade Drill …</p>
+  if (items.length === 0) return <p className="muted p-6">Für diese Auswahl gibt es keine Aufgaben.</p>
 
   if (done) {
     const answered = results.filter((r) => r.answered)
@@ -138,6 +149,11 @@ export default function DrillRunner() {
             richtig ({pctText(items.length ? (correct / items.length) * 100 : null)}) · {answered.length} von {items.length} in der Zeit beantwortet
           </p>
         </Card>
+        {saveError && (
+          <p role="alert" className="mb-4 rounded-xl bg-[var(--bad-bg)] p-3 text-sm text-[var(--bad)]">
+            Nicht alle Antworten konnten gespeichert werden (Gerätespeicher voll?). Das Ergebnis oben ist vollständig, fehlt aber eventuell in der Statistik.
+          </p>
+        )}
         <Review entries={results.map((r, i) => ({ item: items[i], attempt: r }))} />
         <div className="mt-4 flex gap-2">
           <LinkButton to={`/practice/${cat}`} variant="primary">
@@ -170,7 +186,7 @@ export default function DrillRunner() {
           </span>
         </Badge>
         {item.calculator === 'allowed' && (
-          <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => !c)}>
+          <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => (c ? false : 'user'))}>
             <Icon name="calc" />
           </Button>
         )}
@@ -181,7 +197,7 @@ export default function DrillRunner() {
           Antwort abgeben
         </Button>
       )}
-      {calc && item.calculator === 'allowed' && <Calculator onClose={() => setCalc(false)} />}
+      {calc && item.calculator === 'allowed' && <Calculator autoFocus={calc === 'user'} onClose={() => setCalc(false)} />}
       <Confirm
         open={askQuit || blocker.state === 'blocked'}
         title="Drill abbrechen?"
