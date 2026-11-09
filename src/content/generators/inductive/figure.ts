@@ -30,3 +30,21 @@ export const RING = [0, 1, 2, 5, 8, 7, 6, 3]
 export const ROTATING: Shape[] = ['arrow', 'lshape']
 export const STATIC_SHAPES: Shape[] = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'star', 'cross', 'diamond']
 export const SIDES: Record<Shape, number> = { circle: 0, triangle: 3, square: 4, diamond: 4, pentagon: 5, hexagon: 6, star: 10, arrow: 7, lshape: 6, cross: 12 }
+
+/**
+ * Fixed placement of n identical elements (dice-like), used by counting rules.
+ * Shared rendering convention – not an answer key: solver and generator both
+ * place n elements in exactly these cells.
+ */
+export const PACK: number[][] = [
+  [],
+  [4],
+  [3, 5],
+  [3, 4, 5],
+  [0, 2, 6, 8],
+  [0, 2, 4, 6, 8],
+  [0, 1, 2, 6, 7, 8],
+  [0, 1, 2, 4, 6, 7, 8],
+  [0, 1, 2, 3, 5, 6, 7, 8],
+  [0, 1, 2, 3, 4, 5, 6, 7, 8],
+]

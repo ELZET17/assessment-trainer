@@ -2,6 +2,7 @@
 import { useId, type ReactNode } from 'react'
 import type { FlowRow, FlowSpec } from '../../content/generators/diagrammatic/flow'
 import type { FigEl, Panel, Shape } from '../../content/generators/inductive/figure'
+import type { FigureLayout } from '../../content/types'
 import type { SwitchSpec, SwitchSymbol } from '../../content/generators/aon/switchTypes'
 
 // ---------------------------------------------------------------- shapes
@@ -123,7 +124,7 @@ export function FigurePanel({ panel, label, large }: { panel: Panel | null; labe
   )
 }
 
-export function FiguresView({ layout, panels, large }: { layout: 'series' | 'matrix' | 'odd'; panels: (Panel | null)[]; large?: boolean }) {
+export function FiguresView({ layout, panels, large }: { layout: FigureLayout; panels: (Panel | null)[]; large?: boolean }) {
   if (layout === 'matrix') {
     return (
       // Fixed panel width (--fig-w) shared with the answer options: sizes can be compared across both.
@@ -135,6 +136,30 @@ export function FiguresView({ layout, panels, large }: { layout: 'series' | 'mat
     )
   }
   if (layout === 'odd') return null
+  if (layout === 'analogy') {
+    // A : B = C : ?  – two pairs; on narrow screens the pairs wrap below each other.
+    const names = ['A', 'B', 'C', '?']
+    const pair = (i: number) => (
+      <div className="flex items-center gap-1.5">
+        {[i, i + 1].map((k, j) => (
+          <div key={k} className="flex items-center gap-1.5">
+            {j === 1 && <span className="text-xl font-bold muted" aria-hidden="true">:</span>}
+            <div className="w-[var(--fig-w)]">
+              <FigurePanel panel={panels[k]} large={large} label={panels[k] ? `Figur ${names[k]}` : 'Gesuchte Figur'} />
+              <div className="muted mt-1 text-center text-xs">{names[k]}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+    return (
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {pair(0)}
+        <span className="text-xl font-bold muted" aria-label="verhält sich wie">=</span>
+        {pair(2)}
+      </div>
+    )
+  }
   return (
     <div className="flex flex-wrap gap-2">
       {panels.map((p, i) => (

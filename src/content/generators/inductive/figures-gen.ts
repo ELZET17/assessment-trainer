@@ -6,20 +6,20 @@
 import { core, tr, type GeneratorDef } from '../../generator'
 import { firstAccepted } from '../../pipeline'
 import { createRng, deriveSeed, type Rng } from '../../rng'
-import type { Difficulty, Lang, McqItem } from '../../types'
-import { canonPanel, oddCandidates, solveMatrix, solveSeries } from '../../validators/inductive'
+import type { Difficulty, FigureLayout, Lang, McqItem } from '../../types'
+import { canonPanel, oddCandidates, solveMatrixAll, solveSeriesAll } from '../../validators/inductive'
 import { RING, ROTATING, SIDES, STATIC_SHAPES, type FigEl, type Fill, type Panel, type Shape, type Size } from './figure'
 
-const FILLS: Fill[] = ['empty', 'solid', 'striped', 'dotted']
-const FILL_DE: Record<Fill, string> = { empty: 'leer', solid: 'schwarz', striped: 'gestreift', dotted: 'gepunktet' }
-const SHAPE_DE: Record<Shape, string> = { circle: 'Kreis', square: 'Quadrat', triangle: 'Dreieck', pentagon: 'Fünfeck', hexagon: 'Sechseck', star: 'Stern', arrow: 'Pfeil', lshape: 'L-Form', cross: 'Kreuz', diamond: 'Raute' }
-const SIZE_DE = ['klein', 'mittel', 'groß']
-const deg = (k: number) => `${(((k % 8) + 8) % 8) * 45}°`
-const dirDe = (k: number) => (k > 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn')
+export const FILLS: Fill[] = ['empty', 'solid', 'striped', 'dotted']
+export const FILL_DE: Record<Fill, string> = { empty: 'leer', solid: 'schwarz', striped: 'gestreift', dotted: 'gepunktet' }
+export const SHAPE_DE: Record<Shape, string> = { circle: 'Kreis', square: 'Quadrat', triangle: 'Dreieck', pentagon: 'Fünfeck', hexagon: 'Sechseck', star: 'Stern', arrow: 'Pfeil', lshape: 'L-Form', cross: 'Kreuz', diamond: 'Raute' }
+export const SIZE_DE = ['klein', 'mittel', 'groß']
+export const deg = (k: number) => `${(((k % 8) + 8) % 8) * 45}°`
+export const dirDe = (k: number) => (k > 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn')
 
-const clone = (p: Panel): Panel => ({ els: p.els.map((e) => ({ ...e })), ticks: p.ticks, lines: p.lines ? p.lines.slice() : undefined })
+export const clone = (p: Panel): Panel => ({ els: p.els.map((e) => ({ ...e })), ticks: p.ticks, lines: p.lines ? p.lines.slice() : undefined })
 
-function finishOptions(rng: Rng, correct: Panel, variants: { p: Panel; why: string }[]): { options: { panel: Panel; why: string }[]; correctIdx: number } | null {
+export function finishOptions(rng: Rng, correct: Panel, variants: { p: Panel; why: string }[]): { options: { panel: Panel; why: string }[]; correctIdx: number } | null {
   const seen = new Set([canonPanel(correct)])
   const opts: { panel: Panel; why: string }[] = [{ panel: correct, why: '' }]
   for (const v of variants) {
@@ -34,7 +34,7 @@ function finishOptions(rng: Rng, correct: Panel, variants: { p: Panel; why: stri
   return { options: shuffled, correctIdx: shuffled.findIndex((o) => o.panel === correct) }
 }
 
-function item(def: GeneratorDef, seed: number, d: Difficulty, lang: Lang, layout: 'series' | 'matrix' | 'odd', panels: (Panel | null)[], opts: { panel: Panel; why: string }[], correct: number, steps: string[], shortcut: string, prompt: string): McqItem {
+export function item(def: GeneratorDef, seed: number, d: Difficulty, lang: Lang, layout: FigureLayout, panels: (Panel | null)[], opts: { panel: Panel; why: string }[], correct: number, steps: string[], shortcut: string, prompt: string): McqItem {
   return {
     ...core(def, seed, d, lang),
     type: 'mcq',
@@ -102,7 +102,7 @@ export const series: GeneratorDef = {
       const answer = panelAt(5)
       if ((answer.ticks ?? 0) > 9) return null
       // Ambiguity filter: the independent solver must reach exactly our answer.
-      if (solveSeries(panels) !== canonPanel(answer)) return null
+      if (solveSeriesAll(panels) !== canonPanel(answer)) return null
       // Distractors: change exactly one attribute.
       const main = (p: Panel) => p.els[0]
       const variants: { p: Panel; why: string }[] = []
@@ -156,7 +156,8 @@ const LINE_SETS = [1, 2, 4, 8, 16, 32, 64, 128]
 
 export const matrix: GeneratorDef = {
   id: 'ind.matrix',
-  version: 1,
+  // v2: the solver also checks subtraction (A − B), which rejects a few ambiguous line matrices.
+  version: 2,
   category: 'inductive',
   title: '3×3-Matrizen',
   types: ['mcq'],
@@ -221,7 +222,7 @@ export const matrix: GeneratorDef = {
       const answer = cells[8]
       if (attrs.includes('lines') && (answer.lines ?? []).length === 0) return null
       const shown: (Panel | null)[] = [...cells.slice(0, 8), null]
-      if (solveMatrix(shown) !== canonPanel(answer)) return null
+      if (solveMatrixAll(shown) !== canonPanel(answer)) return null
       const variants: { p: Panel; why: string }[] = [
         { p: clone(cells[5]), why: 'Kopie des Feldes darüber – die Zeilenregel wurde nicht angewendet.' },
         { p: clone(cells[7]), why: 'Kopie des Feldes links daneben.' },

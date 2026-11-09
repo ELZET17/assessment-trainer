@@ -10,7 +10,7 @@ Offline-fähige Übungs-App (PWA) für die kognitiven Online-Tests von Bain, BCG
 |---|---|
 | A Numerical Reasoning | Tabellen und Diagramme: Prozent, Prozentpunkte, Anteile, Verhältnisse, Wechselkurse, Durchschnitte, CAGR, Index, Hochrechnung |
 | B Speed Math / Kopfrechnen | Kopfrechnen ohne Rechner, Prozent, Brüche, Überschlag, Dreisatz, Zahlenreihen, Gleichungen; Kopfrechen-Sprint mit freier Eingabe |
-| C Inductive Reasoning | Figurenreihen, 3×3-Matrizen, Odd one out |
+| C Inductive Reasoning | Figurenreihen (auch mit mehreren Elementen und Anzahl-Regeln), 3×3-Matrizen (Verteilung, Überlagerung ODER/XOR/UND/Minus, Anzahl), Analogien A : B = C : ?, Odd one out |
 | D Deductive Reasoning | Syllogismen, Reihenfolgen, Sitzordnungen, Wenn-dann-Regeln, Wahr/Falsch/Nicht bestimmbar |
 | E Verbal Reasoning | 40 Texte (15 auch auf Deutsch), 160 Aussagen – Wahr/Falsch/Nicht bestimmbar |
 | F Critical Thinking | 60 Aufgaben im Watson-Glaser-Stil |

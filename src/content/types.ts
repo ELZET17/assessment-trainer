@@ -121,9 +121,11 @@ export interface TextExhibit {
   body: string
 }
 
+export type FigureLayout = 'series' | 'matrix' | 'odd' | 'analogy'
+
 export interface FiguresExhibit {
   kind: 'figures'
-  layout: 'series' | 'matrix' | 'odd'
+  layout: FigureLayout
   /** `null` marks the missing panel ("?"). */
   panels: (Panel | null)[]
 }

@@ -6,7 +6,8 @@
  *
  * Usage: npx tsx scripts/blind-export.ts [baseUrl]
  * Env (later rounds): BLIND_ROUND=2 (output suffix), BLIND_SALT (fresh seeds),
- * BLIND_GROUPS=A-speed-numerical,… and BANK_IDS=v05,c10,… (id prefixes) to limit the export.
+ * BLIND_GROUPS=A-speed-numerical,… and BANK_IDS=v05,c10,… (id prefixes) to limit the export,
+ * BLIND_GENS=ind.multi,… and BLIND_PER_LEVEL=12 to check newly added generators only.
  */
 import { webkit } from '@playwright/test'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -27,7 +28,9 @@ rmSync(OUT, { recursive: true, force: true })
 rmSync(KEYS, { recursive: true, force: true })
 mkdirSync(KEYS, { recursive: true })
 
-const PER_LEVEL = 15
+const PER_LEVEL = Number(process.env.BLIND_PER_LEVEL ?? 15)
+/** Optional: only these generators (e.g. BLIND_GENS=ind.multi,ind.count after adding new ones). */
+const ONLY_GENS = process.env.BLIND_GENS?.split(',')
 const groups: { name: string; cats: CategoryId[]; images?: boolean }[] = [
   { name: 'A-speed-numerical', cats: ['speed', 'numerical'] },
   { name: 'B-deductive-diagrammatic', cats: ['deductive', 'diagrammatic'] },
@@ -45,7 +48,8 @@ for (const g of groups) {
   const md: string[] = []
   const keys: Record<string, unknown> = {}
   for (const cat of g.cats) {
-    const gens = generatorsFor(cat)
+    const gens = generatorsFor(cat).filter((x) => !ONLY_GENS || ONLY_GENS.includes(x.id))
+    if (!gens.length) continue
     for (const d of [1, 2, 3] as Difficulty[]) {
       for (let i = 0; i < PER_LEVEL; i++) {
         const gen = gens[i % gens.length]

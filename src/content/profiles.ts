@@ -82,8 +82,12 @@ const SPEED_ALL: MixEntry[] = [
 ]
 
 const INDUCTIVE: MixEntry[] = [
-  { gen: 'ind.series', weight: 3 },
+  { gen: 'ind.series', weight: 2 },
+  { gen: 'ind.multi', weight: 2 },
+  { gen: 'ind.count', weight: 1 },
   { gen: 'ind.matrix', weight: 2 },
+  { gen: 'ind.matrix2', weight: 2 },
+  { gen: 'ind.analogy', weight: 1 },
   { gen: 'ind.odd', weight: 1 },
 ]
 

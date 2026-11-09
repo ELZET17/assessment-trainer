@@ -76,3 +76,6 @@ Der Service Worker läuft im Prompt-Modus. Eine neue Version (z. B. eine korrigi
 
 ## D21 – Reihenfolge-Aufgaben gelten erst nach dem Anzeigen als beantwortet
 Wie in SHL-Tests zählt die angezeigte Startreihenfolge als Antwort – aber erst, wenn die Aufgabe tatsächlich angezeigt wurde. Nicht erreichte Aufgaben bleiben leer.
+
+## D22 – Weitere Figurenfamilien mit eigenen Lösern (11/2026)
+Neu: `ind.multi` (mehrere Elemente mit eigener Regel), `ind.count` (Anzahl gleicher Elemente), `ind.analogy` (A : B = C : ?), `ind.matrix2` (Matrizen mit Überlagerung ODER/XOR/UND/Minus bzw. Anzahl). Mehrere gleiche Elemente werden nach einer festen Anordnung (`PACK`, wie Würfelaugen) gezeichnet; Generator und Löser nutzen diese Zeichenkonvention, nicht den Schlüssel. Die Löser laufen parallel (`solveSeriesAll`, `solveMatrixAll`): Eine Aufgabe gilt nur, wenn alle anwendbaren Löser dasselbe Feld vorhersagen. Der Analogie-Löser liest jede Veränderung von A nach B auf alle naheliegenden Arten (relativ „90° drehen“, absolut „zeigt nach rechts“, „wird schwarz“, „tauschen“); genau eine Option darf zu irgendeiner dieser Lesarten passen. Der Matrix-Löser prüft zusätzlich Subtraktion – dadurch fielen einige mehrdeutige Linien-Matrizen weg, `ind.matrix` steigt auf Version 2 (alte v1-Versuche bleiben in der Statistik, sind aber nicht mehr wiederholbar, D17).

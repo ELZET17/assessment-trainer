@@ -153,6 +153,21 @@ Quellen:
 
 ---
 
+## Aufgabentypen im Inductive / Abstract Reasoning (Nachtrag 09.11.2026)
+
+Anlass: Rückmeldung, dass die Figurenaufgaben zu gleichförmig waren. Quellen sind Anbieter von Übungsmaterial (keine offiziellen Testanbieter-Dokumente); die Regelfamilien stimmen über die Quellen hinweg überein.
+
+| Format / Regel | Berichtet von | In der App |
+|---|---|---|
+| Figurenreihe, 3×3-Matrix, Odd one out | [AssessmentDay – SHL Inductive](https://www.assessmentday.co.uk/shl-inductive-reasoning-test.htm), [CaseBasix – Abstract Reasoning (u. a. Bain Sova)](https://www.casebasix.com/pages/abstract-reasoning-test) | `ind.series`, `ind.matrix`, `ind.odd` (bisher) |
+| Analogien („A verhält sich zu B wie C zu …“) | [MConsultingPrep – Inductive Reasoning Guide](https://mconsultingprep.com/inductive-reasoning-tests-guide) | **neu:** `ind.analogy` |
+| Mehrere Elemente mit eigener Bewegung/Drehung („translation“, „rotation“) | [PracticeAptitudeTests – Question Types](https://www.practiceaptitudetests.com/resources/abstract-reasoning-question-types/), [Open Exam Prep – EPSO Abstract Reasoning](https://open-exam-prep.com/study-guides/epso-auditor/competition-structure-reasoning/abstract-reasoning) | **neu:** `ind.multi` |
+| Anzahl von Elementen/Seiten steigt oder fällt um einen festen Schritt | [PracticeAptitudeTests – Improve Abstract Reasoning](https://www.practiceaptitudetests.com/resources/improve-abstract-reasoning-guide/) | **neu:** `ind.count`, `ind.matrix2` (Anzahl) |
+| Überlagerung: Addition, Subtraktion, XOR („gemeinsame Elemente verschwinden“) | [Open Exam Prep – EPSO Abstract Reasoning](https://open-exam-prep.com/study-guides/epso-auditor/competition-structure-reasoning/abstract-reasoning), [EU Training – EPSO AR Teil II](https://eutraining.eu/content/secrets-epso-abstract-reasoning-success-part-ii) | `ind.matrix` (Linien) und **neu:** `ind.matrix2` (Elemente: ODER, XOR, UND, Minus) |
+| SHL interaktiv (Drag & Drop) | [AssessmentDay – SHL Inductive](https://www.assessmentday.co.uk/shl-inductive-reasoning-test.htm) | Kategorie I (bereits vorhanden) |
+
+Nicht umgesetzt: „Set A / Set B“-Klassifikation (v. a. Saville/Kenexa, für die Zielfirmen nicht berichtet).
+
 ## Konsequenzen für die App
 
 1. **BCG Cognitive Test** ist der härteste Speed-Test (22 Sek./Frage, ohne Rechner) → Kategorie B (Kopfrechnen/Speed Math) mit Zielzeit 20–25 Sek. und die Simulation 80/30.

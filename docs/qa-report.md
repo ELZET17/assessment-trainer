@@ -69,10 +69,10 @@ Quelle: Master-Prompt Abschnitte 1–7. „Test“ nennt den Nachweis; E2E = `e2
 ## Gate 2 – Korrektheit (automatisiert)
 
 ```bash
-npm run test:content    # 39 Generatoren × 3 Stufen × 2.000 Items + Determinismus + fast-check
+npm run test:content    # 43 Generatoren × 3 Stufen × 2.000 Items + Determinismus + fast-check
 ```
 
-- **234.000 Aufgaben** gegen unabhängige Löser (`src/content/validators/**`), die nur die öffentliche Aufgabe sehen (`toPublic` entfernt den Schlüssel): 0 Abweichungen, 0 Items mit ≠ 1 richtiger Option, 0 mehrdeutige Muster, 0 Abstürze.
+- **258.000 Aufgaben** (seit 09.11.2026 inkl. der vier neuen Figurenfamilien, D22) gegen unabhängige Löser (`src/content/validators/**`), die nur die öffentliche Aufgabe sehen (`toPublic` entfernt den Schlüssel): 0 Abweichungen, 0 Items mit ≠ 1 richtiger Option, 0 mehrdeutige Muster, 0 Abstürze.
 - Determinismus: gleicher Seed → identische Aufgabe (je Generator 4 feste Seeds × 3 Stufen, dazu fast-check mit 300 zufälligen Seeds); EN und DE haben denselben Schlüssel.
 - Property-Based (fast-check, `tests/content/properties.test.ts`): je Generator 150 zufällige (Seed, Stufe, Sprache)-Kombinationen gegen den Löser.
 - Gefundene Fehler (alle behoben): Rundungs-Epsilon, Präzision im Löser, Rundungsgrenzen, Grid-Symmetrie (siehe Protokoll).
@@ -87,8 +87,10 @@ Export ohne Schlüssel: `scripts/blind-export.ts` (Figuren als Screenshots), Abg
 | 2 | 229 Items: neue Seeds für A/B/D + alle geänderten Verbal-/CT-Items | 0 | 10 | Formulierungen |
 | 3 | 236 Items: neue Seeds A/B/C + geänderte Verbal-/CT-Items | 0 | 15 | Figuren-Darstellung, Logik-Trivialität |
 | 4 | 45 Figuren-Items nach Darstellungs-Änderung | 0 | 10 | nur Lesbarkeit (kleine Figuren in Eckfeldern), keine konkurrierende Regel mehr |
+| 5 | 36 Items der vier neuen Figurenfamilien (D22) | 0 | 2 unsicher (Analogien) | Analogie-Löser um Gitter-/Spiegel-Lesarten erweitert, Bewegung nicht mehr mit Drehung kombiniert |
+| 6 | 24 neue Analogie-Items nach der Korrektur | 0 | 0 unsicher | Größenänderung nur noch klein ↔ groß (Lesbarkeit) |
 
-Die 6 Abweichungen in Runde 1 waren keine falschen Schlüssel im engeren Sinn, sondern zwei vertretbare Lesarten (z. B. „subject to approval“, „up to 20“). Alle wurden umformuliert und in Runde 2/3 ohne Abweichung erneut gelöst. Berichte: [`docs/qa/blind-report-r1.md`](qa/blind-report-r1.md) bis `r4`.
+Die 6 Abweichungen in Runde 1 waren keine falschen Schlüssel im engeren Sinn, sondern zwei vertretbare Lesarten (z. B. „subject to approval“, „up to 20“). Alle wurden umformuliert und in Runde 2/3 ohne Abweichung erneut gelöst. Berichte: [`docs/qa/blind-report-r1.md`](qa/blind-report-r1.md) bis `r6`.
 
 ## Gate 4 – Didaktik & Akademie
 

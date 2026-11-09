@@ -12,6 +12,7 @@ import { flowchart } from './generators/diagrammatic/flow-gen'
 import { digitChallenge, gridChallenge, switchChallenge } from './generators/aon/games'
 import { barDrag, dragOrder, tableFill } from './generators/interactive/shl'
 import { matrix, oddOneOut, series } from './generators/inductive/figures-gen'
+import { analogy, countSeries, matrixMulti, multiSeries } from './generators/inductive/figures-more'
 import type { CategoryId, Difficulty, Item, ItemRef, Lang } from './types'
 
 export const GENERATORS: GeneratorDef[] = [
@@ -51,6 +52,10 @@ export const GENERATORS: GeneratorDef[] = [
   series,
   matrix,
   oddOneOut,
+  multiSeries,
+  countSeries,
+  analogy,
+  matrixMulti,
   // G – Diagrammatic
   flowchart,
   // H – Aon games
