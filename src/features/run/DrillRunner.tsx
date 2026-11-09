@@ -99,6 +99,15 @@ export default function DrillRunner() {
     setDraft(it?.type === 'order' ? { type: 'order', order: it.entries.map((_, i) => i) } : null)
   }, [items, pos])
 
+  // Setting "Taschenrechner standardmäßig öffnen" (only where the calculator is allowed).
+  const calcOpened = useRef(false)
+  useEffect(() => {
+    if (items?.[pos]?.calculator === 'allowed' && settings.calculatorDefault && !calcOpened.current) {
+      calcOpened.current = true
+      setCalc(true)
+    }
+  }, [items, pos, settings.calculatorDefault])
+
   const now = useNow(250, !done && endsAt > 0)
   const remaining = endsAt ? (endsAt - now) / 1000 : 0
   useEffect(() => {
@@ -167,7 +176,7 @@ export default function DrillRunner() {
           Antwort abgeben
         </Button>
       )}
-      {calc && <Calculator onClose={() => setCalc(false)} />}
+      {calc && item.calculator === 'allowed' && <Calculator onClose={() => setCalc(false)} />}
       <Confirm
         open={askQuit || blocker.state === 'blocked'}
         title="Drill abbrechen?"

@@ -33,10 +33,11 @@ export default function Settings() {
       try {
         await navigator.share({ files: [file], title: 'Assessment Trainer – Export' })
         setMsg(`Export geteilt: ${summary}.`)
+        return
       } catch (e) {
-        if ((e as Error).name !== 'AbortError') setMsg('Teilen nicht möglich – bitte erneut versuchen.')
+        if ((e as Error).name === 'AbortError') return
+        // e.g. NotAllowedError (user activation expired): fall back to the download below.
       }
-      return
     }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

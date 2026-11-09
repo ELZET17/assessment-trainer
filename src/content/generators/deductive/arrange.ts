@@ -25,7 +25,8 @@ export function clueTrue(c: Clue, seat: number[], ring: boolean): boolean {
   if (c.t === 'justBefore') return directlyAfter(seat[c.a], seat[c.b], n, ring)
   if (c.t === 'adjacent') return gapBetween(seat[c.a], seat[c.b], n, ring) === 1
   if (c.t === 'notAdjacent') return gapBetween(seat[c.a], seat[c.b], n, ring) !== 1
-  return gapBetween(seat[c.a], seat[c.b], n, ring) === c.n + 1
+  if (c.t === 'gap') return gapBetween(seat[c.a], seat[c.b], n, ring) === c.n + 1
+  throw new Error(`unknown clue ${(c as { t: string }).t}`)
 }
 
 export function factTrue(f: Fact, seat: number[], ring: boolean): boolean {

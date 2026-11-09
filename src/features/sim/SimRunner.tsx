@@ -23,9 +23,6 @@ interface Slot {
   timeMs: number
 }
 
-/** Ordering items start with the shown order as a valid answer (as in Training and in SHL tests). */
-const initialAnswer = (it: Item): Answer | null => (it.type === 'order' ? { type: 'order', order: it.entries.map((_, i) => i) } : null)
-
 export default function SimRunner() {
   const { profileId = '' } = useParams()
   const profile = getProfile(profileId) as Profile
@@ -81,7 +78,7 @@ export default function SimRunner() {
         const list: Slot[] = []
         for (let i = 0; i < n; i++) {
           const it = makeItem(s, profile.difficulty)
-          if (it) list.push({ item: it, answer: initialAnswer(it), timeMs: 0 })
+          if (it) list.push({ item: it, answer: null, timeMs: 0 })
         }
         return list
       })
@@ -210,12 +207,19 @@ export default function SimRunner() {
       const d = adaptiveLevel(profile.difficulty, h)
       setHistory(h)
       const it = makeItem(sec, d)
-      if (it) setSlots((all) => all.map((l, si) => (si === secIdx ? [...l, { item: it, answer: initialAnswer(it), timeMs: 0 }] : l)))
+      if (it) setSlots((all) => all.map((l, si) => (si === secIdx ? [...l, { item: it, answer: null, timeMs: 0 }] : l)))
     }
     if (pos + 1 < (profile.adaptive && sec.count ? sec.count : curList.length)) setPos(pos + 1)
     else if (total) setConfirmEnd(true)
     else nextSection()
   }
+
+  // Ordering items: once shown, the displayed order counts as the answer (as in SHL tests).
+  // Only when shown – never-reached items stay blank.
+  useEffect(() => {
+    if (current?.item.type === 'order' && current.answer === null) setAnswer({ type: 'order', order: current.item.entries.map((_, i) => i) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.item.key, current?.answer])
 
   const calcAllowed = !!(total ? profile?.sections[flat[pos]?.si ?? 0]?.calculator : sec?.calculator)
   // Setting "Taschenrechner standardmäßig öffnen": open it in every section that allows it.

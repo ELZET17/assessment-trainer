@@ -123,7 +123,7 @@ export function Confirm({ open, title, body, confirmLabel, onConfirm, onCancel, 
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={onCancel}>
-      <div ref={ref} tabIndex={-1} role="alertdialog" aria-modal="true" aria-label={title} className="card safe-bottom w-full max-w-md p-5" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.key === 'Escape' && onCancel()}>
+      <div ref={ref} tabIndex={-1} role="alertdialog" aria-modal="true" aria-label={title} className="card w-full max-w-md p-5" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.key === 'Escape' && onCancel()}>
         <h2 className="text-lg font-bold">{title}</h2>
         <div className="muted mt-2 text-[15px]">{body}</div>
         <div className="mt-5 flex justify-end gap-2">

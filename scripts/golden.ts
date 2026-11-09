@@ -8,7 +8,7 @@ import { writeFileSync } from 'node:fs'
 import { GENERATORS } from '../src/content/registry'
 import type { Difficulty } from '../src/content/types'
 
-export const GOLDEN_SEEDS = [11, 2024, 987654321]
+export const GOLDEN_SEEDS = Array.from({ length: 25 }, (_, i) => 11 + i * 104729)
 
 export function goldenHashes(): Record<string, string> {
   const out: Record<string, string> = {}

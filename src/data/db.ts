@@ -1,7 +1,7 @@
 /**
  * IndexedDB via Dexie. The schema is versioned; every future change adds a
  * new `version(n)` with an upgrade function so that stored progress survives
- * app updates (tested in src/data/db.test.ts).
+ * app updates (migration test in src/data/data.test.ts).
  */
 import Dexie, { type EntityTable } from 'dexie'
 import type { Attempt, Session, Settings } from './types'

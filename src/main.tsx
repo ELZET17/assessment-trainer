@@ -26,8 +26,9 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     onRegisteredSW(_url, reg) {
       // Installed apps stay open for days: look for a new version every hour and when brought to the front.
       if (!reg) return
-      setInterval(() => void reg.update(), 60 * 60 * 1000)
-      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && void reg.update())
+      const check = () => reg.update().catch(() => undefined) // offline: try again later
+      setInterval(check, 60 * 60 * 1000)
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && void check())
     },
   })
 }

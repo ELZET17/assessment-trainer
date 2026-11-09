@@ -42,7 +42,7 @@ export default function Layout() {
         <Outlet />
       </main>
       {!focus && (
-        <nav aria-label="Hauptnavigation" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur lg:hidden">
+        <nav aria-label="Hauptnavigation" className="safe-bottom fixed inset-x-0 bottom-0 pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] z-40 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-xl">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold no-underline ${isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>

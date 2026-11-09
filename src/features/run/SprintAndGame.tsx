@@ -118,7 +118,7 @@ export function SprintRun() {
           setScore((s) => ({ right: s.right + (r.correct ? 1 : 0), total: s.total + 1 }))
           setFlash(r.correct)
           setTimeout(() => setFlash(null), 300)
-          void saveAttempt(makeAttempt(item, { mode: 'sprint', sessionId: session.id, answer: { type: 'numeric', value: v }, timeMs: Date.now() - shownAt, result: r }))
+          saveAttempt(makeAttempt(item, { mode: 'sprint', sessionId: session.id, answer: { type: 'numeric', value: v }, timeMs: Date.now() - shownAt, result: r })).catch(() => undefined)
           next()
         }}
       />

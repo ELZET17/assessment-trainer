@@ -52,3 +52,15 @@ test('simulation result lists the questions in test order', async ({ page }) => 
   expect(new Set(seqs).size).toBe(40)
   await expect(page.getByRole('listitem').first()).toContainText('1.')
 })
+
+test('simulation: items never reached stay blank (also drag-and-drop ordering items)', async ({ page }) => {
+  await page.clock.install()
+  await page.goto('#/sim/run/bcg-cca')
+  await expect(page.locator('[data-item-key]').first()).toBeVisible()
+  await page.clock.fastForward(21 * 60 * 1000)
+  await expect(page).toHaveURL(/sim\/result\//)
+  const list = (await attempts(page)).filter((a) => a.mode === 'simulation')
+  expect(list.length).toBe(15)
+  // Only the first, displayed item may count (an ordering item shows a valid start order).
+  expect(list.filter((a) => a.answered).length).toBeLessThanOrEqual(1)
+})

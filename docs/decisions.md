@@ -64,3 +64,15 @@ Abschnittsgrößen 8/6/6/8/6/6 und „ohne Taschenrechner“ folgen den Kandidat
 
 ## D17 – Generator-Versionen bleiben bei v1 bis zum ersten Release
 Generatoren wurden während der Prüf-Gates mehrfach geändert (gleicher Seed → andere Aufgabe als vor der Änderung). Vor dem ersten Deploy gibt es keine gespeicherten Nutzerdaten, deshalb bleibt die Version 1. Ab dem ersten Release gilt: Jede Änderung, die Aufgaben zu einem Seed verändert, erhöht die Generator-Version. `resolveItem` erzeugt eine Aufgabe nur, wenn die gespeicherte Version zur aktuellen passt – ein alter Fehlerheft-Eintrag wird also nie stillschweigend durch eine andere Aufgabe ersetzt, sondern ausgelassen (die Statistik bleibt erhalten, weil sie nur aus den gespeicherten Versuchen rechnet).
+
+## D18 – Antworten werden sofort gespeichert
+Jede Antwort in Simulationen und Aon-Spielen wird direkt beim Antworten in IndexedDB geschrieben (Upsert mit deterministischer ID aus Session und Position, Reihenfolgefeld `seq`). Ein Reload, ein vorzeitiges Ende oder ein Absturz verlieren damit keine Antworten. Beim Abgeben werden dieselben Einträge vervollständigt (unbeantwortete als leer). Ein „Fortsetzen“ abgebrochener Läufe gibt es bewusst nicht: Ein echter Test lässt sich auch nicht unterbrechen.
+
+## D19 – App-Updates nur außerhalb laufender Übungen
+Der Service Worker läuft im Prompt-Modus. Eine neue Version (z. B. eine korrigierte Erklärung) wird sofort aktiviert, wenn gerade keine Übung, kein Drill und keine Simulation läuft, sonst beim nächsten Seitenwechsel. Installierte Apps suchen stündlich und beim Wechsel in den Vordergrund nach Updates.
+
+## D20 – Golden-Test für Generatoren
+`tests/content/golden.json` hält einen Hash der Aufgaben jedes Generators für 25 feste Seeds je Stufe (EN und DE). Ändert eine Code-Änderung Aufgaben, schlägt der Test fehl: Dann wird die Generator-Version erhöht (D17) und `npm run golden` ausgeführt.
+
+## D21 – Reihenfolge-Aufgaben gelten erst nach dem Anzeigen als beantwortet
+Wie in SHL-Tests zählt die angezeigte Startreihenfolge als Antwort – aber erst, wenn die Aufgabe tatsächlich angezeigt wurde. Nicht erreichte Aufgaben bleiben leer.
