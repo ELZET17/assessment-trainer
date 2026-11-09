@@ -2,7 +2,7 @@
 
 Die App ist eine Web-App (PWA). Einmal online öffnen, dann als App hinzufügen – danach funktioniert sie auch ohne Internet.
 
-**Adresse:** https://GITHUB_USER.github.io/assessment-trainer/
+**Adresse:** https://ELZET17.github.io/assessment-trainer/
 
 ## Mac (Safari, macOS Sonoma oder neuer)
 

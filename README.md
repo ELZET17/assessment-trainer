@@ -2,7 +2,7 @@
 
 Offline-fähige Übungs-App (PWA) für die kognitiven Online-Tests von Bain, BCG, Kearney, P&G, Allianz und Deutsche Bank. Läuft im Browser, als App im Mac-Dock (Safari) und auf dem iPhone-Homescreen – ohne Konto, ohne Server, ohne Tracking. Alle Daten bleiben lokal im Browser (IndexedDB) und lassen sich als JSON sichern.
 
-**Live:** https://GITHUB_USER.github.io/assessment-trainer/ · **Installation:** [docs/INSTALL.md](docs/INSTALL.md)
+**Live:** https://ELZET17.github.io/assessment-trainer/ · **Installation:** [docs/INSTALL.md](docs/INSTALL.md)
 
 ## Inhalte
 
