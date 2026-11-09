@@ -1,0 +1,71 @@
+{
+ "lokal:desktop": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100,
+  "seo": 100
+ },
+ "lokal:mobile": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100,
+  "seo": 100
+ },
+ "lokal:page-academy_tactics": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "lokal:page-run_training_cat_inductive_d_2": {
+  "performance": 96,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "lokal:page-settings": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "lokal:page-sim_run_kearney-test": {
+  "performance": 96,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "lokal:page-stats": {
+  "performance": 96,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "live:desktop": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100,
+  "seo": 100
+ },
+ "live:mobile": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100,
+  "seo": 100
+ },
+ "live:page-run_training_cat_inductive_d_2": {
+  "performance": 98,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "live:page-settings": {
+  "performance": 100,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "live:page-sim_run_kearney-test": {
+  "performance": 97,
+  "accessibility": 100,
+  "best-practices": 100
+ },
+ "live:page-stats": {
+  "performance": 92,
+  "accessibility": 100,
+  "best-practices": 100
+ }
+}

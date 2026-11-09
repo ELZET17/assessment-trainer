@@ -57,6 +57,7 @@ for (const [dev, vp] of [
     for (let i = 0; i < 6; i++) {
       await answer(page, i % 3 !== 0)
       await page.getByRole('button', { name: /Weiter/ }).click()
+      await page.waitForTimeout(400) // double-tap protection window
     }
     await page.goto(`${base}#/`)
     await shot('01-home')

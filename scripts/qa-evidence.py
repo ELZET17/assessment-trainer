@@ -27,9 +27,12 @@ for v in ['iphone-light', 'iphone-dark', 'desktop-light', 'desktop-dark']:
     if os.path.exists(p):
         Image.open(p).convert('RGB').save(f'{OUT}/g6-sheet-{v}.jpg', quality=72, optimize=True)
 scores = {}
-for f in sorted(os.listdir('gate-output/lighthouse')):
-    if f.endswith('.json'):
-        d = json.load(open(f'gate-output/lighthouse/{f}'))
-        scores[f.replace('.report.json', '').replace('.json', '')] = {k: round(v['score'] * 100) for k, v in d['categories'].items()}
+for folder, tag in [('gate-output/lighthouse', 'lokal'), ('gate-output/lighthouse-live', 'live')]:
+    if not os.path.isdir(folder):
+        continue
+    for f in sorted(os.listdir(folder)):
+        if f.endswith('.json'):
+            d = json.load(open(f'{folder}/{f}'))
+            scores[f"{tag}:{f.replace('.report.json', '').replace('.json', '')}"] = {k: round(v['score'] * 100) for k, v in d['categories'].items()}
 json.dump(scores, open(f'{OUT}/g7-lighthouse.json', 'w'), indent=1)
 print(sorted(os.listdir(OUT)))

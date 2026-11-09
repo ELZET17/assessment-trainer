@@ -5,13 +5,13 @@ Rohbelege (Antwortdateien der Prüfer, Screenshots, Lighthouse-JSON) liegen loka
 
 | Gate | Perspektive | Ergebnis | Fehler gefunden / behoben |
 |---|---|---|---|
-| 1 | Anforderungs-Abgleich | GATE1_RESULT | – |
+| 1 | Anforderungs-Abgleich | grün: alle 37 Zeilen der Traceability-Tabelle erfüllt und belegt, Abschluss-Durchgang am 09.11.2026 | – |
 | 2 | Korrektheit (automatisiert) | grün: 39 Generatoren × 3 Stufen × 2.000 Aufgaben = 234.000 Aufgaben gegen unabhängige Löser, 0 Abweichungen; Determinismus; fast-check | 4 / 4 |
-| 3 | Blind-Lösen (Subagents) | GATE3_RESULT | GATE3_COUNT |
+| 3 | Blind-Lösen (Subagents) | grün: 4 Runden, 1.045 blind gelöste Aufgaben; seit Runde 1 keine Abweichung vom Schlüssel | 6 Abweichungen + 79 Hinweise / alle bearbeitet |
 | 4 | Didaktik & Akademie (Subagent) | grün nach 2 Runden: Runde 2 mit 0 kritischen Befunden, alle 50 Schlüssel und alle Akademie-Rechnungen richtig; mittlere Befunde behoben | 3 krit. + 30 mittel / alle |
 | 5 | Realismus (Subagent) | grün nach 2 Runden: Runde 2 mit 0 kritischen Befunden; mittlere Befunde behoben | 4 krit. + 19 mittel / alle |
 | 6 | UX beide Geräte | grün: 27 Screens × iPhone/Desktop × hell/dunkel gesichtet, 0 px Überlauf, keine Touch-Ziele < 44 px | 5 / 5 |
-| 7 | Technik | grün: tsc, ESLint, TESTCOUNT Unit-/Property-/Content-Tests, 28 E2E-Tests, Build, Lighthouse ≥ 96/100/100, Offline | 3 / 3 |
+| 7 | Technik | grün: tsc, ESLint, 241 Unit-/Property-/Content-Tests, 44 E2E-Tests, Build, Lighthouse ≥ 96/100/100, Offline | 3 / 3 |
 | 8 | Daten & Statistik | grün: 7/10 → 7/10 und 70 %, Reload/neuer Tab, Export→Reset→Import identisch, Doppelimport ohne Duplikate, Migration v1→v2 | 0 |
 | 9 | Red Team (Subagent) | grün nach Korrektur: kritischer und alle mittleren Befunde behoben und mit den Prüfer-Skripten nachgeprüft | 1 krit. + 5 mittel + 12 gering / alle außer 3 geringen |
 | 10 | Code-Review (Subagent) | grün nach 2 Runden: Runde 2 ohne kritischen Befund, alle mittleren behoben | 1 krit. + 17 mittel / alle |
@@ -38,7 +38,7 @@ Quelle: Master-Prompt Abschnitte 1–7. „Test“ nennt den Nachweis; E2E = `e2
 | 3.1 | Recherche je Firma, offiziell vs. berichtet, Quellen, Datum | `docs/research.md` (Stand 02.11.2026) | Gate 5 (2 Runden) | ✅ |
 | 3.2 | Parameter konfigurierbar in `profiles.ts` | `src/content/profiles.ts` (10 Profile) | Gate 5; `tests/sim.test.ts` | ✅ |
 | 3.3 | Keine kopierten Aufgaben | Alle Items generiert bzw. selbst geschrieben | Gate 3/4 (Originalität), Abschnitt 12 | ✅ |
-| 4.1 | PWA, GitHub Pages, keine externen Requests, Fonts lokal | Systemschrift (D7), HashRouter (D6), Pages-Workflow | Gate 10 (keine externen Requests), Lighthouse | DEPLOY_STATUS |
+| 4.1 | PWA, GitHub Pages, keine externen Requests, Fonts lokal | Systemschrift (D7), HashRouter (D6), Pages-Workflow | Gate 10 (keine externen Requests), Lighthouse | ✅ (live seit 09.11.2026) |
 | 5.1 | 9 Kategorien, je 3 Stufen + adaptiv, deutsche Erklärung mit Weg, Distraktoren, Shortcut | `src/content/generators/**`, `banks/**`; Adaptiv-Treppe `adaptiveNext` | Gate 2 (Struktur: Erklärung vorhanden), Gate 4 | ✅ |
 | 5.1A | Numerical: Tabelle, Balken, gestapelt, Linie, Kreis, kombiniert, 2 Exhibits; alle Fragetypen inkl. Median/Modus/Spannweite, Einheiten-Fallen, Cannot say; 5 Optionen; Rechner-Overlay | `generators/numerical/*`, `ui/exhibits/charts.tsx`, `ui/Calculator.tsx` | Gate 2/3; Screens | ✅ |
 | 5.1B | Speed Math / Kopfrechnen, Rechner immer aus | 12 Generatoren `speed.*`, Sprint mit freier Eingabe | Gate 2/3; E2E | ✅ |
@@ -86,7 +86,7 @@ Export ohne Schlüssel: `scripts/blind-export.ts` (Figuren als Screenshots), Abg
 | 1 | 535 Items: je Kategorie × Stufe 15 (A–D, G–I) + **jedes** Verbal- (160) und CT-Item (60) | 6 (5 Verbal, 1 CT) | 44 | Items überarbeitet, Generatoren entschärft |
 | 2 | 229 Items: neue Seeds für A/B/D + alle geänderten Verbal-/CT-Items | 0 | 10 | Formulierungen |
 | 3 | 236 Items: neue Seeds A/B/C + geänderte Verbal-/CT-Items | 0 | 15 | Figuren-Darstellung, Logik-Trivialität |
-| 4 | 45 Figuren-Items nach Darstellungs-Änderung | GATE3_R4 | | |
+| 4 | 45 Figuren-Items nach Darstellungs-Änderung | 0 | 10 | nur Lesbarkeit (kleine Figuren in Eckfeldern), keine konkurrierende Regel mehr |
 
 Die 6 Abweichungen in Runde 1 waren keine falschen Schlüssel im engeren Sinn, sondern zwei vertretbare Lesarten (z. B. „subject to approval“, „up to 20“). Alle wurden umformuliert und in Runde 2/3 ohne Abweichung erneut gelöst. Berichte: [`docs/qa/blind-report-r1.md`](qa/blind-report-r1.md) bis `r4`.
 
@@ -130,10 +130,10 @@ scripts/lighthouse.sh http://127.0.0.1:4174/
 |---|---|
 | `tsc -b` (strict) | 0 Fehler |
 | ESLint | 0 Fehler, 0 Warnungen |
-| Vitest | TESTCOUNT Tests grün (Unit, fast-check, Content/Gate 2, Simulation) |
-| Playwright | 28 grün, 1 übersprungen (Tastaturtest nur Desktop) – WebKit iPhone + Desktop, Offline zusätzlich in Chromium |
+| Vitest | 241 Tests grün (Unit, fast-check, Content/Gate 2, Simulation) |
+| Playwright | 44 grün, 1 übersprungen (Tastaturtest nur Desktop) – WebKit iPhone + Desktop, Offline zusätzlich in Chromium; davon 11 Regressionstests aus Gate 9/10 |
 | Build | erfolgreich, Service Worker + Precache |
-| Lighthouse Start (mobil/desktop) | Performance 100/100, Accessibility 100/100, Best Practices 100/100, SEO 100/100 |
+| Lighthouse Start (mobil/desktop, auch live) | Performance 100/100, Accessibility 100/100, Best Practices 100/100, SEO 100/100 |
 | Lighthouse Unterseiten (mobil) | Simulation 96/100/100, Training Induktiv 96/100/100, Statistik 96/100/100, Einstellungen 100/100/100, Akademie 100/100/100 |
 | PWA installierbar | Lighthouse 12 hat keine PWA-Kategorie mehr (D8) → per E2E geprüft: Manifest (standalone, Icons 192/512/maskable), apple-touch-icon, iOS-Meta-Tags, Service Worker kontrolliert die Seite |
 | Offline | E2E `offline`: Netz aus, Reload → Training, Simulation, Statistik, Akademie, Deep-Link-Reload funktionieren (WebKit und Chromium) |
@@ -167,10 +167,87 @@ Berichte: [`docs/qa/g10-code-review.md`](qa/g10-code-review.md), [`docs/qa/g10-c
 
 ## Deployment
 
-DEPLOY_SECTION
+- Repo: https://github.com/ELZET17/assessment-trainer (öffentlich). Commits mit neutraler GitHub-Adresse, ohne lokale Pfade.
+- Workflow `.github/workflows/deploy.yml`: Typecheck → ESLint → Unit-Tests → Content-Tests (Gate 2, Golden-Test) → Playwright E2E (WebKit + Chromium) → Build mit `BASE_PATH=/assessment-trainer/` → GitHub Pages. Der Deploy-Job hängt vom Test-Job ab: veröffentlicht wird nur bei Grün. Alle Läufe am 09.11.2026 grün.
+- **Live-URL:** https://elzet17.github.io/assessment-trainer/
+- **Live-Test (Playwright gegen die Produktions-URL, 09.11.2026):** alle 44 E2E-Tests grün (iPhone-WebKit, Desktop-WebKit, Offline zusätzlich Chromium) – Seite lädt, Manifest gültig (standalone, Icons, apple-touch-icon), Service Worker aktiv und kontrolliert die Seite, offline neu geladen funktionieren Training, Simulation, Statistik und Akademie; Datenfluss Gate 8 und alle Regressionstests auch live.
+- **Lighthouse gegen die Live-URL:** Start mobil und desktop je 100/100/100/100; Simulation 97/100/100, Training Induktiv 98/100/100, Statistik 92/100/100, Einstellungen 100/100/100 (Performance/Accessibility/Best Practices).
+- Anleitung für Mac und iPhone: [`docs/INSTALL.md`](INSTALL.md).
 
 ---
 
 ## Fehlerprotokoll
 
-FEHLERPROTOKOLL
+Alle gefundenen Fehler mit Ursache und Behebung (aus `docs/qa-log.md`):
+
+| Datum | Gate | Fund | Ursache | Behebung |
+|---|---|---|---|---|
+| 31.10.2026 | G2 | `speed.units` d3: Optionen wie „1,080,000,003.08“ | `roundTo` addierte einen relativen Epsilon von 1e-9 → bei Werten ~1e9 um +1 verschoben | Epsilon auf 1e-12 relativ reduziert |
+| 31.10.2026 | G2 | `speed.mul` d3: mehrere Optionen „passen“ (63.00 vs. 63.10) | Validator nutzte benötigte statt angezeigte Nachkommastellen | Validator nutzt angezeigte Präzision der Optionen |
+| 31.10.2026 | G2 | Numerical: Ergebnisse genau auf Rundungsgrenze (z. B. 18,75 → 1 NKS) | Generator prüfte Rundungsgrenzen nicht | `numMcq`/`numericMcq` verwerfen Kandidaten auf Rundungsgrenzen |
+| 31.10.2026 | G2 | `aon.grid`: 87 von 3.000 Durchgängen mit falschem Symmetrie-Schlüssel | Asymmetrie-Erzeugung konnte dieselbe Zelle zweimal kippen → wieder symmetrisch | Zwei *verschiedene* Zellen kippen (`rng.sample`) |
+| 31.10.2026 | Review | Numerical-Distraktor „0,00“ bei Einheitenaufgaben | Theme mit zu kleinen Werten (Tsd. Stück) | Einheiten-Generator nur noch mit Kosten-Theme, Ergebnis ≥ 1 |
+| 31.10.2026 | Review | Extremwert-Frage „kleinste absolute Veränderung“ mehrdeutig (Betrag vs. negativster Wert) | Formulierung | Nur noch „größter Zuwachs“; „kleinster“ nur für Niveauwerte |
+| 31.10.2026 | G7/E2E | Nach automatischer Abgabe (Zeitablauf) blieb die Simulation hängen | `useBlocker` las den Zustand `finished` vor dem Re-Render → eigene Weiterleitung zum Ergebnis wurde blockiert | Ref `finishedRef` wird vor der Navigation gesetzt (Simulation und Drill); Regressionstest `e2e/sim.spec.ts` |
+| 31.10.2026 | E2E | Balken ziehen reagierte nicht auf synthetische Touch-Events | `setPointerCapture` warf vor dem Setzen des Werts | Wert zuerst setzen, Capture in try/catch; Regressionstest `e2e/interaction.spec.ts` |
+| 31.10.2026 | Review | „costs for Rent was …“ / „die Kosten … verändert sich“ | Verb-Kongruenz bei Plural-Themen | Plural-Verben für das Kosten-Theme (EN/DE) |
+| 31.10.2026 | G6 | Figuren: Muster sahen wie „halb gefüllt“ aus, Formen sehr klein | Füllmuster wurden über `transform: scale` mitskaliert | Punkte im Nutzerkoordinatensystem skaliert, größere Formen, Einzelfiguren in Matrizen vergrößert |
+| 31.10.2026 | G6 | Kombi-Diagramm: Linienwerte überlagerten Balkenbeschriftungen | gemeinsamer Zeichenbereich | Linie in eigenem Band über den Balken |
+| 31.10.2026 | Smoke | Trainings-Route zeigte nach Wechsel der Kategorie die alte Aufgabe | Komponente wurde bei geändertem Query-String nicht neu gemountet | `Fresh`-Wrapper mit `key = pathname + search` |
+| 31.10.2026 | Review | Verbal v22-2 hatte falschen Schlüssel (F statt T) | Schreibfehler beim Erstellen | korrigiert (11 von 42 = 26,2 % > 25 %) |
+| 02.11.2026 | G7 Lighthouse | Kontrast 2,4 : 1 bei primären/roten Buttons (dunkle Schrift auf Blau/Rot) | Basis-CSS `button { color: inherit; font-size: 16px }` lag außerhalb der Tailwind-Layer und überschrieb Utility-Klassen | Regeln in `@layer base` verschoben; Eingabefelder behalten 16 px (kein iOS-Zoom) |
+| 02.11.2026 | G3 Blind | Verbal v21-2, v29-4, v35-3, v36-1, v36-4 und CT c02 vom Blind-Löser anders beantwortet; weitere 11 Items als „vertretbar mehrdeutig“ markiert | Formulierungen ließen zwei Lesarten zu („subject to approval“, „up to“ vs. „at least“, Schließungen nicht erwähnt, „600 largest“) | Texte/Aussagen präzisiert (Genehmigung ausdrücklich ausstehend, Schließungen genannt, saubere C-Aussagen), c02/c15 ersetzt, c10 Basis präzisiert |
+| 02.11.2026 | G3 Blind | Numerical L3: „average annual rate“ mehrdeutig (CAGR vs. absoluter Zuwachs); „costs … it“ | Formulierung | „compound annual growth rate (CAGR)“ ausdrücklich, Plural-Pronomen |
+| 02.11.2026 | G3 Blind | Lösungsbuchstaben gehäuft auf C (38 von 90) | Numerische Optionen aufsteigend sortiert, Distraktoren meist beidseitig | Ziel-Rang der richtigen Option zufällig gleichverteilt; Distraktoren nach Seite kontingentiert |
+| 02.11.2026 | G3 Blind | SHL-Tabellenzelle: Anteil per Division (22,2) vs. 100 % minus Rest (22,3) | Rundung der übrigen Anteile | Nur Datensätze, bei denen beide Wege übereinstimmen |
+| 02.11.2026 | G3 Blind | SHL-Tabellenzelle aus gerundeter Veränderung: mehrere ganze Zahlen passen | Veränderung nur auf 1 NKS angezeigt | Toleranz = Rundungsintervall der angezeigten Veränderung |
+| 02.11.2026 | G3 Blind | Umsatz/Gewinn-Tabelle in „TWh“ o. Ä. | Einheit vom Datensatz-Theme übernommen | Margen-Reihenfolge nur mit Umsatz-Theme |
+| 02.11.2026 | G3 Blind | Logik: Frage teils direkt durch einen Hinweis beantwortet; Namen nicht genannt; „clockwise“ nicht definiert | Generator prüfte Trivialität nicht | Trivialitätsfilter (ein Hinweis allein darf die Frage nicht entscheiden), Namen im Intro, Uhrzeigersinn definiert |
+| 02.11.2026 | G6 | Auswahlfelder (select) nur 23 px hoch, Link in Statistik < 44 px | WebKit ignoriert `min-height` bei select | feste Höhe `h-11`, Link als Block mit 44 px |
+| 02.11.2026 | G6 | Reihenfolge-Aufgabe: Abgeben erst nach einer Verschiebung möglich | Kein Start-Entwurf | Angezeigte Reihenfolge gilt als Start-Antwort (Training/Drill) |
+| 02.11.2026 | G3 Blind (C) | Odd one out L1/L2: konkurrierende Regeln („einzige schwarze Raute“, „einziges Paar diagonal“, „Sechseck unter Fünfeck“, „einzige runde Form“, Ausreißer bei der Strichzahl) | Merkmalsbibliothek des Prüfers zu klein; Ablenk-Merkmale zufällig 4:1 verteilt | Prüfer kennt jetzt Füllung/Größe/Lage je Form, Zeilen/Spalten, Ecken/Kanten, Anordnung und relative Lage von Paaren, runde/konkave Formen, Formpräsenz; Generator verteilt Ablenk-Merkmale 3:2, Paare nebeneinander, gerade Strichzahlen 2/4/6 mit ungerader dazwischen; Regeltyp fest pro Seed |
+| 02.11.2026 | G3 Blind (C) | Matrix: ein Feld ohne Linien wurde groß gezeichnet, alle anderen klein | Vergrößerung pro Feld statt pro Aufgabe entschieden | Einheitlicher Maßstab für alle Felder und Optionen einer Aufgabe (`largeFigures`) |
+| 02.11.2026 | G3 Blind (C) | Figuren am Feldrand abgeschnitten; Kreuz berührt die Strichleiste; L-Form auf Linienkreuzung kaum lesbar; 5–8 Striche schwer zu zählen | Größe 2 + Drehung über die Zellgrenze; Strichleiste ohne Abstand | Größen 8,5/12,5/16,5, L-Form auf Radius 1 normiert, eigene Strichleiste unterhalb, Striche in Vierergruppen mit Lücke, Hintergrund-Halo um Figuren |
+| 02.11.2026 | G3 Runde 2 | „unit sales … changes“, „passenger numbers … was“ | Englische Kongruenz aus dem deutschen Plural-Flag abgeleitet | eigenes `enPlural` je Thema |
+| 02.11.2026 | G3 Runde 2 | „grows at the same percentage rate“ bei sinkenden Werten | Verb unabhängig von der Richtung | „falls/sinkt“ bei Rückgang (auch CAGR-Frage) |
+| 02.11.2026 | G3 Runde 2 | Kopfrechnen: „revenue of 960 million“ ohne Einheit | Einheit fehlte | „960 million euros … in euros“ |
+| 02.11.2026 | G3 Runde 2 | Logik L1: Optionen nennen Ereignisse, die in den Aussagen nicht vorkommen | dritte Variable nur für Distraktoren | L1 nur mit den zwei eingeführten Ereignissen |
+| 02.11.2026 | G3 Runde 2 | Diagramm L1: „last row“ bei nur einer Zeile | Text für Varianten mit Beispielen | „What is the output?“ ohne Beispiele |
+| 02.11.2026 | G3 Runde 2 | Verbal v21-3 („at least 70 %“ vs. „all“), v36-4 (andere Schließungen nicht ausgeschlossen), CT c10 (Preis vorher/nachher nicht fix) | Restmehrdeutigkeit | Aussagen/Stimulus präzisiert; dazu v03-4, v10, v22-4 (Preis −2 % → Umsatz +3,9 %), v34-2, v36-3 aus Runde-1-Hinweisen |
+| 02.11.2026 | G5 | Kearney: Rechner „erlaubt (Annahme)“, Akademie empfahl Raten erst nach Ausschluss | Quelle (StrategyCase) falsch wiedergegeben – dort „Assume no calculator“ und „nie leer lassen“ (selbst nachgeprüft 02.11.2026) | Kearney ohne Rechner (berichtet), Abschnitte 8/6/6/8/6/6 laut StrategyCase, Rate-Folgerung „keine Frage leer lassen“ in Profil, Akademie und research.md |
+| 02.11.2026 | G5 | Allianz „14 Tage“ als offiziell | FAQ auf Drittportal, nur Ausbildung/duales Studium (nachgeprüft) | Status „berichtet“ mit Zielgruppe |
+| 02.11.2026 | G5 | Zurück/Kein-Zurück, Rechner, Adaptivität, Negativwertung teils ohne Label oder falsch als „laut Berichten“ | Labels unvollständig | Alle Parameter mit offiziell/berichtet/Annahme; neues Profil „Deutsche Bank – Numerical“; Caveats zu Bain TG (32 statt 45–52 Min.), P&G (17 Min. Spielzeit), BCG (kein Verbal), Kearney (3-Options-Verbal, Data Sufficiency fehlt); „Kommt laut Recherche vor bei“ korrigiert |
+| 02.11.2026 | G4 | Syllogismus/Regeln: widersprüchliche Optionen als „kann wahr sein“ bzw. „folgt nicht zwingend“ begründet | Vorlage unterschied nicht zwischen unmöglich und möglich | Begründung per Löser: „widerspricht“ (Negation folgt), „kann wahr sein“ (konsistent) oder „folgt nicht zwingend“ |
+| 02.11.2026 | G4 | Distraktor-Begründungen „Übertrag vergessen“ ohne Übertrag, „Rechenfehler“ ohne Inhalt, falsche %-Angaben | Pauschale Vorlagen | Überträge/Borgen nur, wo sie vorkommen; „Rechenfehler“ wird konkret (Richtung, Abstand, Faktor) aus den gerundeten Werten berechnet |
+| 02.11.2026 | G4 | Abkürzungen: Divisor-Hinweis, Stammbrüche ohne 1/7, „um wie viel größer“, Wechselkurs, Digit | Vorlagen zu allgemein bzw. falsch | itemspezifische Abkürzungen |
+| 02.11.2026 | G4 | Akademie: Herkunftsangaben („laut Berichten“) teils falsch, Bain-TG-Zeit/Frage, Switch-Tipp bei fehlendem 1. Schalter | Ungenaue Formulierungen | korrigiert |
+| 02.11.2026 | G4 | CAGR-Flughafen mit 455–781 Mio. Passagieren | Basiswerte ignorierten Themenbereich | Basis aus dem Wertebereich des Themas |
+| 02.11.2026 | G4 | Logik-Erklärungen springen zu „einzige Anordnung“ | keine Zwischenschritte | Schritte mit vom Löser gezählten verbleibenden Anordnungen; Grammatik „kamen genau 2 Personen“ |
+| 02.11.2026 | G4 Runde 2 | Restliche Begründungen/Abkürzungen nicht itemgenau (Quadrate „Übertrag doppelt“, Einheiten-Faktor 1.000, Zahlenreihen-Prüfreihenfolge ohne Potenzen, %-Überschlag „schließt drei Optionen aus“, Verhältnis „Werte von 2024“ bei nur einem Jahr im Diagramm, CAGR-Näherung „etwas kleiner“, Projektion „doppelt quadriert“, Switch-Beispiel) | Vorlagen allgemein formuliert | itemgenaue Texte; „falsches Jahr“ nur, wenn das Jahr sichtbar ist |
+| 02.11.2026 | G4 Runde 2 | Akademie: Kearney-Taktik setzt Zurückspringen voraus; „Jede Regel streicht eine Option“; usedBy ohne Herkunft | ungenau | Taktik abhängig von Zurück-Möglichkeit; Checkliste korrigiert; „Laut Recherche:“ vor jeder Zuordnung |
+| 02.11.2026 | G5 Runde 2 | Kearney „Case: Grafiken“ zu 69 % Tabellen | Generatoren wählen den Exhibit-Typ zufällig | Mix-Filter `exhibit: 'table' | 'chart'`, Test |
+| 02.11.2026 | G5 Runde 2 | Dieselben 5 CT-Inference-Items in 82–87 % aller Kearney-Läufe | Simulation übergab keine früher gesehenen Bank-Items | Simulation lädt früher beantwortete Bank-IDs und zieht sie zuletzt; Test |
+| 02.11.2026 | G5 Runde 2 | Sova-Caveat, Bain-Dauer und BCG-Büros mit zu starker/ungenauer Quellenangabe | Formulierung | an research.md angeglichen |
+| 02.11.2026 | G3 Runde 3 | Logik L1: Aussage = wörtlich eine Prämisse; Diagramm: zwei Operatoren heben sich auf; CAGR-Frage „keep growing“ bei Rückgang im letzten Jahr; Personalkosten unplausibel klein | Filter fehlten | Trivialitätsfilter auch auf L1, Ausgabe ≠ Eingabe, neutrale CAGR-Formulierung, Kostenkategorie „Reisen“ statt „Personal“ |
+| 02.11.2026 | eigene Prüfung | Fehlerheft-Eintrag würde nach einem Generator-Update stillschweigend eine andere Aufgabe zeigen | `resolveItem` ignorierte die gespeicherte Version | Version wird geprüft, nicht reproduzierbare Einträge werden ausgelassen; Test |
+| 02.11.2026 | G3 Runde 3 (C) | Optionen ca. 12 % kleiner gezeichnet als Reihe/Matrix → Größenvergleich irreführend; Punkt-Füllung auf kleinen Formen kaum erkennbar; Formen knapp am Rand; „einzige Figur mit Dreieck/Raute“ als Konkurrenzregel bei Seitensummen | Panelbreite je Layout verschieden; Muster zu fein; Präsenz-Merkmal nur „fehlt in einer“ | Gemeinsame Panelbreite `--fig-w` für Reihe, Matrix und Optionen (100/120/136 px), dichteres Punktmuster, Größen 10/13,5/17 mit mehr Randabstand, Merkmal „nur eine Figur enthält Form X“ bei Feldern mit mehreren Formen |
+| 02.11.2026 | G10 | **kritisch:** Aon-Spiele – Antworten gingen beim vorzeitigen Abgeben/Verlassen verloren | Ergebnisse nur im Speicher, erst bei Zeitablauf übergeben | Jede Antwort wird sofort gespeichert (`onResult`, deterministische IDs); Einzelspiel mit Bestätigung beim Beenden; E2E-Regressionstest |
+| 02.11.2026 | G10 | Simulation speicherte erst beim Abgeben; letzte Bearbeitungszeit ging verloren; Ergebnisliste in Zufallsreihenfolge | State-only, asynchrone Updates, gleiche Zeitstempel | Sofortiges Upsert je Antwort (ID Session+Position), synchroner Slot-Ref, Feld `seq`; E2E „überlebt Reload“, „Testreihenfolge“ |
+| 02.11.2026 | G10 | Adaptive Stufung zu schnell (Stufe 1→3 nach 3 statt 4 richtigen) | Serie nach Stufenwechsel nicht zurückgesetzt | `adaptiveLevel` spielt die Historie ab; Unit-Test |
+| 02.11.2026 | G10 | Gleiche Aufgabe mehrfach (kleine Wertebereiche, verschiedene Seeds) | Wiederholungsschutz nur über Seed | Inhaltsschlüssel (`contentKey`) in allen Auswahlwegen und Spielen; Tests |
+| 02.11.2026 | G10 | Service Worker aktivierte Updates nie selbst | `injectRegister: false` ohne `skipWaiting` | Prompt-Modus, Update wird außerhalb laufender Tests angewandt, stündliche Prüfung |
+| 02.11.2026 | G10 | Import prüfte kaum Felder; Fehler legten Seiten lahm | Nur id/itemKey/ts geprüft, kein `errorElement` | Feldweise Prüfung, Duplikate je Datei entfernt, Fehlerseite; Unit-Tests |
+| 02.11.2026 | G10 | Fehlerheft zählte nach Versionswechsel nicht übbare Einträge; Item-Änderungen ohne Versionssprung möglich | – | Nicht reproduzierbare Einträge verlassen das Heft; Golden-Test Seed → Item-Hash |
+| 02.11.2026 | G10 | Ordnungsrätsel: Schlüssel mit dem Validator-Löser berechnet | Verstoß gegen Regel 2 | Eigener Backtracking-Löser im Generator (`arrange.ts`) |
+| 02.11.2026 | G10 | `.card`/`.muted`/`.safe-*` überstimmten Tailwind (Feedback-Farben, Padding fehlten) | Klassen außerhalb eines Cascade-Layers | `@layer components`; Safe Areas explizit für Inhalt und Aktionsleisten |
+| 02.11.2026 | G10 | Tastenkürzel beantworteten Akademie-Beispiele gleichzeitig und wirkten hinter Dialogen | globaler Listener | nur aktive Aufgabe, nicht bei Modals/Eingabefeldern/Tastenwiederholung |
+| 02.11.2026 | G10 | Grid-Urteil ohne Zeitlimit; „Nochmal“ wirkungslos; Rechner-Einstellung wirkungslos | Effekt ohne Deps; gleicher Route-Key; Einstellung nie gelesen | behoben; Rechner verdeckt keine Buttons mehr, Standard „aus“ |
+| 02.11.2026 | G10 | Freitext lehnte „12,5 %“ ab; Export auf iOS unsicher; QA-Route im Produktivbundle | – | Einheiten werden ignoriert; Teilen-Dialog auf Touch-Geräten; `/render` nur im Dev-Modus |
+| 09.11.2026 | G10 Runde 2 | Nie angezeigte Reihenfolge-Aufgaben zählten in Simulationen als beantwortet; Fehlerseite ohne Ausweg in der installierten App; iOS-Export ohne Fallback; Drill ignorierte Rechner-Einstellung | Startantwort beim Aufbau gesetzt; Fehlerseite an der Wurzel; – | Startreihenfolge erst beim Anzeigen (D21, E2E); Fehlerseite im Layout mit „Daten sichern“; Download-Fallback; Drill-Rechner |
+| 09.11.2026 | G9 | **kritisch:** Drill – Antwort genau beim Zeitablauf speicherte doppelte/widersprüchliche Einträge | Guard wurde vor dem Re-Render zurückgesetzt | Synchroner `ending`-Ref, Ergebnis-Ref, deterministische IDs; Nachprüfung 0/48 Läufe; E2E |
+| 09.11.2026 | G9 | Doppeltipp beantwortete die nächste Frage (Drill), übersprang Fragen (Simulation, Quick-Set) | keine Eingabesperre | 350 ms Sperre nach Fragenwechsel, Wiedereintrittssperre; E2E |
+| 09.11.2026 | G9 | Reload in Simulation/Drill: Neustart ohne Warnung, Sitzung blieb „laufend“ | – | Warnung beim Verlassen, alte Sitzungen werden als „abgebrochen“ geschlossen und mit Teilergebnis angezeigt |
+| 09.11.2026 | G9 | Taschenrechner im iPhone-Querformat nicht schließbar; Ziffern bei offenem Rechner beantworteten Fragen | feste Position ohne Höhenlimit; Rechner ohne Tastatur | Querformat-Layout; Rechner mit Tastatureingabe und eigenem Fokus; E2E |
+| 09.11.2026 | G9 | Abbruchdialog mit zwei „Abbrechen“; ungültige Deeplinks; Spiel-Intro mit rotem Timer; Import prüfte Abschnitte/Format/Einstellungen nicht | – | eindeutige Buttons; Parameter-Validierung; Timer erst ab Spielstart; Import-Prüfung erweitert; Unit-Tests |
+| 09.11.2026 | G10 Runde 3 | Drill hing, wenn das Speichern fehlschlug (Speicher voll); Simulation ebenso | kein try/finally, Guard blieb gesetzt | Drill zeigt Ergebnis mit Hinweis, Simulation erlaubt erneutes Abgeben mit Warnung |
+| 09.11.2026 | G10 Runde 3 | Kleinere Punkte: Rechner-Toggle blockierte Tastenkürzel, Enter auf Rechner-Buttons, „zuletzt“ zeigte abgebrochene Läufe, Uhr auf dem ersten Spiel-Intro, Deeplink-Lücken und leerer Drill, Sicherung auf iPhone, Doppeltipp im Training, automatisch geöffneter Rechner nahm Eingabefeld den Fokus | – | alle behoben; gemeinsamer Export-Helfer (Teilen/Download) |
