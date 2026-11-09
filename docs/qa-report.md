@@ -13,8 +13,8 @@ Rohbelege (Antwortdateien der Prüfer, Screenshots, Lighthouse-JSON) liegen loka
 | 6 | UX beide Geräte | grün: 27 Screens × iPhone/Desktop × hell/dunkel gesichtet, 0 px Überlauf, keine Touch-Ziele < 44 px | 5 / 5 |
 | 7 | Technik | grün: tsc, ESLint, TESTCOUNT Unit-/Property-/Content-Tests, 28 E2E-Tests, Build, Lighthouse ≥ 96/100/100, Offline | 3 / 3 |
 | 8 | Daten & Statistik | grün: 7/10 → 7/10 und 70 %, Reload/neuer Tab, Export→Reset→Import identisch, Doppelimport ohne Duplikate, Migration v1→v2 | 0 |
-| 9 | Red Team (Subagent) | GATE9_RESULT | GATE9_COUNT |
-| 10 | Code-Review (Subagent) | GATE10_RESULT | GATE10_COUNT |
+| 9 | Red Team (Subagent) | grün nach Korrektur: kritischer und alle mittleren Befunde behoben und mit den Prüfer-Skripten nachgeprüft | 1 krit. + 5 mittel + 12 gering / alle außer 3 geringen |
+| 10 | Code-Review (Subagent) | grün nach 2 Runden: Runde 2 ohne kritischen Befund, alle mittleren behoben | 1 krit. + 17 mittel / alle |
 
 Nicht vollständig prüfbar: **echtes iPhone-Verhalten**. Auf diesem Mac gibt es kein Xcode, also keinen iOS-Simulator. iPhone wurde mit Playwright-WebKit (393×852, Touch, iPhone-User-Agent, Device-Scale 3) emuliert – das ist dieselbe Engine wie Safari, aber kein echtes Gerät (Homescreen-Start, echte Safe Areas, Vibration). Nach dem Deploy bitte einmal auf dem iPhone installieren und kurz durchklicken.
 
@@ -145,11 +145,25 @@ scripts/lighthouse.sh http://127.0.0.1:4174/
 
 ## Gate 9 – Red Team
 
-GATE9_SECTION
+Ein Subagent hat in 12 Szenariogruppen mit 194 Einzelprüfungen (WebKit iPhone mit Touch und Desktop, offline zusätzlich Chromium) versucht, die App zu brechen – mit eigenen Playwright-Skripten, direktem Lesen und Befüllen der IndexedDB und Uhr-Manipulation (`page.clock`).
+
+- **Befunde:** 1 kritisch (Drill: Antwort genau beim Zeitablauf wurde doppelt gespeichert), 5 mittel (Doppeltipp im Drill, zwei gleich beschriftete Buttons, Reload in einer Simulation, Taschenrechner im iPhone-Querformat, Ziffern bei offenem Rechner), 15 gering.
+- **Behoben:** alle kritischen und mittleren sowie G1–G12; mit den Original-Skripten des Prüfers nachgeprüft (Drill-Race: 0 von 48 Läufen fehlerhaft) und mit E2E-Regressionstests abgesichert (`e2e/regression.spec.ts`).
+- **Bestanden u. a.:** 10.000 Antworten – Start 66 ms, Statistik ≤ 54 ms, Fehlerheft ≤ 309 ms, kein Ruckeln; 100.000 importierte Antworten – Statistik 568 ms. Offline 19/19 Routen. Import-Angriffe (Prototype-Pollution, Skript-Strings) wirkungslos. Rotation mit Drag-Widgets. Keine Konsolenfehler.
+- **Bekannte Einschränkungen (gering, nicht behoben):** Einstellungsänderung und Reload innerhalb von 300 ms können in Chromium die letzte Änderung verlieren; keine Synchronisation zwischen mehreren offenen Tabs; im Entwicklungsserver (StrictMode) entstehen doppelte Sitzungen (nicht in der veröffentlichten App).
+
+Bericht inkl. Nachprüfung: [`docs/qa/g9-redteam.md`](qa/g9-redteam.md).
 
 ## Gate 10 – Code-Review
 
-GATE10_SECTION
+Zwei Runden mit frischen Subagents, die den gesamten Code gelesen und jeden Befund am Code belegt haben.
+
+- **Runde 1** (88 Dateien): 1 kritischer Befund – Antworten in Aon-Spielen gingen beim vorzeitigen Beenden verloren – und 14 mittlere (Simulation speicherte erst beim Abgeben, Zeit der letzten Aufgabe ging verloren, Ergebnisliste unsortiert, adaptive Stufung zu schnell, inhaltsgleiche Wiederholungen, Service-Worker-Updates kamen nicht an, Import kaum geprüft, Versionierung nicht erzwungen, Ordnungsrätsel-Schlüssel mit dem Validator berechnet, CSS-Layer, globale Tastenkürzel, Grid-Timer, „Nochmal“ wirkungslos, Rechner-Einstellung wirkungslos). Alle behoben, mit Unit- und E2E-Regressionstests (`e2e/regression.spec.ts`, `tests/sim.test.ts`, Golden-Test).
+- **Runde 2** (52 Dateien): **0 kritisch**; 11 von 15 Runde-1-Befunden vollständig, 4 teilweise behoben; 3 neue mittlere Befunde (nie angezeigte Reihenfolge-Aufgaben zählten als beantwortet, Fehlerseite ohne Ausweg in der installierten App, Export auf iOS ohne Fallback). Alle behoben (D18–D21), Reste der teilweise behobenen Punkte ebenfalls (Drill-Rechner, Import-Felder, Golden-Test mit 25 Seeds).
+- Bestätigt: kein `Math.random` in Generatoren, Validatoren lesen keine Schlüssel, keine externen Requests, kein `dangerouslySetInnerHTML`, Negativwertung korrekt, Import idempotent, Base-Path im Build korrekt.
+- Verbleibend (gering, dokumentiert): Ein Update aus einem zweiten geöffneten Fenster kann einen laufenden Test im ersten neu laden (Antworten bleiben gespeichert); abgebrochene Simulationen bleiben als „laufend“ markiert; Bundle 870 kB (277 kB gzip) ohne Code-Splitting.
+
+Berichte: [`docs/qa/g10-code-review.md`](qa/g10-code-review.md), [`docs/qa/g10-code-review-r2.md`](qa/g10-code-review-r2.md).
 
 ## Deployment
 

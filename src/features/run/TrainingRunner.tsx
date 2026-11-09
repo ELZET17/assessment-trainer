@@ -9,7 +9,7 @@ import { CATEGORY_BY_ID, DIFFICULTY_LABEL } from '../../content/categories'
 import { checkAnswer, type CheckResult } from '../../content/check'
 import { isReproducible, resolveItem, subTitle } from '../../content/items'
 import { adaptiveLevel, pickFrom, quickSetPlan } from '../../content/picker'
-import type { Answer, CategoryId, Difficulty, Item, ItemRef } from '../../content/types'
+import type { Answer, Difficulty, Item, ItemRef } from '../../content/types'
 import { refKey } from '../../content/types'
 import { db } from '../../data/db'
 import { mistakeBook } from '../../data/mistakes'
@@ -20,7 +20,7 @@ import { useSettings } from '../../state/settings'
 import { Calculator } from '../../ui/Calculator'
 import { Explanation, ItemView, needsSubmitButton } from '../../ui/ItemView'
 import { Badge, Button, Card, fmtDuration, Icon, LinkButton, PageHeader, pctText } from '../../ui/kit'
-import { beep, finishSession, haptic, makeAttempt, startSession, useNow } from './common'
+import { beep, finishSession, haptic, makeAttempt, parseRunParams, startSession, useNow } from './common'
 
 type Kind = 'training' | 'mistakes' | 'quick'
 
@@ -32,11 +32,9 @@ export default function TrainingRunner() {
   const [params] = useSearchParams()
   const nav = useNavigate()
   const { settings } = useSettings()
-  const cat = (params.get('cat') ?? 'speed') as CategoryId
-  const sub = params.get('sub')
-  const dParam = params.get('d') ?? '2'
+  const { cat, sub, d: dParam } = parseRunParams(params)
   const adaptive = dParam === 'adaptive'
-  const [difficulty, setDifficulty] = useState<Difficulty>(adaptive ? ADAPTIVE_START : (Number(dParam) as Difficulty))
+  const [difficulty, setDifficulty] = useState<Difficulty>(dParam === 'adaptive' ? ADAPTIVE_START : dParam)
   const attempts = useLiveQuery(() => db.attempts.toArray(), [])
   const [plan, setPlan] = useState<ItemRef[] | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -48,6 +46,7 @@ export default function TrainingRunner() {
   const [done, setDone] = useState(false)
   const [calc, setCalc] = useState(false)
   const calcOpened = useRef(false)
+  const advancing = useRef(false)
   const used = useRef(new Set<string>())
   const index = useRef(0)
   const submitting = useRef(false)
@@ -130,7 +129,9 @@ export default function TrainingRunner() {
   )
 
   const next = useCallback(() => {
-    if (!result) return
+    // One advance per answer (a double press must not skip a planned item).
+    if (!result || advancing.current) return
+    advancing.current = true
     let d = difficulty
     if (adaptive) {
       d = adaptiveLevel(ADAPTIVE_START, log.map((l) => l.correct))
@@ -138,6 +139,11 @@ export default function TrainingRunner() {
     }
     nextItem(d)
   }, [result, adaptive, difficulty, log, nextItem])
+
+  // The next press of "Weiter" is accepted once the new item is on screen.
+  useEffect(() => {
+    advancing.current = false
+  }, [item])
 
   // Setting "Taschenrechner standardmäßig öffnen": open it once at the first item that allows it.
   useEffect(() => {

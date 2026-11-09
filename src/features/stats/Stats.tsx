@@ -217,6 +217,7 @@ export default function Stats() {
                       <a href={`#/sim/result/${s.session.id}`} className="inline-flex min-h-11 items-center font-medium text-[var(--accent)]">
                         {s.session.title}
                       </a>
+                      {s.aborted && <span className="muted ml-2 text-xs">(abgebrochen)</span>}
                       <div className="muted text-xs">{new Date(s.session.startedAt).toLocaleString('de-CH')}</div>
                     </td>
                     <td className="px-2 py-2 text-right">

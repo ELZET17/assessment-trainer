@@ -27,12 +27,13 @@ test('simulation: browser back asks for confirmation', async ({ page }) => {
   await expect(page.locator('[data-item-key]').first()).toBeVisible()
   await page.goBack()
   await expect(page.getByRole('alertdialog', { name: 'Test verlassen?' })).toBeVisible()
-  await page.getByRole('button', { name: 'Abbrechen' }).click()
+  await page.getByRole('button', { name: 'Weiter im Test' }).click()
   await expect(page.locator('[data-item-key]').first()).toBeVisible()
 })
 
 test('simulation without skipping requires an answer before moving on', async ({ page }) => {
-  await page.goto('#/sim/run/db-shl')
+  // Bain Sova has no ordering items (those count as answered once shown).
+  await page.goto('#/sim/run/bain-sova')
   await expect(page.locator('[data-item-key]').first()).toBeVisible()
   await expect(page.getByRole('button', { name: /Weiter/ })).toBeDisabled()
 })

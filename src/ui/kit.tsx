@@ -115,7 +115,7 @@ export function Rich({ text }: { text: string }) {
   )
 }
 
-export function Confirm({ open, title, body, confirmLabel, onConfirm, onCancel, danger }: { open: boolean; title: string; body: ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void; danger?: boolean }) {
+export function Confirm({ open, title, body, confirmLabel, cancelLabel = 'Abbrechen', onConfirm, onCancel, danger }: { open: boolean; title: string; body: ReactNode; confirmLabel: string; cancelLabel?: string; onConfirm: () => void; onCancel: () => void; danger?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (open) ref.current?.focus()
@@ -127,7 +127,7 @@ export function Confirm({ open, title, body, confirmLabel, onConfirm, onCancel, 
         <h2 className="text-lg font-bold">{title}</h2>
         <div className="muted mt-2 text-[15px]">{body}</div>
         <div className="mt-5 flex justify-end gap-2">
-          <Button onClick={onCancel}>Abbrechen</Button>
+          <Button onClick={onCancel}>{cancelLabel}</Button>
           <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>
             {confirmLabel}
           </Button>

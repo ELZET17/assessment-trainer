@@ -16,6 +16,7 @@ copies = {
     'gate-output/g5b/review.md': 'g5-review-r2.md',
     'gate-output/g9/report.md': 'g9-redteam.md',
     'gate-output/g10/review.md': 'g10-code-review.md',
+    'gate-output/g10b/review.md': 'g10-code-review-r2.md',
     'gate-output/screens/audit.md': 'g6-audit.md',
 }
 for src, dst in copies.items():

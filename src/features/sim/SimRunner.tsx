@@ -14,7 +14,7 @@ import { useSettings } from '../../state/settings'
 import { Calculator } from '../../ui/Calculator'
 import { ItemView } from '../../ui/ItemView'
 import { Badge, Button, Confirm, fmtDuration, Icon } from '../../ui/kit'
-import { finishSession, makeAttempt, startSession, useNow } from '../run/common'
+import { finishSession, makeAttempt, startSession, useLeaveWarning, useNow } from '../run/common'
 import { GameSection, type GameResult } from './GameSection'
 
 interface Slot {
@@ -182,7 +182,8 @@ export default function SimRunner() {
     setSecIdx(ni)
     setPos(0)
     setHistory([])
-    setSectionEnds(Date.now() + profile.sections[ni].timeLimitSec * 1000)
+    // A game section starts its countdown with its own Start button (no clock on the intro).
+    setSectionEnds(profile.sections[ni].game ? 0 : Date.now() + profile.sections[ni].timeLimitSec * 1000)
     setShownAt(Date.now())
   }, [total, secIdx, profile, finishAll])
 
@@ -196,8 +197,11 @@ export default function SimRunner() {
     }
   }, [remaining, session, sectionEnds, finished, sec, commitTime, nextSection])
 
+  const lockUntil = useRef(0)
   const goNext = () => {
-    if (!sec) return
+    // A double tap on "Weiter" must not skip the next question.
+    if (!sec || Date.now() < lockUntil.current) return
+    lockUntil.current = Date.now() + 350
     commitTime()
     // Adaptive: grow the section with the next item at the new difficulty.
     if (profile.adaptive && !total && sec.count !== null && curList.length < sec.count && pos === curList.length - 1) {
@@ -221,6 +225,7 @@ export default function SimRunner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.item.key, current?.answer])
 
+  useLeaveWarning(!!session && !finished)
   const calcAllowed = !!(total ? profile?.sections[flat[pos]?.si ?? 0]?.calculator : sec?.calculator)
   // Setting "Taschenrechner standardmäßig öffnen": open it in every section that allows it.
   useEffect(() => {
@@ -241,9 +246,11 @@ export default function SimRunner() {
           {!total && profile.sections.length > 1 && ` · Teil ${secIdx + 1}/${profile.sections.length}`}
         </div>
       </div>
-      <Badge tone={remaining < 60 ? 'bad' : 'neutral'}>
-        <span className="tabnums">⏱ {fmtDuration(remaining)}</span>
-      </Badge>
+      {sectionEnds > 0 && (
+        <Badge tone={remaining < 60 ? 'bad' : 'neutral'}>
+          <span className="tabnums">⏱ {fmtDuration(remaining)}</span>
+        </Badge>
+      )}
       {(total ? profile.sections[flat[pos]?.si ?? 0]?.calculator : sec.calculator) && (
         <Button variant="ghost" aria-label="Taschenrechner" onClick={() => setCalc((c) => !c)}>
           <Icon name="calc" />
@@ -261,6 +268,7 @@ export default function SimRunner() {
       title={blocker.state === 'blocked' ? 'Test verlassen?' : 'Test jetzt abgeben?'}
       body={blocker.state === 'blocked' ? 'Der Test wird abgegeben und ausgewertet. Unbeantwortete Fragen zählen als leer.' : 'Unbeantwortete Fragen zählen als leer. Das kann nicht rückgängig gemacht werden.'}
       confirmLabel="Abgeben"
+      cancelLabel="Weiter im Test"
       danger
       onCancel={() => {
         setConfirmEnd(false)

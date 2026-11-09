@@ -4,7 +4,7 @@ import { useBlocker, useNavigate, useSearchParams } from 'react-router'
 import { CATEGORY_BY_ID } from '../../content/categories'
 import { resolveItem } from '../../content/items'
 import { pickFrom } from '../../content/picker'
-import type { Answer, CategoryId, Difficulty, Item } from '../../content/types'
+import type { Answer, Difficulty, Item } from '../../content/types'
 import { refKey } from '../../content/types'
 import { saveAttempts } from '../../data/repo'
 import type { Attempt, Session } from '../../data/types'
@@ -12,17 +12,15 @@ import { useSettings } from '../../state/settings'
 import { Calculator } from '../../ui/Calculator'
 import { ItemView, needsSubmitButton } from '../../ui/ItemView'
 import { Badge, Button, Card, Confirm, fmtDuration, Icon, LinkButton, PageHeader, pctText, Progress } from '../../ui/kit'
-import { finishSession, makeAttempt, startSession, useNow } from './common'
+import { finishSession, makeAttempt, parseRunParams, startSession, useLeaveWarning, useNow } from './common'
 import { Review } from './Review'
 
 export default function DrillRunner() {
   const [params] = useSearchParams()
   const nav = useNavigate()
   const { settings } = useSettings()
-  const cat = (params.get('cat') ?? 'speed') as CategoryId
-  const sub = params.get('sub')
-  const d = (Number(params.get('d') ?? 2) || 2) as Difficulty
-  const n = Math.max(3, Math.min(40, Number(params.get('n') ?? 10)))
+  const { cat, sub, d: dParam, n } = parseRunParams(params)
+  const d: Difficulty = dParam === 'adaptive' ? 2 : dParam
   const [items, setItems] = useState<Item[] | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [pos, setPos] = useState(0)
@@ -35,6 +33,11 @@ export default function DrillRunner() {
   const [askQuit, setAskQuit] = useState(false)
   const busy = useRef(false)
   const doneRef = useRef(false)
+  // Synchronous guards (state updates arrive one render later – too late for a tap at the time limit).
+  const ending = useRef(false)
+  const resultsRef = useRef<Attempt[]>([])
+  /** Taps right after a question change are ignored, so a double tap cannot answer the next question. */
+  const lockUntil = useRef(0)
 
   useEffect(() => {
     const used = new Set<string>()
@@ -58,39 +61,43 @@ export default function DrillRunner() {
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) => !doneRef.current && !!session && currentLocation.pathname !== nextLocation.pathname)
 
-  const end = useCallback(
-    async (finalResults: Attempt[]) => {
-      if (!items || !session || done) return
-      // Unanswered items (time ran out) are stored as not answered.
-      const missing = items.slice(finalResults.length).map((it) => makeAttempt(it, { mode: 'drill', sessionId: session.id, answer: null, timeMs: 0 }))
-      const all = [...finalResults, ...missing]
-      await saveAttempts(missing)
-      await finishSession(session)
-      doneRef.current = true
-      setResults(all)
-      setDone(true)
-    },
-    [items, session, done],
-  )
+  /** Ids are session + position: every item is stored exactly once, whatever races happen. */
+  const idOf = (s: Session, i: number) => `${s.id}:${i}`
+
+  const end = useCallback(async () => {
+    if (!items || !session || ending.current) return
+    ending.current = true
+    // Unanswered items (time ran out) are stored as not answered.
+    const given = resultsRef.current
+    const missing = items.slice(given.length).map((it, k) => makeAttempt(it, { mode: 'drill', sessionId: session.id, answer: null, timeMs: 0, id: idOf(session, given.length + k), seq: given.length + k }))
+    const all = [...given, ...missing]
+    await saveAttempts(missing)
+    await finishSession(session)
+    doneRef.current = true
+    setResults(all)
+    setDone(true)
+  }, [items, session])
 
   const answer = useCallback(
     async (a: Answer) => {
-      if (!items || !session || busy.current || done) return
+      if (!items || !session || busy.current || ending.current || Date.now() < lockUntil.current) return
+      const index = resultsRef.current.length
+      if (index !== pos) return
       busy.current = true
-      const it = items[pos]
-      const att = makeAttempt(it, { mode: 'drill', sessionId: session.id, answer: a, timeMs: Date.now() - shownAt })
-      await saveAttempts([att])
-      const next = [...results, att]
-      setResults(next)
+      const att = makeAttempt(items[index], { mode: 'drill', sessionId: session.id, answer: a, timeMs: Date.now() - shownAt, id: idOf(session, index), seq: index })
+      resultsRef.current = [...resultsRef.current, att]
+      setResults(resultsRef.current)
       setDraft(null)
-      if (pos + 1 >= items.length) await end(next)
+      await saveAttempts([att])
+      if (index + 1 >= items.length) await end()
       else {
-        setPos(pos + 1)
+        lockUntil.current = Date.now() + 350
+        setPos(index + 1)
         setShownAt(Date.now())
       }
       busy.current = false
     },
-    [items, session, pos, shownAt, results, end, done],
+    [items, session, pos, shownAt, end],
   )
 
   // Ordering items start with a valid answer (the shown order), like in SHL tests.
@@ -108,14 +115,12 @@ export default function DrillRunner() {
     }
   }, [items, pos, settings.calculatorDefault])
 
+  useLeaveWarning(!!session && !done)
   const now = useNow(250, !done && endsAt > 0)
   const remaining = endsAt ? (endsAt - now) / 1000 : 0
   useEffect(() => {
-    if (!done && endsAt && remaining <= 0 && !busy.current) {
-      busy.current = true
-      void end(results).finally(() => (busy.current = false))
-    }
-  }, [remaining, done, endsAt, end, results])
+    if (!done && endsAt && remaining <= 0 && !ending.current) void end()
+  }, [remaining, done, endsAt, end])
 
   if (!items || !session) return <p className="muted p-6">Lade Drill …</p>
 
@@ -181,7 +186,8 @@ export default function DrillRunner() {
         open={askQuit || blocker.state === 'blocked'}
         title="Drill abbrechen?"
         body="Bisher gegebene Antworten bleiben gespeichert."
-        confirmLabel="Abbrechen"
+        confirmLabel="Drill abbrechen"
+        cancelLabel="Weiter üben"
         danger
         onCancel={() => {
           setAskQuit(false)
@@ -189,6 +195,7 @@ export default function DrillRunner() {
         }}
         onConfirm={() => {
           setAskQuit(false)
+          ending.current = true
           void finishSession(session, 'aborted').then(() => {
             doneRef.current = true
             setDone(true)

@@ -121,7 +121,8 @@ export function SimIntro() {
 export function SimResult() {
   const { sessionId = '' } = useParams()
   const { settings } = useSettings()
-  const session = useLiveQuery(() => db.sessions.get(sessionId), [sessionId])
+  // null = no such session (undefined = still loading).
+  const session = useLiveQuery(async () => (await db.sessions.get(sessionId)) ?? null, [sessionId])
   const attempts = useLiveQuery(() => db.attempts.where('sessionId').equals(sessionId).toArray(), [sessionId])
   const profile = session?.profileId ? getProfile(session.profileId) : undefined
   const entries = useMemo(() => {
@@ -132,6 +133,7 @@ export function SimResult() {
       .map((a) => ({ attempt: a, item: resolveItem(a.ref, a.lang ?? settings.itemLang) as Item }))
       .filter((e) => e.item)
   }, [attempts, settings.itemLang])
+  if (session === null) return <p className="muted p-6">Dieses Ergebnis gibt es nicht (mehr).</p>
   if (!session || !attempts) return <p className="muted p-6">Lade Ergebnis …</p>
   const [res] = simulationResults([session], attempts, () => profile?.scoring.correct ?? 1)
   return (

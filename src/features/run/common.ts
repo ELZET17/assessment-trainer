@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { checkAnswer, type CheckResult } from '../../content/check'
-import type { Answer, Item } from '../../content/types'
-import { localDay, saveSession, uuid } from '../../data/repo'
+import { CATEGORY_BY_ID } from '../../content/categories'
+import { GENERATORS } from '../../content/registry'
+import type { Answer, CategoryId, Difficulty, Item } from '../../content/types'
+import { abortStaleSessions, localDay, saveSession, uuid } from '../../data/repo'
 import type { Attempt, Mode, Session } from '../../data/types'
 
 export function makeAttempt(item: Item, o: { mode: Mode; sessionId: string; answer: Answer | null; timeMs: number; points?: number; result?: CheckResult; id?: string; seq?: number }): Attempt {
@@ -32,6 +34,8 @@ export function makeAttempt(item: Item, o: { mode: Mode; sessionId: string; answ
 }
 
 export async function startSession(s: Omit<Session, 'id' | 'startedAt' | 'status'>): Promise<Session> {
+  // A run of this kind left without finishing (reload, closed app) is closed as "aborted" first.
+  await abortStaleSessions(s.mode)
   const session: Session = { ...s, id: uuid(), startedAt: Date.now(), status: 'running' }
   await saveSession(session)
   return session
@@ -41,6 +45,19 @@ export async function finishSession(s: Session, status: Session['status'] = 'fin
   const done = { ...s, status, endedAt: Date.now() }
   await saveSession(done)
   return done
+}
+
+/** Asks before reloading or closing the page while a timed run is active (answers are saved anyway). */
+export function useLeaveWarning(active: boolean): void {
+  useEffect(() => {
+    if (!active) return
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [active])
 }
 
 /** Re-renders every `ms` milliseconds; returns Date.now(). */
@@ -83,4 +100,18 @@ export function beep(ok: boolean, enabled: boolean): void {
   } catch {
     /* audio unavailable */
   }
+}
+
+/** Deep-link parameters are validated: unknown values fall back to sensible defaults. */
+export function parseRunParams(params: URLSearchParams): { cat: CategoryId; sub: string | null; d: Difficulty | 'adaptive'; n: number } {
+  const rawCat = params.get('cat') ?? 'speed'
+  const cat = (rawCat in CATEGORY_BY_ID ? rawCat : 'speed') as CategoryId
+  const rawSub = params.get('sub')
+  // Generator subcategories must exist in this category; bank subcategories (verbal.*, critical.*) are filtered by the picker.
+  const sub = rawSub && (GENERATORS.some((g) => g.id === rawSub && g.category === cat) || rawSub.startsWith(`${cat}.`)) ? rawSub : null
+  const rawD = params.get('d') ?? '2'
+  const d = rawD === 'adaptive' ? 'adaptive' : (['1', '2', '3'].includes(rawD) ? Number(rawD) : 2) as Difficulty
+  const rawN = Number(params.get('n') ?? 10)
+  const n = Number.isFinite(rawN) ? Math.max(3, Math.min(40, Math.round(rawN))) : 10
+  return { cat, sub, d, n }
 }

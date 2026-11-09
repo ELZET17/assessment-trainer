@@ -111,12 +111,15 @@ export interface SimResult {
   answered: number
   correct: number
   planned: number | null
+  /** Run was interrupted (reload, app closed, "Beenden" without finishing) – partial result. */
+  aborted: boolean
 }
 
 export function simulationResults(sessions: Session[], attempts: Attempt[], maxPointsPerItem: (s: Session) => number): SimResult[] {
   const bySession = groupBy(attempts, (a) => a.sessionId)
   return sessions
-    .filter((s) => s.mode === 'simulation' && s.status === 'finished')
+    // Interrupted runs are listed too, as long as they contain answers (they count in the statistics as well).
+    .filter((s) => s.mode === 'simulation' && (s.status === 'finished' || (s.status === 'aborted' && (bySession.get(s.id) ?? []).some((a) => a.answered))))
     .map((s) => {
       const list = bySession.get(s.id) ?? []
       const planned = s.sections?.every((x) => x.planned !== null) ? s.sections.reduce((n, x) => n + (x.planned ?? 0), 0) : null
@@ -127,6 +130,7 @@ export function simulationResults(sessions: Session[], attempts: Attempt[], maxP
         answered: list.filter((a) => a.answered).length,
         correct: list.filter((a) => a.correct).length,
         planned,
+        aborted: s.status !== 'finished',
       }
     })
     .sort((a, b) => b.session.startedAt - a.session.startedAt)

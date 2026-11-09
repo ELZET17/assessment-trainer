@@ -229,3 +229,34 @@ describe('import validation', () => {
     expect(() => migrateExport({ app: 'assessment-trainer', attempts: [{ id: 'a' }], sessions: [] })).toThrow(/keine gültigen/)
   })
 })
+
+describe('import validation of sessions and settings', () => {
+  it('drops sessions with broken sections and cleans unknown or invalid settings', async () => {
+    const db = openDb(`imp2-${Math.random()}`)
+    const good = att({ correct: true })
+    const file = {
+      app: 'assessment-trainer',
+      format: 1,
+      schemaVersion: 1,
+      attempts: [good],
+      sessions: [
+        { id: 's-ok', startedAt: 1, mode: 'drill', status: 'finished', title: 'ok', sections: [{ id: 'a', title: 'A', planned: 5, timeLimitSec: 60 }] },
+        { id: 's-bad', startedAt: 1, mode: 'simulation', status: 'finished', title: 'bad', sections: [{ id: 'a', title: 'A', planned: 'zehn' }] },
+      ],
+      settings: { id: 'x', itemLang: 'fr', theme: 'dark', speedInput: 'telepathy', targetAccuracy: 250, sound: 'yes' },
+    }
+    const r = await importMerge(file, db)
+    expect(r.addedSessions).toBe(1)
+    const s = await db.settings.get('settings')
+    expect(s?.itemLang).toBe('en')
+    expect(s?.theme).toBe('dark')
+    expect(s?.speedInput).toBe(DEFAULT_SETTINGS.speedInput)
+    expect(s?.targetAccuracy).toBe(100)
+    expect(s?.sound).toBe(DEFAULT_SETTINGS.sound)
+  })
+
+  it('rejects unknown formats', () => {
+    expect(() => migrateExport({ app: 'assessment-trainer', format: 2, attempts: [], sessions: [] })).toThrow(/Dateiformat/)
+    expect(() => migrateExport({ app: 'assessment-trainer', schemaVersion: {}, attempts: [], sessions: [] })).toThrow(/beschädigt/)
+  })
+})

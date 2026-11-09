@@ -36,7 +36,7 @@ const SPRINT_GENS = ['speed.addsub', 'speed.mul', 'speed.div', 'speed.squares', 
 
 export function SprintRun() {
   const [params] = useSearchParams()
-  const sec = Number(params.get('sec') ?? 90)
+  const sec = [60, 90, 120].includes(Number(params.get('sec'))) ? Number(params.get('sec')) : 90
   const { settings } = useSettings()
   const [session, setSession] = useState<Session | null>(null)
   const [item, setItem] = useState<McqItem | null>(null)
@@ -130,7 +130,8 @@ export function SprintRun() {
 const GAME_SEC = { switch: 360, digit: 300, grid: 360 } as const
 
 export function GameRun() {
-  const { game = 'switch' } = useParams() as { game: 'switch' | 'digit' | 'grid' }
+  const { game: raw = 'switch' } = useParams()
+  const game = (['switch', 'digit', 'grid'].includes(raw) ? raw : 'switch') as 'switch' | 'digit' | 'grid'
   // "Nochmal" stays on the same route, so a round counter remounts the game.
   const [round, setRound] = useState(0)
   return <GameRound key={`${game}-${round}`} game={game} onAgain={() => setRound((r) => r + 1)} />
@@ -211,6 +212,7 @@ function GameRound({ game, onAgain }: { game: 'switch' | 'digit' | 'grid'; onAga
         title="Spiel beenden?"
         body="Deine bisherigen Antworten bleiben gespeichert und zählen in der Statistik."
         confirmLabel="Beenden"
+        cancelLabel="Weiter spielen"
         onCancel={() => setConfirmEnd(false)}
         onConfirm={() => void leave()}
       />
